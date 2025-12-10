@@ -271,6 +271,17 @@ main {
   font-size: 13px;
 }
 
+.badge.link {
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.badge.link:hover,
+.badge.link:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
 .detail-view {
   display: flex;
   flex-direction: column;

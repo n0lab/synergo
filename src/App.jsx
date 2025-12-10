@@ -51,6 +51,12 @@ export default function App() {
     );
   }, [query]);
 
+  const navigateToOracleWithQuery = (value) => {
+    setSection('oracle');
+    setSelectedMedia(null);
+    setQuery(value);
+  };
+
   const addTo = (listSetter) => (item) => {
     listSetter((prev) => {
       if (prev.find((entry) => entry.id === item.id)) return prev;
@@ -77,6 +83,7 @@ export default function App() {
           onDelete={(id) =>
             setNomenclatures((prev) => prev.filter((item) => item.id !== id))
           }
+          onNavigate={navigateToOracleWithQuery}
         />
       );
     }

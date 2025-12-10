@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 
 const pattern = /^[A-Za-z0-9]+(?:_[A-Za-z0-9]+)*$/;
 
-export default function Nomenclatures({ items, onAdd, onUpdate, onDelete }) {
+export default function Nomenclatures({ items, onAdd, onUpdate, onDelete, onNavigate }) {
   const [label, setLabel] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
@@ -175,7 +175,14 @@ export default function Nomenclatures({ items, onAdd, onUpdate, onDelete }) {
                     aria-label="Libellé"
                   />
                 ) : (
-                  <span className="badge">{item.label}</span>
+                  <button
+                    className="badge link"
+                    type="button"
+                    onClick={() => onNavigate?.(item.label)}
+                    aria-label={`Rechercher ${item.label}`}
+                  >
+                    {item.label}
+                  </button>
                 )}
               </div>
               <div className="cell">
