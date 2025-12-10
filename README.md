@@ -1,1 +1,1 @@
-# synergo
+# Synergo
