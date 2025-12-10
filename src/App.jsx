@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import OracleOverview from './components/OracleOverview.jsx';
 import MediaDetail from './components/MediaDetail.jsx';
+import Nomenclatures from './components/Nomenclatures.jsx';
 import { mediaLibrary } from './data.js';
 
 const palette = {
@@ -17,6 +18,22 @@ export default function App() {
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [reviewList, setReviewList] = useState([]);
   const [quizzList, setQuizzList] = useState([]);
+  const [nomenclatures, setNomenclatures] = useState(() => {
+    const collected = new Map();
+    mediaLibrary.forEach((item) => {
+      item.tags?.forEach((tag) => {
+        if (!collected.has(tag)) {
+          collected.set(tag, { id: `seed-${tag}`, label: tag, description: '' });
+        }
+      });
+      item.annotations?.forEach(({ label }) => {
+        if (!collected.has(label)) {
+          collected.set(label, { id: `seed-${label}`, label, description: '' });
+        }
+      });
+    });
+    return Array.from(collected.values());
+  });
 
   const stats = useMemo(
     () => ({
@@ -42,6 +59,28 @@ export default function App() {
   };
 
   const renderSection = () => {
+    if (section === 'nomenclatures') {
+      return (
+        <Nomenclatures
+          items={nomenclatures}
+          onAdd={(entry) =>
+            setNomenclatures((prev) => [
+              ...prev,
+              { id: `user-${Date.now()}-${entry.label}`, ...entry },
+            ])
+          }
+          onUpdate={(id, patch) =>
+            setNomenclatures((prev) =>
+              prev.map((item) => (item.id === id ? { ...item, ...patch } : item))
+            )
+          }
+          onDelete={(id) =>
+            setNomenclatures((prev) => prev.filter((item) => item.id !== id))
+          }
+        />
+      );
+    }
+
     if (section === 'reviewer') {
       return (
         <div className="placeholder">

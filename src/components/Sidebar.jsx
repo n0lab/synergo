@@ -2,6 +2,7 @@ import React from 'react';
 
 const sections = [
   { key: 'oracle', label: 'Oracle' },
+  { key: 'nomenclatures', label: 'Nomenclatures' },
   { key: 'reviewer', label: 'Reviewer' },
   { key: 'quizz', label: 'Quizz' },
 ];

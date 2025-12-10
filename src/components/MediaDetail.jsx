@@ -7,6 +7,14 @@ export default function MediaDetail({ media, onBack, onToReview, onToQuizz }) {
 
   const fps = media.fps ?? 30;
   const frameDuration = useMemo(() => 1 / fps, [fps]);
+  const seekTo = (timeInSeconds) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = Math.max(0, timeInSeconds);
+    if (!video.paused) {
+      video.play();
+    }
+  };
 
   const sortedAnnotations = useMemo(() => {
     if (!media.annotations) return [];
@@ -104,7 +112,13 @@ export default function MediaDetail({ media, onBack, onToReview, onToQuizz }) {
             <div className="annotation-list">
               {sortedAnnotations.map(({ time, label }) => (
                 <div key={`${media.id}-${time}-${label}`} className="annotation-row">
-                  <span className="timestamp">{formatTimestamp(time)}</span>
+                  <button
+                    type="button"
+                    className="timestamp link"
+                    onClick={() => seekTo(time)}
+                  >
+                    {formatTimestamp(time)}
+                  </button>
                   <span className="badge">{label}</span>
                 </div>
               ))}
