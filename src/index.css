@@ -39,6 +39,28 @@ button {
   cursor: pointer;
 }
 
+.btn,
+.primary,
+.ghost,
+.ghost.soft,
+.video-controls button {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  transition: border 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.primary {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 8px 20px rgba(127, 90, 240, 0.25);
+}
+
+.primary:hover {
+  filter: brightness(1.05);
+}
+
 .app {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -336,17 +358,26 @@ main {
 }
 
 .ghost {
-  padding: 10px 12px;
-  border-radius: 12px;
   background: transparent;
   color: var(--text);
   border: 1px solid var(--border);
-  transition: border 0.2s ease, background 0.2s ease;
+  transition: border 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .ghost:hover {
   border-color: var(--accent);
   background: var(--badge);
+}
+
+.ghost.soft {
+  background: color-mix(in srgb, var(--badge) 70%, transparent);
+  border-color: color-mix(in srgb, var(--border) 70%, var(--accent) 30%);
+}
+
+.ghost.soft:hover {
+  border-color: var(--accent);
+  background: var(--badge);
+  color: var(--text);
 }
 
 .placeholder {
@@ -387,6 +418,12 @@ main {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) auto;
   gap: 12px;
   align-items: end;
+}
+
+.nomenclature-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 10px 0 4px;
 }
 
 .field-group {

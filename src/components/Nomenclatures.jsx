@@ -9,10 +9,21 @@ export default function Nomenclatures({ items, onAdd, onUpdate, onDelete }) {
   const [editingId, setEditingId] = useState(null);
   const [draftLabel, setDraftLabel] = useState('');
   const [draftDescription, setDraftDescription] = useState('');
+  const [query, setQuery] = useState('');
 
   const sortedItems = useMemo(() => {
     return [...items].sort((a, b) => a.label.localeCompare(b.label, 'fr'));
   }, [items]);
+
+  const filteredItems = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return sortedItems;
+    return sortedItems.filter((item) => {
+      const labelMatch = item.label.toLowerCase().includes(needle);
+      const descriptionMatch = (item.description || '').toLowerCase().includes(needle);
+      return labelMatch || descriptionMatch;
+    });
+  }, [query, sortedItems]);
 
   const resetForm = () => {
     setLabel('');
@@ -102,9 +113,21 @@ export default function Nomenclatures({ items, onAdd, onUpdate, onDelete }) {
             placeholder="Contexte, posture, interprétation..."
           />
         </div>
-        <button type="submit">Ajouter</button>
+        <button className="primary" type="submit">Ajouter</button>
       </form>
       {error && <div className="error-banner">{error}</div>}
+
+      <div className="nomenclature-toolbar">
+        <div className="field-group">
+          <label htmlFor="nomenclature-search">Rechercher</label>
+          <input
+            id="nomenclature-search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Filtrer par nomenclature ou description..."
+          />
+        </div>
+      </div>
 
       <div className="table-wrapper">
         <div className="table head">
@@ -112,7 +135,7 @@ export default function Nomenclatures({ items, onAdd, onUpdate, onDelete }) {
           <div className="cell">Description</div>
           <div className="cell actions">Actions</div>
         </div>
-        {sortedItems.map((item) => {
+        {filteredItems.map((item) => {
           const isEditing = editingId === item.id;
           return (
             <div className="table row" key={item.id}>
@@ -141,14 +164,14 @@ export default function Nomenclatures({ items, onAdd, onUpdate, onDelete }) {
               <div className="cell actions">
                 {isEditing ? (
                   <div className="action-group">
-                    <button onClick={saveEdit}>Enregistrer</button>
+                    <button className="primary" onClick={saveEdit}>Enregistrer</button>
                     <button className="ghost" type="button" onClick={cancelEdit}>
                       Annuler
                     </button>
                   </div>
                 ) : (
                   <div className="action-group">
-                    <button type="button" onClick={() => startEdit(item)}>
+                    <button className="ghost soft" type="button" onClick={() => startEdit(item)}>
                       Modifier
                     </button>
                     <button className="ghost" type="button" onClick={() => requestDelete(item)}>
