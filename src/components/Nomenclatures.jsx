@@ -10,6 +10,7 @@ export default function Nomenclatures({ items, onAdd, onUpdate, onDelete }) {
   const [draftLabel, setDraftLabel] = useState('');
   const [draftDescription, setDraftDescription] = useState('');
   const [query, setQuery] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const sortedItems = useMemo(() => {
     return [...items].sort((a, b) => a.label.localeCompare(b.label, 'fr'));
@@ -53,6 +54,17 @@ export default function Nomenclatures({ items, onAdd, onUpdate, onDelete }) {
     if (!validLabel) return;
     onAdd({ label: validLabel, description: description.trim() });
     resetForm();
+    setShowAddModal(false);
+  };
+
+  const openAddModal = () => {
+    resetForm();
+    setShowAddModal(true);
+  };
+
+  const closeAddModal = () => {
+    resetForm();
+    setShowAddModal(false);
   };
 
   const startEdit = (item) => {
@@ -94,31 +106,8 @@ export default function Nomenclatures({ items, onAdd, onUpdate, onDelete }) {
         </p>
       </header>
 
-      <form className="nomenclature-form" onSubmit={handleAdd}>
-        <div className="field-group">
-          <label htmlFor="nomenclature-label">Nomenclature</label>
-          <input
-            id="nomenclature-label"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            placeholder="Ex: R_C_E_3_1"
-          />
-        </div>
-        <div className="field-group">
-          <label htmlFor="nomenclature-description">Description</label>
-          <input
-            id="nomenclature-description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Contexte, posture, interprétation..."
-          />
-        </div>
-        <button className="primary" type="submit">Ajouter</button>
-      </form>
-      {error && <div className="error-banner">{error}</div>}
-
       <div className="nomenclature-toolbar">
-        <div className="field-group">
+        <div className="field-group wide">
           <label htmlFor="nomenclature-search">Rechercher</label>
           <input
             id="nomenclature-search"
@@ -127,7 +116,46 @@ export default function Nomenclatures({ items, onAdd, onUpdate, onDelete }) {
             placeholder="Filtrer par nomenclature ou description..."
           />
         </div>
+        <button className="primary" type="button" onClick={openAddModal}>
+          Ajouter
+        </button>
       </div>
+      {error && <div className="error-banner">{error}</div>}
+
+      {showAddModal && (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <form className="modal" onSubmit={handleAdd}>
+            <h3>Ajouter une nomenclature</h3>
+            <div className="field-group">
+              <label htmlFor="modal-nomenclature-label">Nomenclature</label>
+              <input
+                id="modal-nomenclature-label"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                placeholder="Ex: R_C_E_3_1"
+                autoFocus
+              />
+            </div>
+            <div className="field-group">
+              <label htmlFor="modal-nomenclature-description">Description</label>
+              <input
+                id="modal-nomenclature-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Contexte, posture, interprétation..."
+              />
+            </div>
+            <div className="action-group end">
+              <button className="ghost" type="button" onClick={closeAddModal}>
+                Annuler
+              </button>
+              <button className="primary" type="submit">
+                Ajouter
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="table-wrapper">
         <div className="table head">

@@ -35,7 +35,7 @@ export const mediaLibrary = [
     title: 'Main sur le cœur',
     tags: ['R_H_C_1_0', 'R_H_C_1_1'],
     src:
-      'https://images.unsplash.com/photo-1530025809667-1f49a365ffed?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?auto=format&fit=crop&w=1200&q=80',
     description: 'Geste associé à l’assurance de bonne foi.',
   },
   {

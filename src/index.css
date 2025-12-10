@@ -69,6 +69,10 @@ button {
   transition: background 0.2s ease;
 }
 
+.app.sidebar-collapsed {
+  grid-template-columns: 120px 1fr;
+}
+
 .sidebar {
   background: var(--panel);
   border-right: 1px solid var(--border);
@@ -82,7 +86,9 @@ button {
 }
 
 .sidebar.collapsed {
-  width: 84px;
+  width: 100%;
+  align-items: center;
+  padding-inline: 12px;
 }
 
 .sidebar-header {
@@ -107,6 +113,23 @@ button {
   color: var(--text);
   border: 1px solid transparent;
   transition: background 0.2s ease, border 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+.nav-item .icon {
+  font-size: 18px;
+}
+
+.nav-item .label {
+  flex: 1;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 12px;
 }
 
 .nav-item:hover {
@@ -413,23 +436,22 @@ main {
   gap: 14px;
 }
 
-.nomenclature-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) auto;
-  gap: 12px;
-  align-items: end;
-}
-
 .nomenclature-toolbar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: flex-end;
   margin: 10px 0 4px;
+  gap: 12px;
 }
 
 .field-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.field-group.wide {
+  flex: 1;
 }
 
 .field-group input {
@@ -446,6 +468,31 @@ main {
   border: 1px solid rgba(248, 114, 114, 0.4);
   padding: 10px 12px;
   border-radius: 12px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: grid;
+  place-items: center;
+  z-index: 20;
+}
+
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  width: min(520px, 90vw);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.action-group.end {
+  justify-content: flex-end;
 }
 
 .table-wrapper {

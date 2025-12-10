@@ -134,7 +134,7 @@ export default function App() {
   };
 
   return (
-    <div className={`app ${theme}`}>
+    <div className={`app ${theme} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <Sidebar
         activeSection={section}
         onSelect={(key) => {

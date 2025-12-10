@@ -1,10 +1,10 @@
 import React from 'react';
 
 const sections = [
-  { key: 'oracle', label: 'Oracle' },
-  { key: 'nomenclatures', label: 'Nomenclatures' },
-  { key: 'reviewer', label: 'Reviewer' },
-  { key: 'quizz', label: 'Quizz' },
+  { key: 'oracle', label: 'Oracle', icon: '🔮' },
+  { key: 'nomenclatures', label: 'Nomenclatures', icon: '🏷️' },
+  { key: 'reviewer', label: 'Reviewer', icon: '📝' },
+  { key: 'quizz', label: 'Quizz', icon: '❓' },
 ];
 
 export default function Sidebar({ activeSection, onSelect, collapsed, onToggle }) {
@@ -22,8 +22,12 @@ export default function Sidebar({ activeSection, onSelect, collapsed, onToggle }
             key={section.key}
             className={`nav-item ${activeSection === section.key ? 'active' : ''}`}
             onClick={() => onSelect(section.key)}
+            title={collapsed ? section.label : undefined}
           >
-            {section.label}
+            <span className="icon" aria-hidden="true">
+              {section.icon}
+            </span>
+            {!collapsed && <span className="label">{section.label}</span>}
           </button>
         ))}
       </nav>
