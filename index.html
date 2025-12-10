@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestes non-verbaux</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="sidebar__top">
+          <button class="sidebar__collapse" id="collapseSidebar" aria-label="Réduire le menu">
+            ☰
+          </button>
+          <div class="brand">
+            <div class="brand__logo">GN</div>
+            <div class="brand__name">Gestes Non-Verbaux</div>
+          </div>
+        </div>
+        <nav class="sidebar__nav" aria-label="Sections">
+          <button class="nav-item active" data-section="Oracle">
+            <span class="nav-item__icon">🔮</span>
+            <span class="nav-item__label">Oracle</span>
+          </button>
+          <button class="nav-item" data-section="Reviewer">
+            <span class="nav-item__icon">🧾</span>
+            <span class="nav-item__label">Reviewer</span>
+            <span class="nav-item__badge" id="reviewerCount">0</span>
+          </button>
+          <button class="nav-item" data-section="Quizz">
+            <span class="nav-item__icon">❓</span>
+            <span class="nav-item__label">Quizz</span>
+            <span class="nav-item__badge" id="quizzCount">0</span>
+          </button>
+        </nav>
+        <div class="sidebar__footer">
+          <button id="toggleTheme" class="ghost-button" aria-label="Changer de thème">
+            Mode clair
+          </button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="page-header">
+          <div>
+            <p class="eyebrow">Plateforme</p>
+            <h1 class="title">Classification des gestes non-verbaux</h1>
+          </div>
+          <div class="header-actions">
+            <div class="chip" id="activeSectionLabel">Oracle</div>
+          </div>
+        </header>
+
+        <section id="content"></section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
