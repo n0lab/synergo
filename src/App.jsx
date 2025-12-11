@@ -3,11 +3,26 @@ import Sidebar from './components/Sidebar.jsx';
 import OracleOverview from './components/OracleOverview.jsx';
 import MediaDetail from './components/MediaDetail.jsx';
 import Nomenclatures from './components/Nomenclatures.jsx';
+import AddResource from './components/AddResource.jsx';
 import { deriveNomenclaturesFromMedia, loadDatabase, persistDatabase } from './db.js';
 
 const palette = {
   light: 'light',
   dark: 'dark',
+};
+
+const detectMediaType = (link) => {
+  const normalized = (link ?? '').toLowerCase();
+  const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+
+  if (normalized.includes('youtube.com') || normalized.includes('youtu.be') || normalized.includes('vimeo.com')) {
+    return 'video';
+  }
+
+  if (videoExtensions.some((ext) => normalized.includes(ext))) return 'video';
+  if (imageExtensions.some((ext) => normalized.includes(ext))) return 'photo';
+  return 'video';
 };
 
 const syncNomenclaturesWithMedia = (media, nomenclatures) => {
@@ -119,6 +134,22 @@ export default function App() {
       nomenclatures: [...prev.nomenclatures, { id: `user-${Date.now()}-${entry.label}`, ...entry }],
     }));
 
+  const addResource = ({ title, description, src, type }) => {
+    const resolvedType = type || detectMediaType(src);
+    const newEntry = {
+      id: `user-media-${Date.now()}`,
+      title,
+      description,
+      src,
+      type: resolvedType,
+      tags: [],
+      annotations: [],
+      ...(resolvedType === 'video' ? { fps: 30 } : {}),
+    };
+
+    updateDb((prev) => ({ ...prev, media: [newEntry, ...prev.media] }));
+  };
+
   const updateMedia = (id, updater) => {
     let updatedItem = null;
     updateDb((prev) => {
@@ -194,6 +225,25 @@ export default function App() {
       );
     }
 
+    if (section === 'add-resource') {
+      return (
+        <AddResource
+          detectType={detectMediaType}
+          onBack={() => {
+            setSection('oracle');
+            setSelectedMedia(null);
+          }}
+          onCreate={(payload) => {
+            addResource({ ...payload, type: detectMediaType(payload.src) });
+            setSection('oracle');
+            setSelectedMedia(null);
+            setQuery('');
+            setTypeFilter('all');
+          }}
+        />
+      );
+    }
+
     if (selectedMedia) {
       return (
         <MediaDetail
@@ -216,6 +266,7 @@ export default function App() {
         onSelect={setSelectedMedia}
         activeType={typeFilter}
         onTypeChange={setTypeFilter}
+        onAddResource={() => setSection('add-resource')}
       />
     );
   };
