@@ -139,13 +139,13 @@ export default function Nomenclatures({
 
       <div className="nomenclature-toolbar oracle-toolbar">
         <div className="field-group wide">
-          <label htmlFor="nomenclature-search">{t('nomenclatureSearchLabel')}</label>
           <div className="input-with-clear">
             <input
               id="nomenclature-search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('nomenclatureSearchPlaceholder')}
+              aria-label={t('nomenclatureSearchLabel')}
             />
             <button
               type="button"
