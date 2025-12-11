@@ -65,6 +65,16 @@ export default function MediaDetail({
     setEditing(true);
   }, [media.annotations, media.description, media.src, media.tags, media.title]);
 
+  const cancelEditing = useCallback(() => {
+    setDraftAnnotations(media.annotations ?? []);
+    setDraftTags(media.tags ?? []);
+    setDraftTitle(media.title ?? '');
+    setDraftDescription(media.description ?? '');
+    setDraftSrc(media.src ?? '');
+    setNewNomenclatureLabel('');
+    setEditing(false);
+  }, [media.annotations, media.description, media.src, media.tags, media.title]);
+
   const saveEdits = useCallback(() => {
     const nextTitle = draftTitle.trim() || media.title;
     const nextDescription = draftDescription.trim();
@@ -105,14 +115,6 @@ export default function MediaDetail({
     if (!confirmed) return;
     onDeleteMedia?.(media.id);
   }, [media.id, media.title, onDeleteMedia]);
-
-  const handleEditAction = () => {
-    if (editing) {
-      saveEdits();
-    } else {
-      startEditing();
-    }
-  };
 
   useEffect(() => {
     if (!editing) return;
@@ -218,7 +220,6 @@ export default function MediaDetail({
 
   const addNomenclatureFromInput = (event) => {
     event.preventDefault();
-    if (!editing) return;
 
     const trimmed = newNomenclatureLabel.trim();
     if (!trimmed) return;
@@ -226,21 +227,42 @@ export default function MediaDetail({
     if (media.type === 'video') {
       const currentTime = Number((videoRef.current?.currentTime ?? 0).toFixed(1));
 
-      setDraftAnnotations((prev) => {
-        const next = [...(prev ?? [])];
-        const exists = next.some(
+      if (editing) {
+        setDraftAnnotations((prev) => {
+          const next = [...(prev ?? [])];
+          const exists = next.some(
+            (ann) => ann.label.trim() === trimmed && ann.time === currentTime
+          );
+          if (exists) return next;
+          return [...next, { time: currentTime, label: trimmed }];
+        });
+      } else {
+        const exists = (media.annotations ?? []).some(
           (ann) => ann.label.trim() === trimmed && ann.time === currentTime
         );
-        if (exists) return next;
-        return [...next, { time: currentTime, label: trimmed }];
-      });
+        if (!exists) {
+          const nextAnnotations = [...(media.annotations ?? []), { time: currentTime, label: trimmed }];
+          const nextTags = Array.from(new Set([...(media.tags ?? []), trimmed]));
+          onUpdateMedia?.(media.id, { annotations: nextAnnotations, tags: nextTags });
+        }
+      }
     } else {
-      setDraftTags((prev) => {
-        const next = prev ?? [];
-        const exists = next.some((tag) => tag.trim().toLowerCase() === trimmed.toLowerCase());
-        if (exists) return next;
-        return [...next, trimmed];
-      });
+      if (editing) {
+        setDraftTags((prev) => {
+          const next = prev ?? [];
+          const exists = next.some((tag) => tag.trim().toLowerCase() === trimmed.toLowerCase());
+          if (exists) return next;
+          return [...next, trimmed];
+        });
+      } else {
+        const exists = (media.tags ?? []).some(
+          (tag) => tag.trim().toLowerCase() === trimmed.toLowerCase()
+        );
+        if (!exists) {
+          const nextTags = [...(media.tags ?? []), trimmed];
+          onUpdateMedia?.(media.id, { tags: nextTags });
+        }
+      }
     }
 
     setNewNomenclatureLabel('');
@@ -255,7 +277,9 @@ export default function MediaDetail({
         </div>
         <ActionBar
           editing={editing}
-          onEdit={handleEditAction}
+          onStartEdit={startEditing}
+          onSave={saveEdits}
+          onCancel={cancelEditing}
           onToReview={() => onToReview(media)}
           onToQuizz={() => onToQuizz(media)}
           onDelete={confirmDeletion}
@@ -433,7 +457,7 @@ export default function MediaDetail({
               })}
             </div>
           )}
-          {editing && (
+          {!editing && (
             <form className="add-nomenclature-form" onSubmit={addNomenclatureFromInput}>
               <input
                 value={newNomenclatureLabel}

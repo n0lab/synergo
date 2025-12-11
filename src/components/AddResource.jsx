@@ -20,7 +20,8 @@ export default function AddResource({ onBack, onCreate, detectType }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const hasLink = !!link.trim();
+    const trimmedLink = link.trim();
+    const hasLink = !!trimmedLink;
     const hasFile = !!file;
 
     if (!title.trim() || (!hasLink && !hasFile)) {
@@ -28,11 +29,19 @@ export default function AddResource({ onBack, onCreate, detectType }) {
       return;
     }
 
+    if (hasLink) {
+      const normalizedLink = trimmedLink.toLowerCase();
+      if (normalizedLink.includes('youtube.com') || normalizedLink.includes('youtu.be')) {
+        setError('Les liens YouTube ne sont pas pris en charge.');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setError('');
 
     try {
-      let payloadSrc = link.trim();
+      let payloadSrc = trimmedLink;
       let payloadType = detectedType;
 
       if (hasFile) {
@@ -115,7 +124,8 @@ export default function AddResource({ onBack, onCreate, detectType }) {
           />
           <div className="helper-row">
             <span className="muted">
-              Ajoutez un lien (YouTube inclus) ou déposez un fichier qui sera conservé localement.
+              Ajoutez un lien ou déposez un fichier qui sera conservé localement (liens YouTube non
+              pris en charge).
             </span>
           </div>
         </div>

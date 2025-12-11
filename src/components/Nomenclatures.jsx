@@ -1,6 +1,13 @@
 import React, { useMemo, useState } from 'react';
 
-export default function Nomenclatures({ items, onAdd, onUpdate, onDelete, onNavigate }) {
+export default function Nomenclatures({
+  items,
+  onAdd,
+  onUpdate,
+  onDelete,
+  onNavigate,
+  isNomenclatureUsed,
+}) {
   const [label, setLabel] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
@@ -87,10 +94,16 @@ export default function Nomenclatures({ items, onAdd, onUpdate, onDelete, onNavi
   };
 
   const requestDelete = (item) => {
+    if (isNomenclatureUsed?.(item.label)) {
+      setError('Impossible de supprimer une nomenclature utilisée sur une ressource.');
+      return;
+    }
+
     const confirmed = window.confirm(
       `Supprimer la nomenclature "${item.label}" ? Cette action est définitive.`
     );
     if (confirmed) {
+      setError('');
       onDelete(item.id);
     }
   };

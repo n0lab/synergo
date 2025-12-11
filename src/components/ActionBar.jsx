@@ -1,18 +1,39 @@
 import React from 'react';
 
-export default function ActionBar({ editing, onEdit, onToReview, onToQuizz, onDelete }) {
+export default function ActionBar({
+  editing,
+  onStartEdit,
+  onSave,
+  onCancel,
+  onToReview,
+  onToQuizz,
+  onDelete,
+}) {
   return (
     <div className="action-bar">
       {editing && (
-        <button className="ghost danger" onClick={onDelete}>
+        <button className="ghost danger" type="button" onClick={onDelete}>
           Supprimer
         </button>
       )}
-      <button className={`ghost ${editing ? 'success' : ''}`} onClick={onEdit}>
-        {editing ? 'Sauvegarder' : 'Edit'}
+      {editing && (
+        <button className="ghost warning" type="button" onClick={onCancel}>
+          Annuler
+        </button>
+      )}
+      <button
+        className={`ghost ${editing ? 'success' : ''}`}
+        type="button"
+        onClick={editing ? onSave : onStartEdit}
+      >
+        {editing ? 'Enregistrer' : 'Éditer'}
       </button>
-      <button className="ghost" onClick={onToReview}>To Review</button>
-      <button className="ghost" onClick={onToQuizz}>To Quizz</button>
+      <button className="ghost" type="button" onClick={onToReview}>
+        To Review
+      </button>
+      <button className="ghost" type="button" onClick={onToQuizz}>
+        To Quizz
+      </button>
     </div>
   );
 }
