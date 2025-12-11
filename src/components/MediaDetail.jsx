@@ -8,6 +8,7 @@ export default function MediaDetail({
   onToReview,
   onToQuizz,
   onUpdateMedia,
+  onDeleteMedia,
 }) {
   const videoRef = useRef(null);
   const [paused, setPaused] = useState(true);
@@ -95,6 +96,12 @@ export default function MediaDetail({
 
     setEditing(false);
   }, [draftAnnotations, draftDescription, draftSrc, draftTags, draftTitle, media]);
+
+  const confirmDeletion = useCallback(() => {
+    const confirmed = window.confirm(`Supprimer définitivement "${media.title}" ?`);
+    if (!confirmed) return;
+    onDeleteMedia?.(media.id);
+  }, [media.id, media.title, onDeleteMedia]);
 
   const handleEditAction = () => {
     if (editing) {
@@ -218,6 +225,7 @@ export default function MediaDetail({
           onEdit={handleEditAction}
           onToReview={() => onToReview(media)}
           onToQuizz={() => onToQuizz(media)}
+          onDelete={confirmDeletion}
         />
       </header>
       <div className="detail-body">

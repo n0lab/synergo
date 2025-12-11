@@ -61,6 +61,13 @@ button {
   filter: brightness(1.05);
 }
 
+.primary.compact {
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(127, 90, 240, 0.2);
+}
+
 .app {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -567,6 +574,16 @@ main {
   color: var(--text);
   border: 1px solid var(--border);
   transition: border 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.ghost.danger {
+  color: #f87272;
+  border-color: color-mix(in srgb, #f87272 80%, var(--border));
+}
+
+.ghost.danger:hover {
+  border-color: #f87272;
+  background: rgba(248, 114, 114, 0.08);
 }
 
 .ghost:hover {

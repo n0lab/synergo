@@ -20,7 +20,7 @@ export default function OracleOverview({
           <p>Explorez les ressources de gestes non-verbaux et leurs nomenclatures.</p>
         </div>
         <div className="kpi-row">
-          <button type="button" className="primary" onClick={onAddResource}>
+          <button type="button" className="primary compact" onClick={onAddResource}>
             Ajouter
           </button>
           <StatsCard
