@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import OracleOverview from './components/OracleOverview.jsx';
 import ReviewerOverview from './components/ReviewerOverview.jsx';
@@ -6,6 +6,7 @@ import MediaDetail from './components/MediaDetail.jsx';
 import Nomenclatures from './components/Nomenclatures.jsx';
 import AddResource from './components/AddResource.jsx';
 import { deriveNomenclaturesFromMedia, loadDatabase, persistDatabase } from './db.js';
+import { translate } from './i18n.js';
 
 const palette = {
   light: 'light',
@@ -51,6 +52,7 @@ export default function App() {
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [selectedMedia, setSelectedMedia] = useState(null);
+  const [language, setLanguage] = useState('en');
   const [db, setDb] = useState(() => {
     const initial = loadDatabase();
     return {
@@ -58,6 +60,8 @@ export default function App() {
       nomenclatures: syncNomenclaturesWithMedia(initial.media, initial.nomenclatures),
     };
   });
+
+  const t = useCallback((key, params) => translate(language, key, params), [language]);
 
   useEffect(() => {
     persistDatabase(db);
@@ -258,6 +262,7 @@ export default function App() {
           onToQuizz={addTo('quizzList')}
           onUpdateMedia={updateMedia}
           onDeleteMedia={deleteResource}
+          t={t}
         />
       );
     }
@@ -271,6 +276,8 @@ export default function App() {
           onDelete={deleteNomenclature}
           onNavigate={navigateToOracleWithQuery}
           isNomenclatureUsed={isNomenclatureUsed}
+          t={t}
+          language={language}
         />
       );
     }
@@ -281,6 +288,7 @@ export default function App() {
           items={db.reviewList}
           onSelect={setSelectedMedia}
           onRemove={removeFromList('reviewList')}
+          t={t}
         />
       );
     }
@@ -288,14 +296,14 @@ export default function App() {
     if (section === 'quizz') {
       return (
         <div className="placeholder">
-          <h2>Quizz</h2>
-          <p>Sélection pour quiz futur</p>
+          <h2>{t('quizzTitle')}</h2>
+          <p>{t('quizzPlaceholder')}</p>
           <ul>
             {db.quizzList.map((item) => (
               <li key={`quiz-${item.id}`}>{item.title}</li>
             ))}
           </ul>
-          {db.quizzList.length === 0 && <div className="muted">Aucun élément pour l'instant.</div>}
+          {db.quizzList.length === 0 && <div className="muted">{t('reviewerEmpty')}</div>}
         </div>
       );
     }
@@ -305,6 +313,7 @@ export default function App() {
         <AddResource
           detectType={detectMediaType}
           findExistingResource={findExistingResource}
+          t={t}
           onNavigateToResource={(resource) => {
             setSection('oracle');
             setSelectedMedia(resource);
@@ -338,13 +347,26 @@ export default function App() {
         onAddResource={() => setSection('add-resource')}
         onAddResultsToReview={() => addManyToList('reviewList', filteredMedia)}
         onAddResultsToQuizz={() => addManyToList('quizzList', filteredMedia)}
+        t={t}
+        language={language}
       />
     );
   };
 
+  const navigation = useMemo(
+    () => [
+      { key: 'oracle', label: t('sidebarOracle'), icon: '🔮' },
+      { key: 'nomenclatures', label: t('sidebarNomenclatures'), icon: '🏷️' },
+      { key: 'reviewer', label: t('sidebarReviewer'), icon: '📝' },
+      { key: 'quizz', label: t('sidebarQuizz'), icon: '❓' },
+    ],
+    [t]
+  );
+
   return (
     <div className={`app ${theme} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <Sidebar
+        sections={navigation}
         activeSection={section}
         onSelect={(key) => {
           setSection(key);
@@ -369,13 +391,20 @@ export default function App() {
             setSidebarCollapsed(true);
           }
         }}
+        t={t}
       />
       <main>
         <header className="topbar">
           <div />
           <div className="topbar-actions">
             <button className="ghost" onClick={() => setTheme((t) => (t === palette.dark ? palette.light : palette.dark))}>
-              {theme === palette.dark ? 'Mode clair' : 'Mode sombre'}
+              {theme === palette.dark ? t('themeLight') : t('themeDark')}
+            </button>
+            <button
+              className="ghost"
+              onClick={() => setLanguage((prev) => (prev === 'en' ? 'fr' : 'en'))}
+            >
+              {language === 'en' ? t('switchToFrench') : t('switchToEnglish')}
             </button>
           </div>
         </header>

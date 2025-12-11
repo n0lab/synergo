@@ -9,6 +9,7 @@ export default function MediaDetail({
   onToQuizz,
   onUpdateMedia,
   onDeleteMedia,
+  t,
 }) {
   const videoRef = useRef(null);
   const [paused, setPaused] = useState(true);
@@ -111,10 +112,10 @@ export default function MediaDetail({
   }, [draftAnnotations, draftDescription, draftSrc, draftTags, draftTitle, media]);
 
   const confirmDeletion = useCallback(() => {
-    const confirmed = window.confirm(`Supprimer définitivement "${media.title}" ?`);
+    const confirmed = window.confirm(t('confirmDeleteResource', { title: media.title }));
     if (!confirmed) return;
     onDeleteMedia?.(media.id);
-  }, [media.id, media.title, onDeleteMedia]);
+  }, [media.id, media.title, onDeleteMedia, t]);
 
   useEffect(() => {
     if (!editing) return;
@@ -203,8 +204,8 @@ export default function MediaDetail({
   const requestDelete = (label, time) => {
     const confirmed = window.confirm(
       media.type === 'video'
-        ? `Supprimer la nomenclature "${label}" à ${formatTimestamp(time)} ?`
-        : `Supprimer la nomenclature "${label}" de cette photo ?`
+        ? t('confirmDeleteAnnotationVideo', { label, first: label, second: formatTimestamp(time) })
+        : t('confirmDeleteAnnotationPhoto', { label })
     );
 
     if (!confirmed) return;
@@ -272,7 +273,7 @@ export default function MediaDetail({
     <div className="detail-view">
       <header className="detail-header">
         <div className="title-block">
-          <button className="ghost" onClick={onBack}>&larr; Retour</button>
+          <button className="ghost" onClick={onBack}>{t('back')}</button>
           <div className="media-title">{media.title}</div>
         </div>
         <ActionBar
@@ -283,6 +284,7 @@ export default function MediaDetail({
           onToReview={() => onToReview(media)}
           onToQuizz={() => onToQuizz(media)}
           onDelete={confirmDeletion}
+          t={t}
         />
       </header>
       <div className="detail-body">
@@ -291,7 +293,7 @@ export default function MediaDetail({
             <div className="field-group">
               {editing && (
                 <label className="muted" htmlFor="title-input">
-                  Titre
+                  {t('titleLabel')}
                 </label>
               )}
               {editing ? (
@@ -308,7 +310,7 @@ export default function MediaDetail({
             <div className="field-group full-span">
               {editing && (
                 <label className="muted" htmlFor="description-input">
-                  Description
+                  {t('descriptionLabel')}
                 </label>
               )}
               {editing ? (
@@ -326,7 +328,7 @@ export default function MediaDetail({
             {editing && (
               <div className="field-group full-span resource-field">
                 <label className="muted" htmlFor="link-input">
-                  Lien de la ressource
+                  {t('linkLabel')}
                 </label>
                 <input
                   id="link-input"
@@ -348,12 +350,12 @@ export default function MediaDetail({
                 onPlay={() => setPaused(false)}
               />
               <div className="video-controls">
-                <button onClick={() => step(-1)} aria-label="Frame précédente">
-                  ← Frame précédente
+                <button onClick={() => step(-1)} aria-label={t('previousFrame')}>
+                  {t('previousFrame')}
                 </button>
-                <button onClick={handlePlayPause}>{paused ? 'Lecture' : 'Pause'}</button>
-                <button onClick={() => step(1)} aria-label="Frame suivante">
-                  Frame suivante →
+                <button onClick={handlePlayPause}>{paused ? t('play') : t('pause')}</button>
+                <button onClick={() => step(1)} aria-label={t('nextFrame')}>
+                  {t('nextFrame')}
                 </button>
               </div>
             </div>
@@ -363,7 +365,7 @@ export default function MediaDetail({
         </section>
         <aside className="tags-panel">
           <div className="tags-panel-header">
-            <h3>Nomenclatures</h3>
+            <h3>{t('nomenclaturesHeading')}</h3>
           </div>
           <div className="annotation-section">
             {media.type === 'video' ? (
@@ -378,7 +380,7 @@ export default function MediaDetail({
                         <button
                           type="button"
                           className="delete-annotation"
-                          aria-label={`Supprimer ${label}`}
+                          aria-label={t('deleteNomenclatureLabel', { label })}
                           onClick={() => requestDelete(label, time)}
                         >
                           ×
@@ -399,7 +401,7 @@ export default function MediaDetail({
                               className="badge editable"
                               value={label}
                               onChange={(e) => handleAnnotationLabelChange(time, label, e.target.value)}
-                              aria-label="Nomenclature"
+                              aria-label={t('nomenclatureLabel')}
                             />
                           ) : (
                             <span className="badge">{label}</span>
@@ -414,7 +416,7 @@ export default function MediaDetail({
                   );
                 })}
                 {sortedAnnotations.length === 0 && (
-                  <div className="muted">Aucune nomenclature horodatée.</div>
+                  <div className="muted">{t('noTimedNomenclatures')}</div>
                 )}
               </div>
             ) : (
@@ -431,7 +433,7 @@ export default function MediaDetail({
                         <button
                           type="button"
                           className="delete-annotation"
-                          aria-label={`Supprimer ${tag}`}
+                          aria-label={t('deleteNomenclatureLabel', { label: tag })}
                           onClick={() => requestDelete(tag)}
                         >
                           ×
@@ -444,7 +446,7 @@ export default function MediaDetail({
                               className="badge editable"
                               value={tag}
                               onChange={(e) => handlePhotoTagChange(index, e.target.value)}
-                              aria-label="Nomenclature"
+                              aria-label={t('nomenclatureLabel')}
                             />
                           ) : (
                             <span className="badge">{tag}</span>
@@ -466,11 +468,11 @@ export default function MediaDetail({
               <input
                 value={newNomenclatureLabel}
                 onChange={(event) => setNewNomenclatureLabel(event.target.value)}
-                placeholder="Nouvelle nomenclature"
-                aria-label="Nouvelle nomenclature"
+                placeholder={t('newNomenclaturePlaceholder')}
+                aria-label={t('addNomenclatureAria')}
               />
               <button type="submit" className="primary compact">
-                Ajouter
+                {t('add')}
               </button>
             </form>
           )}

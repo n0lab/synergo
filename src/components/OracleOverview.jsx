@@ -13,6 +13,7 @@ export default function OracleOverview({
   onAddResource,
   onAddResultsToReview,
   onAddResultsToQuizz,
+  t,
 }) {
   const hasQuery = query.trim().length > 0;
 
@@ -20,8 +21,8 @@ export default function OracleOverview({
     <div className="oracle">
       <div className="header-row">
         <div>
-          <h2>Oracle</h2>
-          <p>Explorez les ressources de gestes non-verbaux et leurs nomenclatures.</p>
+          <h2>{t('oracleTitle')}</h2>
+          <p>{t('oracleSubtitle')}</p>
         </div>
         <div className="kpi-row">
           {hasQuery && (
@@ -32,7 +33,7 @@ export default function OracleOverview({
                 onClick={onAddResultsToReview}
                 disabled={items.length === 0}
               >
-                Vers reviewer
+                {t('oracleToReviewer')}
               </button>
               <button
                 className="ghost purple"
@@ -40,22 +41,22 @@ export default function OracleOverview({
                 onClick={onAddResultsToQuizz}
                 disabled={items.length === 0}
               >
-                Vers quizz
+                {t('oracleToQuizz')}
               </button>
             </>
           )}
           <button type="button" className="ghost success" onClick={onAddResource}>
-            Ajouter
+            {t('oracleAdd')}
           </button>
           <StatsCard
-            label="Vidéos"
+            label={t('oracleVideos')}
             value={stats.videos}
             accent="#7f5af0"
             onClick={() => onTypeChange('video')}
             active={activeType === 'video'}
           />
           <StatsCard
-            label="Photos"
+            label={t('oraclePhotos')}
             value={stats.photos}
             accent="#2cb67d"
             onClick={() => onTypeChange('photo')}
@@ -65,11 +66,11 @@ export default function OracleOverview({
       </div>
 
       <div className="oracle-toolbar">
-        <SearchBar value={query} onChange={onQueryChange} />
+        <SearchBar value={query} onChange={onQueryChange} t={t} />
         <div className="oracle-actions">
           {activeType !== 'all' && (
             <button className="ghost" type="button" onClick={() => onTypeChange('all')}>
-              Réinitialiser le filtrage
+              {t('oracleResetFilter')}
             </button>
           )}
         </div>
@@ -78,7 +79,7 @@ export default function OracleOverview({
       <div className="grid">
         {items.map((item) => (
           <div className="card media-card" key={item.id} onClick={() => onSelect(item)}>
-            <div className="media-type">{item.type === 'video' ? '🎬 Vidéo' : '📷 Photo'}</div>
+            <div className="media-type">{item.type === 'video' ? t('oracleVideoTag') : t('oraclePhotoTag')}</div>
             <h3>{item.title}</h3>
             <p className="description">{item.description}</p>
             <div className="tags">
@@ -90,7 +91,7 @@ export default function OracleOverview({
             </div>
           </div>
         ))}
-        {items.length === 0 && <div className="muted">Aucun résultat pour cette nomenclature.</div>}
+        {items.length === 0 && <div className="muted">{t('oracleNoResults')}</div>}
       </div>
     </div>
   );

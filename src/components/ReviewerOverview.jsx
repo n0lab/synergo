@@ -1,12 +1,12 @@
 import React from 'react';
 
-export default function ReviewerOverview({ items, onSelect, onRemove }) {
+export default function ReviewerOverview({ items, onSelect, onRemove, t }) {
   return (
     <div className="oracle">
       <div className="header-row">
         <div>
-          <h2>Reviewer</h2>
-          <p>Éléments à revoir, prêts à être ouverts ou retirés.</p>
+          <h2>{t('reviewerTitle')}</h2>
+          <p>{t('reviewerSubtitle')}</p>
         </div>
       </div>
 
@@ -14,7 +14,7 @@ export default function ReviewerOverview({ items, onSelect, onRemove }) {
         {items.map((item) => (
           <div className="card media-card" key={item.id} onClick={() => onSelect(item)}>
             <div className="media-card-header">
-              <div className="media-type">{item.type === 'video' ? '🎬 Vidéo' : '📷 Photo'}</div>
+              <div className="media-type">{item.type === 'video' ? t('oracleVideoTag') : t('oraclePhotoTag')}</div>
               <button
                 type="button"
                 className="remove-review"
@@ -22,7 +22,7 @@ export default function ReviewerOverview({ items, onSelect, onRemove }) {
                   event.stopPropagation();
                   onRemove(item.id);
                 }}
-                aria-label="Retirer de la liste Reviewer"
+                aria-label={t('reviewerRemove')}
               >
                 ✕
               </button>
@@ -38,7 +38,7 @@ export default function ReviewerOverview({ items, onSelect, onRemove }) {
             </div>
           </div>
         ))}
-        {items.length === 0 && <div className="muted">Aucun élément pour l'instant.</div>}
+        {items.length === 0 && <div className="muted">{t('reviewerEmpty')}</div>}
       </div>
     </div>
   );
