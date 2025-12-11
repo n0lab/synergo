@@ -33,8 +33,12 @@ export default function App() {
 
   const filteredMedia = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    const matchesQuery = (item) =>
-      item.tags.some((tag) => tag.toLowerCase().includes(normalized));
+    const matchesQuery = (item) => {
+      const inTags = item.tags.some((tag) => tag.toLowerCase().includes(normalized));
+      const inTitle = item.title.toLowerCase().includes(normalized);
+      const inDescription = (item.description || '').toLowerCase().includes(normalized);
+      return inTags || inTitle || inDescription;
+    };
 
     return db.media.filter((item) => {
       const typeOk = typeFilter === 'all' ? true : item.type === typeFilter;
