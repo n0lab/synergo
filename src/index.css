@@ -383,6 +383,10 @@ main {
   margin-bottom: 12px;
 }
 
+.resource-field {
+  margin-top: 12px;
+}
+
 .text-input {
   width: 100%;
   padding: 10px 12px;
