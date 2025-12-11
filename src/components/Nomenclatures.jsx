@@ -119,7 +119,7 @@ export default function Nomenclatures({
   };
 
   return (
-    <div className="oracle">
+    <div className="nomenclature-page oracle">
       <div className="header-row">
         <div>
           <h2>{t('nomenclaturePageTitle')}</h2>
@@ -158,7 +158,6 @@ export default function Nomenclatures({
             </button>
           </div>
         </div>
-        <div className="search-spacer" aria-hidden="true" />
       </div>
       {error && <div className="error-banner">{error}</div>}
 
