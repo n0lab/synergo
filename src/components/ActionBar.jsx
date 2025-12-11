@@ -22,16 +22,16 @@ export default function ActionBar({
         </button>
       )}
       <button
-        className={`ghost ${editing ? 'success' : ''}`}
+        className="ghost success"
         type="button"
         onClick={editing ? onSave : onStartEdit}
       >
         {editing ? 'Enregistrer' : 'Éditer'}
       </button>
-      <button className="ghost" type="button" onClick={onToReview}>
+      <button className="ghost info" type="button" onClick={onToReview}>
         To Review
       </button>
-      <button className="ghost" type="button" onClick={onToQuizz}>
+      <button className="ghost purple" type="button" onClick={onToQuizz}>
         To Quizz
       </button>
     </div>
