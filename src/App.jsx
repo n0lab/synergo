@@ -16,6 +16,9 @@ const detectMediaType = (link) => {
   const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
   const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
 
+  if (normalized.startsWith('data:video')) return 'video';
+  if (normalized.startsWith('data:image')) return 'photo';
+
   if (normalized.includes('youtube.com') || normalized.includes('youtu.be') || normalized.includes('vimeo.com')) {
     return 'video';
   }
@@ -150,6 +153,17 @@ export default function App() {
     updateDb((prev) => ({ ...prev, media: [newEntry, ...prev.media] }));
   };
 
+  const deleteResource = (id) => {
+    updateDb((prev) => ({
+      ...prev,
+      media: prev.media.filter((item) => item.id !== id),
+      reviewList: prev.reviewList.filter((item) => item.id !== id),
+      quizzList: prev.quizzList.filter((item) => item.id !== id),
+    }));
+
+    setSelectedMedia((prev) => (prev?.id === id ? null : prev));
+  };
+
   const updateMedia = (id, updater) => {
     let updatedItem = null;
     updateDb((prev) => {
@@ -253,6 +267,7 @@ export default function App() {
           onToReview={addTo('reviewList')}
           onToQuizz={addTo('quizzList')}
           onUpdateMedia={updateMedia}
+          onDeleteMedia={deleteResource}
         />
       );
     }
