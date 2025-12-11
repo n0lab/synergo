@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import StatsCard from './StatsCard.jsx';
 
 export default function Nomenclatures({
   items,
@@ -18,6 +19,8 @@ export default function Nomenclatures({
   const [draftDescription, setDraftDescription] = useState('');
   const [query, setQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+
+  const totalNomenclatures = items.length;
 
   const sortedItems = useMemo(() => {
     return [...items].sort((a, b) => a.label.localeCompare(b.label, language ?? 'fr'));
@@ -117,10 +120,19 @@ export default function Nomenclatures({
 
   return (
     <div className="nomenclature-page">
-      <header className="page-header">
-        <h2>{t('nomenclaturePageTitle')}</h2>
-        <p className="muted">{t('nomenclaturePageSubtitle')}</p>
-      </header>
+      <div className="page-header-row">
+        <header className="page-header">
+          <h2>{t('nomenclaturePageTitle')}</h2>
+          <p className="muted">{t('nomenclaturePageSubtitle')}</p>
+        </header>
+        <div className="nomenclature-kpi-row">
+          <StatsCard
+            label={t('nomenclatureTotalLabel')}
+            value={totalNomenclatures}
+            accent="#2cb67d"
+          />
+        </div>
+      </div>
 
       <div className="nomenclature-toolbar">
         <div className="field-group wide">

@@ -64,6 +64,7 @@ const translations = {
     addResourceAction: 'Add resource',
     nomenclaturePageTitle: 'Nomenclatures',
     nomenclaturePageSubtitle: 'Manage nomenclatures added via media or directly from this page.',
+    nomenclatureTotalLabel: 'Saved nomenclatures',
     nomenclatureSearchLabel: 'Search',
     nomenclatureSearchPlaceholder: 'Filter by nomenclature or description...',
     nomenclatureClearFilter: 'Clear filter',
@@ -161,6 +162,7 @@ const translations = {
     nomenclaturePageTitle: 'Nomenclatures',
     nomenclaturePageSubtitle:
       'Gérez les nomenclatures ajoutées via les médias ou directement depuis cette page.',
+    nomenclatureTotalLabel: 'Nomenclatures enregistrées',
     nomenclatureSearchLabel: 'Rechercher',
     nomenclatureSearchPlaceholder: 'Filtrer par nomenclature ou description...',
     nomenclatureClearFilter: 'Effacer le filtre',

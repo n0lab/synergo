@@ -751,6 +751,18 @@ main {
   gap: 6px;
 }
 
+.page-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.nomenclature-kpi-row {
+  display: flex;
+  align-items: stretch;
+}
+
 .nomenclature-page {
   background: var(--panel);
   border: 1px solid var(--border);
