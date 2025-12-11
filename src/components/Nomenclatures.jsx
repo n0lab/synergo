@@ -217,7 +217,7 @@ export default function Nomenclatures({
 
       <div className="table-wrapper">
         <div className="table head">
-          <div className="cell">{t('nomenclatureLabel')}</div>
+          <div className="cell label">{t('nomenclatureLabel')}</div>
           <div className="cell">{t('nomenclatureDescription')}</div>
           <div className="cell">{t('nomenclatureInterpretation')}</div>
           <div className="cell actions">{t('actions')}</div>
@@ -226,7 +226,7 @@ export default function Nomenclatures({
           const isEditing = editingId === item.id;
           return (
             <div className="table row" key={item.id}>
-              <div className="cell">
+              <div className="cell label">
                 {isEditing ? (
                   <input
                     value={draftLabel}
