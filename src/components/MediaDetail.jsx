@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ActionBar from './ActionBar.jsx';
 
 export default function MediaDetail({
@@ -14,6 +14,9 @@ export default function MediaDetail({
   const [editing, setEditing] = useState(false);
   const [draftAnnotations, setDraftAnnotations] = useState(media.annotations ?? []);
   const [draftTags, setDraftTags] = useState(media.tags ?? []);
+  const [draftTitle, setDraftTitle] = useState(media.title ?? '');
+  const [draftDescription, setDraftDescription] = useState(media.description ?? '');
+  const [draftSrc, setDraftSrc] = useState(media.src ?? '');
 
   const fps = media.fps ?? 30;
   const frameDuration = useMemo(() => 1 / fps, [fps]);
@@ -29,6 +32,9 @@ export default function MediaDetail({
     setEditing(false);
     setDraftAnnotations(media.annotations ?? []);
     setDraftTags(media.tags ?? []);
+    setDraftTitle(media.title ?? '');
+    setDraftDescription(media.description ?? '');
+    setDraftSrc(media.src ?? '');
   }, [media]);
 
   const seekTo = (timeInSeconds) => {
@@ -46,13 +52,20 @@ export default function MediaDetail({
     return [...source].sort((a, b) => a.time - b.time);
   }, [draftAnnotations, editing, media.annotations]);
 
-  const startEditing = () => {
+  const startEditing = useCallback(() => {
     setDraftAnnotations(media.annotations ?? []);
     setDraftTags(media.tags ?? []);
+    setDraftTitle(media.title ?? '');
+    setDraftDescription(media.description ?? '');
+    setDraftSrc(media.src ?? '');
     setEditing(true);
-  };
+  }, [media.annotations, media.description, media.src, media.tags, media.title]);
 
-  const saveEdits = () => {
+  const saveEdits = useCallback(() => {
+    const nextTitle = draftTitle.trim() || media.title;
+    const nextDescription = draftDescription.trim();
+    const nextSrc = draftSrc.trim() || media.src;
+
     if (media.type === 'video') {
       const sanitizedAnnotations = (draftAnnotations ?? [])
         .map((ann) => ({ ...ann, label: ann.label.trim() }))
@@ -63,17 +76,25 @@ export default function MediaDetail({
       onUpdateMedia?.(media.id, {
         annotations: sanitizedAnnotations,
         tags: sanitizedTags,
+        title: nextTitle,
+        description: nextDescription,
+        src: nextSrc,
       });
     } else {
       const sanitizedTags = (draftTags ?? [])
         .map((tag) => tag.trim())
         .filter(Boolean);
 
-      onUpdateMedia?.(media.id, { tags: sanitizedTags });
+      onUpdateMedia?.(media.id, {
+        tags: sanitizedTags,
+        title: nextTitle,
+        description: nextDescription,
+        src: nextSrc,
+      });
     }
 
     setEditing(false);
-  };
+  }, [draftAnnotations, draftDescription, draftSrc, draftTags, draftTitle, media]);
 
   const handleEditAction = () => {
     if (editing) {
@@ -141,6 +162,8 @@ export default function MediaDetail({
     return `${minutes}:${paddedSeconds}`;
   };
 
+  const mediaSrc = editing ? draftSrc : media.src;
+
   const findDescription = (label) => {
     const found = nomenclatureByLabel.get(label);
     if (!found) return '';
@@ -199,12 +222,61 @@ export default function MediaDetail({
       </header>
       <div className="detail-body">
         <section className="media-panel">
-          <h2 className="media-heading">{media.title}</h2>
+          <div className="metadata-grid">
+            <div className="field-group">
+              <label className="muted" htmlFor="title-input">
+                Titre
+              </label>
+              {editing ? (
+                <input
+                  id="title-input"
+                  value={draftTitle}
+                  onChange={(event) => setDraftTitle(event.target.value)}
+                  className="text-input"
+                />
+              ) : (
+                <h2 className="media-heading">{media.title}</h2>
+              )}
+            </div>
+            <div className="field-group">
+              <label className="muted" htmlFor="link-input">
+                Lien de la ressource
+              </label>
+              {editing ? (
+                <input
+                  id="link-input"
+                  value={draftSrc}
+                  onChange={(event) => setDraftSrc(event.target.value)}
+                  className="text-input"
+                />
+              ) : (
+                <a className="resource-link" href={media.src} target="_blank" rel="noreferrer">
+                  {media.src}
+                </a>
+              )}
+            </div>
+            <div className="field-group full-span">
+              <label className="muted" htmlFor="description-input">
+                Description
+              </label>
+              {editing ? (
+                <textarea
+                  id="description-input"
+                  value={draftDescription}
+                  onChange={(event) => setDraftDescription(event.target.value)}
+                  className="text-input"
+                  rows={3}
+                />
+              ) : (
+                <p className="description">{media.description}</p>
+              )}
+            </div>
+          </div>
           {media.type === 'video' ? (
             <div className="video-wrapper">
               <video
                 ref={videoRef}
-                src={media.src}
+                src={mediaSrc}
                 controls
                 className="video-player"
                 onPause={() => setPaused(true)}
@@ -221,9 +293,8 @@ export default function MediaDetail({
               </div>
             </div>
           ) : (
-            <img src={media.src} alt={media.title} className="photo" />
+            <img src={mediaSrc} alt={media.title} className="photo" />
           )}
-          <p className="description">{media.description}</p>
         </section>
         <aside className="tags-panel">
           <h3>Nomenclatures</h3>
