@@ -650,6 +650,26 @@ main {
   background: color-mix(in srgb, var(--accent-2) 12%, var(--badge));
 }
 
+.ghost.info {
+  color: #38bdf8;
+  border-color: color-mix(in srgb, #38bdf8 80%, var(--border));
+}
+
+.ghost.info:hover {
+  border-color: #38bdf8;
+  background: color-mix(in srgb, #38bdf8 12%, var(--badge));
+}
+
+.ghost.purple {
+  color: #a855f7;
+  border-color: color-mix(in srgb, #a855f7 80%, var(--border));
+}
+
+.ghost.purple:hover {
+  border-color: #a855f7;
+  background: color-mix(in srgb, #a855f7 12%, var(--badge));
+}
+
 .ghost.soft {
   background: color-mix(in srgb, var(--badge) 70%, transparent);
   border-color: color-mix(in srgb, var(--border) 70%, var(--accent) 30%);

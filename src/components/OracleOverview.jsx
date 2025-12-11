@@ -24,6 +24,26 @@ export default function OracleOverview({
           <p>Explorez les ressources de gestes non-verbaux et leurs nomenclatures.</p>
         </div>
         <div className="kpi-row">
+          {hasQuery && (
+            <>
+              <button
+                className="ghost info"
+                type="button"
+                onClick={onAddResultsToReview}
+                disabled={items.length === 0}
+              >
+                Vers reviewer
+              </button>
+              <button
+                className="ghost purple"
+                type="button"
+                onClick={onAddResultsToQuizz}
+                disabled={items.length === 0}
+              >
+                Vers quizz
+              </button>
+            </>
+          )}
           <button type="button" className="ghost success" onClick={onAddResource}>
             Ajouter
           </button>
@@ -47,26 +67,6 @@ export default function OracleOverview({
       <div className="oracle-toolbar">
         <SearchBar value={query} onChange={onQueryChange} />
         <div className="oracle-actions">
-          {hasQuery && (
-            <>
-              <button
-                className="ghost"
-                type="button"
-                onClick={onAddResultsToReview}
-                disabled={items.length === 0}
-              >
-                Vers reviewer
-              </button>
-              <button
-                className="ghost"
-                type="button"
-                onClick={onAddResultsToQuizz}
-                disabled={items.length === 0}
-              >
-                Vers quizz
-              </button>
-            </>
-          )}
           {activeType !== 'all' && (
             <button className="ghost" type="button" onClick={() => onTypeChange('all')}>
               Réinitialiser le filtrage
