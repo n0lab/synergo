@@ -1,12 +1,19 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ActionBar from './ActionBar.jsx';
 
-export default function MediaDetail({ media, onBack, onToReview, onToQuizz }) {
+export default function MediaDetail({ media, nomenclatures, onBack, onToReview, onToQuizz }) {
   const videoRef = useRef(null);
   const [paused, setPaused] = useState(true);
 
   const fps = media.fps ?? 30;
   const frameDuration = useMemo(() => 1 / fps, [fps]);
+  const nomenclatureByLabel = useMemo(() => {
+    const map = new Map();
+    (nomenclatures ?? []).forEach((entry) => {
+      map.set(entry.label, entry);
+    });
+    return map;
+  }, [nomenclatures]);
   const seekTo = (timeInSeconds) => {
     const video = videoRef.current;
     if (!video) return;
@@ -65,6 +72,12 @@ export default function MediaDetail({ media, onBack, onToReview, onToQuizz }) {
     return `${minutes}:${paddedSeconds}`;
   };
 
+  const findDescription = (label) => {
+    const found = nomenclatureByLabel.get(label);
+    if (!found) return '';
+    return found.description?.trim() ?? '';
+  };
+
   return (
     <div className="detail-view">
       <header className="detail-header">
@@ -112,14 +125,19 @@ export default function MediaDetail({ media, onBack, onToReview, onToQuizz }) {
             <div className="annotation-list">
               {sortedAnnotations.map(({ time, label }) => (
                 <div key={`${media.id}-${time}-${label}`} className="annotation-row">
-                  <button
-                    type="button"
-                    className="timestamp link"
-                    onClick={() => seekTo(time)}
-                  >
-                    {formatTimestamp(time)}
-                  </button>
-                  <span className="badge">{label}</span>
+                  <div className="annotation-row-header">
+                    <button
+                      type="button"
+                      className="timestamp link"
+                      onClick={() => seekTo(time)}
+                    >
+                      {formatTimestamp(time)}
+                    </button>
+                    <span className="badge">{label}</span>
+                  </div>
+                  {findDescription(label) && (
+                    <div className="annotation-description">{findDescription(label)}</div>
+                  )}
                 </div>
               ))}
               {sortedAnnotations.length === 0 && (
@@ -127,11 +145,16 @@ export default function MediaDetail({ media, onBack, onToReview, onToQuizz }) {
               )}
             </div>
           ) : (
-            <div className="tags">
+            <div className="annotation-list">
               {media.tags.map((tag) => (
-                <span className="badge" key={tag}>
-                  {tag}
-                </span>
+                <div className="annotation-row" key={tag}>
+                  <div className="annotation-row-header">
+                    <span className="badge">{tag}</span>
+                  </div>
+                  {findDescription(tag) && (
+                    <div className="annotation-description">{findDescription(tag)}</div>
+                  )}
+                </div>
               ))}
             </div>
           )}
