@@ -224,9 +224,11 @@ export default function MediaDetail({
         <section className="media-panel">
           <div className="metadata-grid">
             <div className="field-group">
-              <label className="muted" htmlFor="title-input">
-                Titre
-              </label>
+              {editing && (
+                <label className="muted" htmlFor="title-input">
+                  Titre
+                </label>
+              )}
               {editing ? (
                 <input
                   id="title-input"
@@ -238,27 +240,12 @@ export default function MediaDetail({
                 <h2 className="media-heading">{media.title}</h2>
               )}
             </div>
-            <div className="field-group">
-              <label className="muted" htmlFor="link-input">
-                Lien de la ressource
-              </label>
-              {editing ? (
-                <input
-                  id="link-input"
-                  value={draftSrc}
-                  onChange={(event) => setDraftSrc(event.target.value)}
-                  className="text-input"
-                />
-              ) : (
-                <a className="resource-link" href={media.src} target="_blank" rel="noreferrer">
-                  {media.src}
-                </a>
-              )}
-            </div>
             <div className="field-group full-span">
-              <label className="muted" htmlFor="description-input">
-                Description
-              </label>
+              {editing && (
+                <label className="muted" htmlFor="description-input">
+                  Description
+                </label>
+              )}
               {editing ? (
                 <textarea
                   id="description-input"
@@ -295,6 +282,25 @@ export default function MediaDetail({
           ) : (
             <img src={mediaSrc} alt={media.title} className="photo" />
           )}
+          <div className="field-group resource-field">
+            {editing && (
+              <label className="muted" htmlFor="link-input">
+                Lien de la ressource
+              </label>
+            )}
+            {editing ? (
+              <input
+                id="link-input"
+                value={draftSrc}
+                onChange={(event) => setDraftSrc(event.target.value)}
+                className="text-input"
+              />
+            ) : (
+              <a className="resource-link" href={media.src} target="_blank" rel="noreferrer">
+                {media.src}
+              </a>
+            )}
+          </div>
         </section>
         <aside className="tags-panel">
           <h3>Nomenclatures</h3>
