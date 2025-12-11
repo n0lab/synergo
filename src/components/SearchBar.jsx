@@ -20,7 +20,7 @@ export default function SearchBar({ value, onChange }) {
           ×
         </button>
       </div>
-      <span className="hint">Recherche dynamique sur les tags</span>
+      <div className="search-spacer" aria-hidden="true" />
     </div>
   );
 }

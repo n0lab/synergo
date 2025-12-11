@@ -251,9 +251,8 @@ main {
   outline: 2px solid var(--accent);
 }
 
-.search-bar .hint {
-  color: var(--muted);
-  font-size: 13px;
+.search-spacer {
+  height: 48px;
 }
 
 .input-with-clear {
