@@ -7,6 +7,12 @@ function applyAddedAt(media) {
   return media.map((item, index) => ({
     ...item,
     addedAt: typeof item.addedAt === 'number' ? item.addedAt : now - (media.length - index),
+    updatedAt:
+      typeof item.updatedAt === 'number'
+        ? item.updatedAt
+        : typeof item.addedAt === 'number'
+          ? item.addedAt
+          : now - (media.length - index),
   }));
 }
 

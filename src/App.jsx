@@ -81,10 +81,14 @@ export default function App() {
     [db.media]
   );
 
-  const orderedMedia = useMemo(
-    () => [...db.media].sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0)),
-    [db.media]
-  );
+  const orderedMedia = useMemo(() => {
+    return [...db.media].sort((a, b) => {
+      const lastChangeA = Math.max(a.updatedAt ?? 0, a.addedAt ?? 0);
+      const lastChangeB = Math.max(b.updatedAt ?? 0, b.addedAt ?? 0);
+
+      return lastChangeB - lastChangeA;
+    });
+  }, [db.media]);
 
   const filteredMedia = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -164,15 +168,17 @@ export default function App() {
 
   const addResource = ({ title, description, src, type }) => {
     const resolvedType = type || detectMediaType(src);
+    const timestamp = Date.now();
     const newEntry = {
-      id: `user-media-${Date.now()}`,
+      id: `user-media-${timestamp}`,
       title,
       description,
       src,
       type: resolvedType,
       tags: [],
       annotations: [],
-      addedAt: Date.now(),
+      addedAt: timestamp,
+      updatedAt: timestamp,
       ...(resolvedType === 'video' ? { fps: 30 } : {}),
     };
 
@@ -193,10 +199,11 @@ export default function App() {
   const updateMedia = (id, updater) => {
     let updatedItem = null;
     updateDb((prev) => {
+      const timestamp = Date.now();
       const nextMedia = prev.media.map((item) => {
         if (item.id !== id) return item;
         const patch = typeof updater === 'function' ? updater(item) : updater;
-        updatedItem = { ...item, ...patch };
+        updatedItem = { ...item, ...patch, updatedAt: timestamp };
         return updatedItem;
       });
       return { ...prev, media: nextMedia };
