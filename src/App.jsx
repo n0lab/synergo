@@ -119,6 +119,26 @@ export default function App() {
       nomenclatures: [...prev.nomenclatures, { id: `user-${Date.now()}-${entry.label}`, ...entry }],
     }));
 
+  const updateMedia = (id, updater) => {
+    let updatedItem = null;
+    updateDb((prev) => {
+      const nextMedia = prev.media.map((item) => {
+        if (item.id !== id) return item;
+        const patch = typeof updater === 'function' ? updater(item) : updater;
+        updatedItem = { ...item, ...patch };
+        return updatedItem;
+      });
+      return { ...prev, media: nextMedia };
+    });
+
+    setSelectedMedia((prev) => {
+      if (prev?.id === id && updatedItem) {
+        return updatedItem;
+      }
+      return prev;
+    });
+  };
+
   const updateNomenclature = (id, patch) =>
     updateDb((prev) => ({
       ...prev,
@@ -182,6 +202,8 @@ export default function App() {
           onBack={() => setSelectedMedia(null)}
           onToReview={addTo('reviewList')}
           onToQuizz={addTo('quizzList')}
+          onUpdateMedia={updateMedia}
+          onUpdateNomenclature={updateNomenclature}
         />
       );
     }
