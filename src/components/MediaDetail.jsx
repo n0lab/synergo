@@ -115,10 +115,13 @@ export default function MediaDetail({
     if (!editing) return;
 
     const handleKey = (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        saveEdits();
-      }
+      if (event.key !== 'Enter') return;
+
+      const isDescriptionInput = event.target?.id === 'description-input';
+      if (event.shiftKey && isDescriptionInput) return;
+
+      event.preventDefault();
+      saveEdits();
     };
 
     window.addEventListener('keydown', handleKey);
