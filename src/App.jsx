@@ -3,11 +3,29 @@ import Sidebar from './components/Sidebar.jsx';
 import OracleOverview from './components/OracleOverview.jsx';
 import MediaDetail from './components/MediaDetail.jsx';
 import Nomenclatures from './components/Nomenclatures.jsx';
-import { loadDatabase, persistDatabase } from './db.js';
+import { deriveNomenclaturesFromMedia, loadDatabase, persistDatabase } from './db.js';
 
 const palette = {
   light: 'light',
   dark: 'dark',
+};
+
+const syncNomenclaturesWithMedia = (media, nomenclatures) => {
+  const seeds = deriveNomenclaturesFromMedia(media);
+  const byLabel = new Map(
+    (nomenclatures ?? []).map((entry) => [entry.label.toLowerCase(), entry])
+  );
+  let changed = false;
+
+  seeds.forEach((seed) => {
+    if (!byLabel.has(seed.label.toLowerCase())) {
+      byLabel.set(seed.label.toLowerCase(), seed);
+      changed = true;
+    }
+  });
+
+  if (!changed) return nomenclatures;
+  return Array.from(byLabel.values());
 };
 
 export default function App() {
@@ -17,7 +35,13 @@ export default function App() {
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [selectedMedia, setSelectedMedia] = useState(null);
-  const [db, setDb] = useState(() => loadDatabase());
+  const [db, setDb] = useState(() => {
+    const initial = loadDatabase();
+    return {
+      ...initial,
+      nomenclatures: syncNomenclaturesWithMedia(initial.media, initial.nomenclatures),
+    };
+  });
 
   useEffect(() => {
     persistDatabase(db);
@@ -68,6 +92,15 @@ export default function App() {
   const updateDb = (updater) => {
     setDb((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater;
+      const syncedNomenclatures = syncNomenclaturesWithMedia(
+        next.media,
+        next.nomenclatures
+      );
+
+      if (syncedNomenclatures !== next.nomenclatures) {
+        return { ...next, nomenclatures: syncedNomenclatures };
+      }
+
       return next;
     });
   };
@@ -145,6 +178,7 @@ export default function App() {
       return (
         <MediaDetail
           media={selectedMedia}
+          nomenclatures={db.nomenclatures}
           onBack={() => setSelectedMedia(null)}
           onToReview={addTo('reviewList')}
           onToQuizz={addTo('quizzList')}

@@ -2,7 +2,7 @@ import { mediaLibrary } from './data.js';
 
 const STORAGE_KEY = 'synergo-db';
 
-function deriveNomenclaturesFromMedia(media) {
+export function deriveNomenclaturesFromMedia(media) {
   const collected = new Map();
   media.forEach((item) => {
     item.tags?.forEach((tag) => {
