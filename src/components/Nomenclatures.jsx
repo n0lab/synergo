@@ -95,6 +95,13 @@ export default function Nomenclatures({
     cancelEdit();
   };
 
+  const handleEditKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      saveEdit();
+    }
+  };
+
   const requestDelete = (item) => {
     if (isNomenclatureUsed?.(item.label)) {
       setError(t('nomenclatureDeleteBlocked'));
@@ -192,6 +199,7 @@ export default function Nomenclatures({
                   <input
                     value={draftLabel}
                     onChange={(e) => setDraftLabel(e.target.value)}
+                    onKeyDown={handleEditKeyDown}
                     aria-label={t('nomenclatureLabel')}
                   />
                 ) : (
@@ -210,6 +218,7 @@ export default function Nomenclatures({
                   <input
                     value={draftDescription}
                     onChange={(e) => setDraftDescription(e.target.value)}
+                    onKeyDown={handleEditKeyDown}
                     aria-label={t('nomenclatureDescription')}
                   />
                 ) : (
