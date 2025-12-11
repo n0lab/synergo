@@ -127,6 +127,18 @@ export default function App() {
     });
   };
 
+  const addManyToList = (listKey, items) => {
+    if (!items?.length) return;
+
+    updateDb((prev) => {
+      const existingIds = new Set(prev[listKey].map((entry) => entry.id));
+      const additions = items.filter((item) => !existingIds.has(item.id));
+
+      if (additions.length === 0) return prev;
+      return { ...prev, [listKey]: [...prev[listKey], ...additions] };
+    });
+  };
+
   const addNomenclature = (entry) =>
     updateDb((prev) => ({
       ...prev,
@@ -290,6 +302,8 @@ export default function App() {
         activeType={typeFilter}
         onTypeChange={setTypeFilter}
         onAddResource={() => setSection('add-resource')}
+        onAddResultsToReview={() => addManyToList('reviewList', filteredMedia)}
+        onAddResultsToQuizz={() => addManyToList('quizzList', filteredMedia)}
       />
     );
   };

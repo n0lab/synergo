@@ -11,7 +11,11 @@ export default function OracleOverview({
   activeType,
   onTypeChange,
   onAddResource,
+  onAddResultsToReview,
+  onAddResultsToQuizz,
 }) {
+  const hasQuery = query.trim().length > 0;
+
   return (
     <div className="oracle">
       <div className="header-row">
@@ -20,7 +24,7 @@ export default function OracleOverview({
           <p>Explorez les ressources de gestes non-verbaux et leurs nomenclatures.</p>
         </div>
         <div className="kpi-row">
-          <button type="button" className="primary compact" onClick={onAddResource}>
+          <button type="button" className="ghost success" onClick={onAddResource}>
             Ajouter
           </button>
           <StatsCard
@@ -42,11 +46,33 @@ export default function OracleOverview({
 
       <div className="oracle-toolbar">
         <SearchBar value={query} onChange={onQueryChange} />
-        {activeType !== 'all' && (
-          <button className="ghost" type="button" onClick={() => onTypeChange('all')}>
-            Réinitialiser le filtrage
-          </button>
-        )}
+        <div className="oracle-actions">
+          {hasQuery && (
+            <>
+              <button
+                className="ghost"
+                type="button"
+                onClick={onAddResultsToReview}
+                disabled={items.length === 0}
+              >
+                Vers reviewer
+              </button>
+              <button
+                className="ghost"
+                type="button"
+                onClick={onAddResultsToQuizz}
+                disabled={items.length === 0}
+              >
+                Vers quizz
+              </button>
+            </>
+          )}
+          {activeType !== 'all' && (
+            <button className="ghost" type="button" onClick={() => onTypeChange('all')}>
+              Réinitialiser le filtrage
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid">

@@ -99,7 +99,7 @@ export default function AddResource({ onBack, onCreate, detectType }) {
         </div>
 
         <div className="field-group">
-          <label htmlFor="resource-link">Lien de la ressource</label>
+          <label htmlFor="resource-link">Lien de la ressource (liens YouTube non pris en charge)</label>
           <input
             id="resource-link"
             type="url"
@@ -124,8 +124,7 @@ export default function AddResource({ onBack, onCreate, detectType }) {
           />
           <div className="helper-row">
             <span className="muted">
-              Ajoutez un lien ou déposez un fichier qui sera conservé localement (liens YouTube non
-              pris en charge).
+              Ajoutez un lien ou déposez un fichier qui sera conservé localement.
             </span>
           </div>
         </div>

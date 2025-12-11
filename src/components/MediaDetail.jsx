@@ -362,101 +362,105 @@ export default function MediaDetail({
           )}
         </section>
         <aside className="tags-panel">
-          <h3>Nomenclatures</h3>
-          {media.type === 'video' ? (
-            <div className="annotation-list">
-              {sortedAnnotations.map(({ time, label }, index) => {
-                const description = findDescription(label);
-                const rowKey = `${media.id}-${time}-${index}`;
+          <div className="tags-panel-header">
+            <h3>Nomenclatures</h3>
+          </div>
+          <div className="annotation-section">
+            {media.type === 'video' ? (
+              <div className="annotation-list">
+                {sortedAnnotations.map(({ time, label }, index) => {
+                  const description = findDescription(label);
+                  const rowKey = `${media.id}-${time}-${index}`;
 
-                return (
-                  <div key={rowKey} className={`annotation-row ${editing ? 'editing' : ''}`}>
-                    {editing && (
-                      <button
-                        type="button"
-                        className="delete-annotation"
-                        aria-label={`Supprimer ${label}`}
-                        onClick={() => requestDelete(label, time)}
-                      >
-                        ×
-                      </button>
-                    )}
-                    <div className="annotation-row-content">
-                      <div className="annotation-row-header">
+                  return (
+                    <div key={rowKey} className={`annotation-row ${editing ? 'editing' : ''}`}>
+                      {editing && (
                         <button
                           type="button"
-                          className="timestamp link"
-                          onClick={() => seekTo(time)}
-                          disabled={editing}
+                          className="delete-annotation"
+                          aria-label={`Supprimer ${label}`}
+                          onClick={() => requestDelete(label, time)}
                         >
-                          {formatTimestamp(time)}
+                          ×
                         </button>
-                        {editing ? (
-                          <input
-                            className="badge editable"
-                            value={label}
-                            onChange={(e) => handleAnnotationLabelChange(time, label, e.target.value)}
-                            aria-label="Nomenclature"
-                          />
-                        ) : (
-                          <span className="badge">{label}</span>
-                        )}
+                      )}
+                      <div className="annotation-row-content">
+                        <div className="annotation-row-header">
+                          <button
+                            type="button"
+                            className="timestamp link"
+                            onClick={() => seekTo(time)}
+                            disabled={editing}
+                          >
+                            {formatTimestamp(time)}
+                          </button>
+                          {editing ? (
+                            <input
+                              className="badge editable"
+                              value={label}
+                              onChange={(e) => handleAnnotationLabelChange(time, label, e.target.value)}
+                              aria-label="Nomenclature"
+                            />
+                          ) : (
+                            <span className="badge">{label}</span>
+                          )}
+                        </div>
+                        {!editing &&
+                          description && (
+                            <div className="annotation-description">{description}</div>
+                          )}
                       </div>
-                      {!editing &&
-                        description && (
-                          <div className="annotation-description">{description}</div>
-                        )}
                     </div>
-                  </div>
-                );
-              })}
-              {sortedAnnotations.length === 0 && (
-                <div className="muted">Aucune nomenclature horodatée.</div>
-              )}
-            </div>
-          ) : (
-            <div className="annotation-list">
-              {(editing ? draftTags : media.tags).map((tag, index) => {
-                const description = findDescription(tag);
+                  );
+                })}
+                {sortedAnnotations.length === 0 && (
+                  <div className="muted">Aucune nomenclature horodatée.</div>
+                )}
+              </div>
+            ) : (
+              <div className="annotation-list">
+                {(editing ? draftTags : media.tags).map((tag, index) => {
+                  const description = findDescription(tag);
 
-                return (
-                  <div
-                    key={`${media.id}-photo-tag-${index}`}
-                    className={`annotation-row ${editing ? 'editing' : ''}`}
-                  >
-                    {editing && (
-                      <button
-                        type="button"
-                        className="delete-annotation"
-                        aria-label={`Supprimer ${tag}`}
-                        onClick={() => requestDelete(tag)}
-                      >
-                        ×
-                      </button>
-                    )}
-                    <div className="annotation-row-content">
-                      <div className="annotation-row-header">
-                        {editing ? (
-                          <input
-                            className="badge editable"
-                            value={tag}
-                            onChange={(e) => handlePhotoTagChange(index, e.target.value)}
-                            aria-label="Nomenclature"
-                          />
-                        ) : (
-                          <span className="badge">{tag}</span>
-                        )}
+                  return (
+                    <div
+                      key={`${media.id}-photo-tag-${index}`}
+                      className={`annotation-row ${editing ? 'editing' : ''}`}
+                    >
+                      {editing && (
+                        <button
+                          type="button"
+                          className="delete-annotation"
+                          aria-label={`Supprimer ${tag}`}
+                          onClick={() => requestDelete(tag)}
+                        >
+                          ×
+                        </button>
+                      )}
+                      <div className="annotation-row-content">
+                        <div className="annotation-row-header">
+                          {editing ? (
+                            <input
+                              className="badge editable"
+                              value={tag}
+                              onChange={(e) => handlePhotoTagChange(index, e.target.value)}
+                              aria-label="Nomenclature"
+                            />
+                          ) : (
+                            <span className="badge">{tag}</span>
+                          )}
+                        </div>
+                        {!editing &&
+                          description && (
+                            <div className="annotation-description">{description}</div>
+                          )}
                       </div>
-                      {!editing &&
-                        description && (
-                          <div className="annotation-description">{description}</div>
-                        )}
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
           {!editing && (
             <form className="add-nomenclature-form" onSubmit={addNomenclatureFromInput}>
               <input

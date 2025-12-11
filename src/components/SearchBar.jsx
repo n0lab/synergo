@@ -6,7 +6,7 @@ export default function SearchBar({ value, onChange }) {
       <div className="input-with-clear">
         <input
           type="search"
-          placeholder="Rechercher par nomenclature..."
+          placeholder="Rechercher"
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
