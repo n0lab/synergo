@@ -12,6 +12,8 @@ export default function MediaDetail({
   const videoRef = useRef(null);
   const [paused, setPaused] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [draftAnnotations, setDraftAnnotations] = useState(media.annotations ?? []);
+  const [draftTags, setDraftTags] = useState(media.tags ?? []);
 
   const fps = media.fps ?? 30;
   const frameDuration = useMemo(() => 1 / fps, [fps]);
@@ -23,7 +25,11 @@ export default function MediaDetail({
     return map;
   }, [nomenclatures]);
 
-  const toggleEditing = () => setEditing((prev) => !prev);
+  useEffect(() => {
+    setEditing(false);
+    setDraftAnnotations(media.annotations ?? []);
+    setDraftTags(media.tags ?? []);
+  }, [media]);
 
   const seekTo = (timeInSeconds) => {
     const video = videoRef.current;
@@ -35,9 +41,47 @@ export default function MediaDetail({
   };
 
   const sortedAnnotations = useMemo(() => {
-    if (!media.annotations) return [];
-    return [...media.annotations].sort((a, b) => a.time - b.time);
-  }, [media.annotations]);
+    const source = editing ? draftAnnotations : media.annotations;
+    if (!source) return [];
+    return [...source].sort((a, b) => a.time - b.time);
+  }, [draftAnnotations, editing, media.annotations]);
+
+  const startEditing = () => {
+    setDraftAnnotations(media.annotations ?? []);
+    setDraftTags(media.tags ?? []);
+    setEditing(true);
+  };
+
+  const saveEdits = () => {
+    if (media.type === 'video') {
+      const sanitizedAnnotations = (draftAnnotations ?? [])
+        .map((ann) => ({ ...ann, label: ann.label.trim() }))
+        .filter((ann) => ann.label);
+
+      const sanitizedTags = Array.from(new Set(sanitizedAnnotations.map((ann) => ann.label)));
+
+      onUpdateMedia?.(media.id, {
+        annotations: sanitizedAnnotations,
+        tags: sanitizedTags,
+      });
+    } else {
+      const sanitizedTags = (draftTags ?? [])
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+
+      onUpdateMedia?.(media.id, { tags: sanitizedTags });
+    }
+
+    setEditing(false);
+  };
+
+  const handleEditAction = () => {
+    if (editing) {
+      saveEdits();
+    } else {
+      startEditing();
+    }
+  };
 
   const handlePlayPause = () => {
     const video = videoRef.current;
@@ -93,37 +137,18 @@ export default function MediaDetail({
     const nextLabel = nextValue.trim();
     if (!nextLabel) return;
 
-    onUpdateMedia?.(media.id, (item) => {
-      const updatedAnnotations = (item.annotations ?? []).map((ann) =>
-        ann.time === time && ann.label === currentLabel ? { ...ann, label: nextLabel } : ann
-      );
-
-      let updatedTags = item.tags ?? [];
-      const stillUsesOldLabel = updatedAnnotations.some((ann) => ann.label === currentLabel);
-      updatedTags = stillUsesOldLabel
-        ? updatedTags
-        : updatedTags.filter((tag) => tag !== currentLabel);
-
-      if (!updatedTags.includes(nextLabel)) {
-        updatedTags = [...updatedTags, nextLabel];
-      }
-
-      return {
-        ...item,
-        annotations: updatedAnnotations,
-        tags: updatedTags,
-      };
-    });
+    setDraftAnnotations((prev) =>
+      (prev ?? []).map((ann) =>
+        ann.time === time && ann.label === currentLabel ? { ...ann, label: nextValue } : ann
+      )
+    );
   };
 
   const handlePhotoTagChange = (index, nextValue) => {
     const nextLabel = nextValue.trim();
     if (!nextLabel) return;
 
-    onUpdateMedia?.(media.id, (item) => {
-      const updatedTags = item.tags.map((tag, idx) => (idx === index ? nextLabel : tag));
-      return { ...item, tags: updatedTags };
-    });
+    setDraftTags((prev) => (prev ?? []).map((tag, idx) => (idx === index ? nextValue : tag)));
   };
 
   const requestDelete = (label, time) => {
@@ -135,23 +160,13 @@ export default function MediaDetail({
 
     if (!confirmed) return;
 
-    onUpdateMedia?.(media.id, (item) => {
-      const remainingAnnotations = (item.annotations ?? []).filter(
-        (ann) => !(ann.label === label && ann.time === time)
+    if (media.type === 'video') {
+      setDraftAnnotations((prev) =>
+        (prev ?? []).filter((ann) => !(ann.label === label && ann.time === time))
       );
-
-      let updatedTags = item.tags ?? [];
-      if (item.type === 'video') {
-        const labelStillUsed = remainingAnnotations.some((ann) => ann.label === label);
-        updatedTags = labelStillUsed
-          ? updatedTags
-          : updatedTags.filter((tag) => tag !== label);
-      } else {
-        updatedTags = updatedTags.filter((tag) => tag !== label);
-      }
-
-      return { ...item, annotations: remainingAnnotations, tags: updatedTags };
-    });
+    } else {
+      setDraftTags((prev) => (prev ?? []).filter((tag) => tag !== label));
+    }
   };
 
   return (
@@ -163,7 +178,7 @@ export default function MediaDetail({
         </div>
         <ActionBar
           editing={editing}
-          onEdit={toggleEditing}
+          onEdit={handleEditAction}
           onToReview={() => onToReview(media)}
           onToQuizz={() => onToQuizz(media)}
         />
@@ -251,7 +266,7 @@ export default function MediaDetail({
             </div>
           ) : (
             <div className="annotation-list">
-              {media.tags.map((tag, index) => {
+              {(editing ? draftTags : media.tags).map((tag, index) => {
                 const description = findDescription(tag);
 
                 return (
