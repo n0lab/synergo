@@ -247,6 +247,13 @@ main {
   color: var(--text);
 }
 
+.search-bar input::-webkit-search-decoration,
+.search-bar input::-webkit-search-cancel-button,
+.search-bar input::-webkit-search-results-button,
+.search-bar input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}
+
 .search-bar input:focus {
   outline: 2px solid var(--accent);
 }
