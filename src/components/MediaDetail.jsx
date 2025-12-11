@@ -215,9 +215,9 @@ export default function MediaDetail({
           <h3>Nomenclatures</h3>
           {media.type === 'video' ? (
             <div className="annotation-list">
-              {sortedAnnotations.map(({ time, label }) => {
+              {sortedAnnotations.map(({ time, label }, index) => {
                 const description = findDescription(label);
-                const rowKey = `${media.id}-${time}-${label}`;
+                const rowKey = `${media.id}-${time}-${index}`;
 
                 return (
                   <div key={rowKey} className={`annotation-row ${editing ? 'editing' : ''}`}>
@@ -271,7 +271,7 @@ export default function MediaDetail({
 
                 return (
                   <div
-                    key={`${tag}-${index}`}
+                    key={`${media.id}-photo-tag-${index}`}
                     className={`annotation-row ${editing ? 'editing' : ''}`}
                   >
                     {editing && (
