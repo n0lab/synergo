@@ -19,6 +19,19 @@ function deriveNomenclaturesFromMedia(media) {
   return Array.from(collected.values());
 }
 
+function mergeById(seedList, savedList) {
+  const map = new Map(seedList.map((item) => [item.id, item]));
+  (savedList ?? []).forEach((item) => {
+    const seedItem = map.get(item.id);
+    if (seedItem) {
+      map.set(item.id, { ...item, ...seedItem });
+    } else {
+      map.set(item.id, item);
+    }
+  });
+  return Array.from(map.values());
+}
+
 function buildSeed(media) {
   return {
     media,
@@ -41,8 +54,8 @@ export function loadDatabase() {
     return {
       ...seed,
       ...parsed,
-      media: parsed.media ?? seed.media,
-      nomenclatures: parsed.nomenclatures ?? seed.nomenclatures,
+      media: mergeById(seed.media, parsed.media),
+      nomenclatures: mergeById(seed.nomenclatures, parsed.nomenclatures),
       reviewList: parsed.reviewList ?? seed.reviewList,
       quizzList: parsed.quizzList ?? seed.quizzList,
     };
