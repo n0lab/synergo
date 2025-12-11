@@ -23,6 +23,17 @@ export default function App() {
     persistDatabase(db);
   }, [db]);
 
+  useEffect(() => {
+    const { classList } = document.body;
+
+    classList.remove(...Object.values(palette));
+    classList.add(theme);
+
+    return () => {
+      classList.remove(theme);
+    };
+  }, [theme]);
+
   const stats = useMemo(
     () => ({
       videos: db.media.filter((item) => item.type === 'video').length,
