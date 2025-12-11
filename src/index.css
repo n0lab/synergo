@@ -744,42 +744,24 @@ main {
   color: var(--muted);
 }
 
-.page-header {
-  margin-bottom: 16px;
+.nomenclature-page {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 16px;
 }
 
-.page-header-row {
+.nomenclature-page .header-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
 }
 
-.nomenclature-kpi-row {
-  display: flex;
-  align-items: stretch;
-}
-
-.nomenclature-page {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
 .nomenclature-toolbar {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin: 10px 0 4px;
+  align-items: flex-start;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .field-group {

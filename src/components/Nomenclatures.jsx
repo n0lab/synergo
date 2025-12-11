@@ -119,13 +119,16 @@ export default function Nomenclatures({
   };
 
   return (
-    <div className="nomenclature-page">
-      <div className="page-header-row">
-        <header className="page-header">
+    <div className="nomenclature-page oracle">
+      <div className="header-row">
+        <div>
           <h2>{t('nomenclaturePageTitle')}</h2>
-          <p className="muted">{t('nomenclaturePageSubtitle')}</p>
-        </header>
-        <div className="nomenclature-kpi-row">
+          <p>{t('nomenclaturePageSubtitle')}</p>
+        </div>
+        <div className="kpi-row">
+          <button className="ghost success" type="button" onClick={openAddModal}>
+            {t('nomenclatureAdd')}
+          </button>
           <StatsCard
             label={t('nomenclatureTotalLabel')}
             value={totalNomenclatures}
@@ -134,7 +137,7 @@ export default function Nomenclatures({
         </div>
       </div>
 
-      <div className="nomenclature-toolbar">
+      <div className="nomenclature-toolbar oracle-toolbar">
         <div className="field-group wide">
           <label htmlFor="nomenclature-search">{t('nomenclatureSearchLabel')}</label>
           <div className="input-with-clear">
@@ -155,9 +158,6 @@ export default function Nomenclatures({
             </button>
           </div>
         </div>
-        <button className="primary" type="button" onClick={openAddModal}>
-          {t('nomenclatureAdd')}
-        </button>
       </div>
       {error && <div className="error-banner">{error}</div>}
 
