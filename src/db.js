@@ -2,6 +2,14 @@ import { mediaLibrary } from './data.js';
 
 const STORAGE_KEY = 'synergo-db';
 
+function applyAddedAt(media) {
+  const now = Date.now();
+  return media.map((item, index) => ({
+    ...item,
+    addedAt: typeof item.addedAt === 'number' ? item.addedAt : now - (media.length - index),
+  }));
+}
+
 export function deriveNomenclaturesFromMedia(media) {
   const collected = new Map();
   media.forEach((item) => {
@@ -35,9 +43,10 @@ function mergeById(seedList, savedList) {
 }
 
 function buildSeed(media) {
+  const seededMedia = applyAddedAt(media);
   return {
-    media,
-    nomenclatures: deriveNomenclaturesFromMedia(media),
+    media: seededMedia,
+    nomenclatures: deriveNomenclaturesFromMedia(seededMedia),
     reviewList: [],
     quizzList: [],
   };
@@ -53,10 +62,13 @@ export function loadDatabase() {
   }
   try {
     const parsed = JSON.parse(saved);
+    const seededMedia = applyAddedAt(seed.media);
+    const parsedMedia = applyAddedAt(parsed.media ?? []);
+
     return {
       ...seed,
       ...parsed,
-      media: mergeById(seed.media, parsed.media),
+      media: mergeById(seededMedia, parsedMedia),
       nomenclatures: mergeById(seed.nomenclatures, parsed.nomenclatures),
       reviewList: parsed.reviewList ?? seed.reviewList,
       quizzList: parsed.quizzList ?? seed.quizzList,

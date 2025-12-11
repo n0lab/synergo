@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react';
 
-export default function AddResource({ onBack, onCreate, detectType }) {
+export default function AddResource({ onBack, onCreate, detectType, findExistingResource, onNavigateToResource }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [link, setLink] = useState('');
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
+  const [duplicateResource, setDuplicateResource] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const detectedType = useMemo(() => detectType?.(link), [detectType, link]);
@@ -39,6 +40,7 @@ export default function AddResource({ onBack, onCreate, detectType }) {
 
     setIsSubmitting(true);
     setError('');
+    setDuplicateResource(null);
 
     try {
       let payloadSrc = trimmedLink;
@@ -50,6 +52,17 @@ export default function AddResource({ onBack, onCreate, detectType }) {
       }
 
       payloadType = payloadType || detectType?.(payloadSrc);
+
+      const existingResource = findExistingResource?.({
+        title: title.trim(),
+        src: payloadSrc,
+      });
+
+      if (existingResource) {
+        setDuplicateResource(existingResource);
+        setIsSubmitting(false);
+        return;
+      }
 
       onCreate({
         title: title.trim(),
@@ -129,7 +142,24 @@ export default function AddResource({ onBack, onCreate, detectType }) {
           </div>
         </div>
 
-        {error && <div className="error-banner">{error}</div>}
+        {(error || duplicateResource) && (
+          <div className="error-banner">
+            {duplicateResource ? (
+              <>
+                Désolé cette ressource existe déjà et est utilisé ici :{' '}
+                <button
+                  type="button"
+                  className="resource-link"
+                  onClick={() => duplicateResource && onNavigateToResource?.(duplicateResource)}
+                >
+                  {duplicateResource.title}
+                </button>
+              </>
+            ) : (
+              error
+            )}
+          </div>
+        )}
 
         <div className="action-group end">
           <button type="button" className="ghost" onClick={onBack}>

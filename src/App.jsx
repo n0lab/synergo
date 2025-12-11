@@ -81,6 +81,11 @@ export default function App() {
     [db.media]
   );
 
+  const orderedMedia = useMemo(
+    () => [...db.media].sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0)),
+    [db.media]
+  );
+
   const filteredMedia = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     const matchesQuery = (item) => {
@@ -90,12 +95,12 @@ export default function App() {
       return inTags || inTitle || inDescription;
     };
 
-    return db.media.filter((item) => {
+    return orderedMedia.filter((item) => {
       const typeOk = typeFilter === 'all' ? true : item.type === typeFilter;
       if (!normalized) return typeOk;
       return typeOk && matchesQuery(item);
     });
-  }, [db.media, query, typeFilter]);
+  }, [orderedMedia, query, typeFilter]);
 
   const navigateToOracleWithQuery = (value) => {
     setSection('oracle');
@@ -146,6 +151,17 @@ export default function App() {
       nomenclatures: [...prev.nomenclatures, { id: `user-${Date.now()}-${entry.label}`, ...entry }],
     }));
 
+  const findExistingResource = ({ title, src }) => {
+    const normalizedTitle = title?.trim().toLowerCase();
+    const normalizedSrc = src?.trim();
+
+    return db.media.find((item) => {
+      const sameTitle = normalizedTitle && item.title.trim().toLowerCase() === normalizedTitle;
+      const sameSrc = normalizedSrc && item.src?.trim() === normalizedSrc;
+      return sameTitle || sameSrc;
+    });
+  };
+
   const addResource = ({ title, description, src, type }) => {
     const resolvedType = type || detectMediaType(src);
     const newEntry = {
@@ -156,6 +172,7 @@ export default function App() {
       type: resolvedType,
       tags: [],
       annotations: [],
+      addedAt: Date.now(),
       ...(resolvedType === 'video' ? { fps: 30 } : {}),
     };
 
@@ -264,6 +281,13 @@ export default function App() {
       return (
         <AddResource
           detectType={detectMediaType}
+          findExistingResource={findExistingResource}
+          onNavigateToResource={(resource) => {
+            setSection('oracle');
+            setSelectedMedia(resource);
+            setQuery('');
+            setTypeFilter('all');
+          }}
           onBack={() => {
             setSection('oracle');
             setSelectedMedia(null);
