@@ -213,7 +213,9 @@ export default function Nomenclatures({
                     aria-label={t('nomenclatureDescription')}
                   />
                 ) : (
-                  <span className="muted">{item.description || '—'}</span>
+                  <span className="muted nomenclature-description" title={item.description || '—'}>
+                    {item.description || '—'}
+                  </span>
                 )}
               </div>
               <div className="cell actions">
