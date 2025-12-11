@@ -20,7 +20,6 @@ export default function SearchBar({ value, onChange, t }) {
           ×
         </button>
       </div>
-      <div className="search-spacer" aria-hidden="true" />
     </div>
   );
 }

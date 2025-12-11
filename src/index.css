@@ -272,10 +272,6 @@ main {
   outline: 2px solid var(--accent);
 }
 
-.search-spacer {
-  height: 48px;
-}
-
 .input-with-clear {
   position: relative;
   display: flex;
@@ -747,7 +743,7 @@ main {
 .nomenclature-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .nomenclature-page .header-row {
