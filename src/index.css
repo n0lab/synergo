@@ -644,6 +644,34 @@ main {
   color: var(--text);
 }
 
+.field-group textarea {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.helper-row {
+  margin-top: 4px;
+}
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.add-resource-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 780px;
+}
+
 .error-banner {
   color: #f87272;
   background: rgba(248, 114, 114, 0.1);
