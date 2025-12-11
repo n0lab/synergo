@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import OracleOverview from './components/OracleOverview.jsx';
+import ReviewerOverview from './components/ReviewerOverview.jsx';
 import MediaDetail from './components/MediaDetail.jsx';
 import Nomenclatures from './components/Nomenclatures.jsx';
 import AddResource from './components/AddResource.jsx';
@@ -149,6 +150,12 @@ export default function App() {
     });
   };
 
+  const removeFromList = (listKey) => (id) =>
+    updateDb((prev) => ({
+      ...prev,
+      [listKey]: prev[listKey].filter((entry) => entry.id !== id),
+    }));
+
   const addNomenclature = (entry) =>
     updateDb((prev) => ({
       ...prev,
@@ -241,6 +248,20 @@ export default function App() {
     }));
 
   const renderSection = () => {
+    if (selectedMedia) {
+      return (
+        <MediaDetail
+          media={selectedMedia}
+          nomenclatures={db.nomenclatures}
+          onBack={() => setSelectedMedia(null)}
+          onToReview={addTo('reviewList')}
+          onToQuizz={addTo('quizzList')}
+          onUpdateMedia={updateMedia}
+          onDeleteMedia={deleteResource}
+        />
+      );
+    }
+
     if (section === 'nomenclatures') {
       return (
         <Nomenclatures
@@ -256,16 +277,11 @@ export default function App() {
 
     if (section === 'reviewer') {
       return (
-        <div className="placeholder">
-          <h2>Reviewer</h2>
-          <p>Éléments à revoir</p>
-          <ul>
-            {db.reviewList.map((item) => (
-              <li key={`review-${item.id}`}>{item.title}</li>
-            ))}
-          </ul>
-          {db.reviewList.length === 0 && <div className="muted">Aucun élément pour l'instant.</div>}
-        </div>
+        <ReviewerOverview
+          items={db.reviewList}
+          onSelect={setSelectedMedia}
+          onRemove={removeFromList('reviewList')}
+        />
       );
     }
 
@@ -306,20 +322,6 @@ export default function App() {
             setQuery('');
             setTypeFilter('all');
           }}
-        />
-      );
-    }
-
-    if (selectedMedia) {
-      return (
-        <MediaDetail
-          media={selectedMedia}
-          nomenclatures={db.nomenclatures}
-          onBack={() => setSelectedMedia(null)}
-          onToReview={addTo('reviewList')}
-          onToQuizz={addTo('quizzList')}
-          onUpdateMedia={updateMedia}
-          onDeleteMedia={deleteResource}
         />
       );
     }
