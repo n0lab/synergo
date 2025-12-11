@@ -186,6 +186,22 @@ main {
   min-width: 150px;
 }
 
+.kpi.clickable {
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: border 0.2s ease, transform 0.15s ease;
+}
+
+.kpi.clickable:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-3px);
+}
+
+.kpi.clickable.active {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 25%, transparent);
+}
+
 .kpi-label {
   color: var(--muted);
   font-size: 14px;
@@ -201,6 +217,19 @@ main {
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
+}
+
+.oracle-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.oracle-toolbar .search-bar {
+  flex: 1;
+  margin: 0;
 }
 
 .search-bar {
@@ -225,6 +254,42 @@ main {
 .search-bar .hint {
   color: var(--muted);
   font-size: 13px;
+}
+
+.input-with-clear {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-clear input {
+  width: 100%;
+  padding-right: 42px;
+}
+
+.clear-button {
+  position: absolute;
+  right: 10px;
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border 0.15s ease;
+}
+
+.clear-button:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--panel);
+}
+
+.clear-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .grid {

@@ -2,7 +2,15 @@ import React from 'react';
 import StatsCard from './StatsCard.jsx';
 import SearchBar from './SearchBar.jsx';
 
-export default function OracleOverview({ stats, query, onQueryChange, items, onSelect }) {
+export default function OracleOverview({
+  stats,
+  query,
+  onQueryChange,
+  items,
+  onSelect,
+  activeType,
+  onTypeChange,
+}) {
   return (
     <div className="oracle">
       <div className="header-row">
@@ -11,12 +19,31 @@ export default function OracleOverview({ stats, query, onQueryChange, items, onS
           <p>Explorez les ressources de gestes non-verbaux et leurs nomenclatures.</p>
         </div>
         <div className="kpi-row">
-          <StatsCard label="Vidéos" value={stats.videos} accent="#7f5af0" />
-          <StatsCard label="Photos" value={stats.photos} accent="#2cb67d" />
+          <StatsCard
+            label="Vidéos"
+            value={stats.videos}
+            accent="#7f5af0"
+            onClick={() => onTypeChange('video')}
+            active={activeType === 'video'}
+          />
+          <StatsCard
+            label="Photos"
+            value={stats.photos}
+            accent="#2cb67d"
+            onClick={() => onTypeChange('photo')}
+            active={activeType === 'photo'}
+          />
         </div>
       </div>
 
-      <SearchBar value={query} onChange={onQueryChange} />
+      <div className="oracle-toolbar">
+        <SearchBar value={query} onChange={onQueryChange} />
+        {activeType !== 'all' && (
+          <button className="ghost" type="button" onClick={() => onTypeChange('all')}>
+            Réinitialiser le filtrage
+          </button>
+        )}
+      </div>
 
       <div className="grid">
         {items.map((item) => (

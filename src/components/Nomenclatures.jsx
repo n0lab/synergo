@@ -109,12 +109,23 @@ export default function Nomenclatures({ items, onAdd, onUpdate, onDelete, onNavi
       <div className="nomenclature-toolbar">
         <div className="field-group wide">
           <label htmlFor="nomenclature-search">Rechercher</label>
-          <input
-            id="nomenclature-search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Filtrer par nomenclature ou description..."
-          />
+          <div className="input-with-clear">
+            <input
+              id="nomenclature-search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Filtrer par nomenclature ou description..."
+            />
+            <button
+              type="button"
+              className="clear-button"
+              aria-label="Effacer le filtre"
+              onClick={() => setQuery('')}
+              disabled={!query}
+            >
+              ×
+            </button>
+          </div>
         </div>
         <button className="primary" type="button" onClick={openAddModal}>
           Ajouter

@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import OracleOverview from './components/OracleOverview.jsx';
 import MediaDetail from './components/MediaDetail.jsx';
 import Nomenclatures from './components/Nomenclatures.jsx';
-import { mediaLibrary } from './data.js';
+import { loadDatabase, persistDatabase } from './db.js';
 
 const palette = {
   light: 'light',
@@ -15,74 +15,82 @@ export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [section, setSection] = useState('oracle');
   const [query, setQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [selectedMedia, setSelectedMedia] = useState(null);
-  const [reviewList, setReviewList] = useState([]);
-  const [quizzList, setQuizzList] = useState([]);
-  const [nomenclatures, setNomenclatures] = useState(() => {
-    const collected = new Map();
-    mediaLibrary.forEach((item) => {
-      item.tags?.forEach((tag) => {
-        if (!collected.has(tag)) {
-          collected.set(tag, { id: `seed-${tag}`, label: tag, description: '' });
-        }
-      });
-      item.annotations?.forEach(({ label }) => {
-        if (!collected.has(label)) {
-          collected.set(label, { id: `seed-${label}`, label, description: '' });
-        }
-      });
-    });
-    return Array.from(collected.values());
-  });
+  const [db, setDb] = useState(() => loadDatabase());
+
+  useEffect(() => {
+    persistDatabase(db);
+  }, [db]);
 
   const stats = useMemo(
     () => ({
-      videos: mediaLibrary.filter((item) => item.type === 'video').length,
-      photos: mediaLibrary.filter((item) => item.type === 'photo').length,
+      videos: db.media.filter((item) => item.type === 'video').length,
+      photos: db.media.filter((item) => item.type === 'photo').length,
     }),
-    []
+    [db.media]
   );
 
   const filteredMedia = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return mediaLibrary;
-    return mediaLibrary.filter((item) =>
-      item.tags.some((tag) => tag.toLowerCase().includes(normalized))
-    );
-  }, [query]);
+    const matchesQuery = (item) =>
+      item.tags.some((tag) => tag.toLowerCase().includes(normalized));
+
+    return db.media.filter((item) => {
+      const typeOk = typeFilter === 'all' ? true : item.type === typeFilter;
+      if (!normalized) return typeOk;
+      return typeOk && matchesQuery(item);
+    });
+  }, [db.media, query, typeFilter]);
 
   const navigateToOracleWithQuery = (value) => {
     setSection('oracle');
     setSelectedMedia(null);
     setQuery(value);
+    setTypeFilter('all');
   };
 
-  const addTo = (listSetter) => (item) => {
-    listSetter((prev) => {
-      if (prev.find((entry) => entry.id === item.id)) return prev;
-      return [...prev, item];
+  const updateDb = (updater) => {
+    setDb((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      return next;
     });
   };
+
+  const addTo = (listKey) => (item) => {
+    updateDb((prev) => {
+      const exists = prev[listKey].some((entry) => entry.id === item.id);
+      if (exists) return prev;
+      return { ...prev, [listKey]: [...prev[listKey], item] };
+    });
+  };
+
+  const addNomenclature = (entry) =>
+    updateDb((prev) => ({
+      ...prev,
+      nomenclatures: [...prev.nomenclatures, { id: `user-${Date.now()}-${entry.label}`, ...entry }],
+    }));
+
+  const updateNomenclature = (id, patch) =>
+    updateDb((prev) => ({
+      ...prev,
+      nomenclatures: prev.nomenclatures.map((item) => (item.id === id ? { ...item, ...patch } : item)),
+    }));
+
+  const deleteNomenclature = (id) =>
+    updateDb((prev) => ({
+      ...prev,
+      nomenclatures: prev.nomenclatures.filter((item) => item.id !== id),
+    }));
 
   const renderSection = () => {
     if (section === 'nomenclatures') {
       return (
         <Nomenclatures
-          items={nomenclatures}
-          onAdd={(entry) =>
-            setNomenclatures((prev) => [
-              ...prev,
-              { id: `user-${Date.now()}-${entry.label}`, ...entry },
-            ])
-          }
-          onUpdate={(id, patch) =>
-            setNomenclatures((prev) =>
-              prev.map((item) => (item.id === id ? { ...item, ...patch } : item))
-            )
-          }
-          onDelete={(id) =>
-            setNomenclatures((prev) => prev.filter((item) => item.id !== id))
-          }
+          items={db.nomenclatures}
+          onAdd={addNomenclature}
+          onUpdate={updateNomenclature}
+          onDelete={deleteNomenclature}
           onNavigate={navigateToOracleWithQuery}
         />
       );
@@ -94,11 +102,11 @@ export default function App() {
           <h2>Reviewer</h2>
           <p>Éléments à revoir</p>
           <ul>
-            {reviewList.map((item) => (
+            {db.reviewList.map((item) => (
               <li key={`review-${item.id}`}>{item.title}</li>
             ))}
           </ul>
-          {reviewList.length === 0 && <div className="muted">Aucun élément pour l'instant.</div>}
+          {db.reviewList.length === 0 && <div className="muted">Aucun élément pour l'instant.</div>}
         </div>
       );
     }
@@ -109,11 +117,11 @@ export default function App() {
           <h2>Quizz</h2>
           <p>Sélection pour quiz futur</p>
           <ul>
-            {quizzList.map((item) => (
+            {db.quizzList.map((item) => (
               <li key={`quiz-${item.id}`}>{item.title}</li>
             ))}
           </ul>
-          {quizzList.length === 0 && <div className="muted">Aucun élément pour l'instant.</div>}
+          {db.quizzList.length === 0 && <div className="muted">Aucun élément pour l'instant.</div>}
         </div>
       );
     }
@@ -123,8 +131,8 @@ export default function App() {
         <MediaDetail
           media={selectedMedia}
           onBack={() => setSelectedMedia(null)}
-          onToReview={addTo(setReviewList)}
-          onToQuizz={addTo(setQuizzList)}
+          onToReview={addTo('reviewList')}
+          onToQuizz={addTo('quizzList')}
         />
       );
     }
@@ -136,6 +144,8 @@ export default function App() {
         onQueryChange={setQuery}
         items={filteredMedia}
         onSelect={setSelectedMedia}
+        activeType={typeFilter}
+        onTypeChange={setTypeFilter}
       />
     );
   };
