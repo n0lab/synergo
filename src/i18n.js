@@ -64,7 +64,7 @@ const translations = {
     addResourceAction: 'Add resource',
     nomenclaturePageTitle: 'Nomenclatures',
     nomenclaturePageSubtitle: 'Manage nomenclatures added via media or directly from this page.',
-    nomenclatureTotalLabel: 'Saved nomenclatures',
+    nomenclatureTotalLabel: 'Nomenclatures',
     nomenclatureSearchLabel: 'Search',
     nomenclatureSearchPlaceholder: 'Filter by nomenclature or description...',
     nomenclatureClearFilter: 'Clear filter',
