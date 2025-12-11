@@ -216,88 +216,106 @@ export default function Nomenclatures({
       )}
 
       <div className="table-wrapper">
-        <div className="table head">
-          <div className="cell label">{t('nomenclatureLabel')}</div>
-          <div className="cell">{t('nomenclatureDescription')}</div>
-          <div className="cell">{t('nomenclatureInterpretation')}</div>
-          <div className="cell actions">{t('actions')}</div>
-        </div>
-        {filteredItems.map((item) => {
-          const isEditing = editingId === item.id;
-          return (
-            <div className="table row" key={item.id}>
-              <div className="cell label">
-                {isEditing ? (
-                  <input
-                    value={draftLabel}
-                    onChange={(e) => setDraftLabel(e.target.value)}
-                    onKeyDown={handleEditKeyDown}
-                    aria-label={t('nomenclatureLabel')}
-                  />
-                ) : (
-                  <button
-                    className="badge link"
-                    type="button"
-                    onClick={() => onNavigate?.(item.label)}
-                    aria-label={t('searchNomenclature', { label: item.label })}
-                  >
-                    {item.label}
-                  </button>
-                )}
-              </div>
-              <div className="cell">
-                {isEditing ? (
-                  <input
-                    value={draftDescription}
-                    onChange={(e) => setDraftDescription(e.target.value)}
-                    onKeyDown={handleEditKeyDown}
-                    aria-label={t('nomenclatureDescription')}
-                  />
-                ) : (
-                  <span className="muted nomenclature-description" title={item.description || '—'}>
-                    {item.description || '—'}
-                  </span>
-                )}
-              </div>
-              <div className="cell">
-                {isEditing ? (
-                  <input
-                    value={draftInterpretation}
-                    onChange={(e) => setDraftInterpretation(e.target.value)}
-                    onKeyDown={handleEditKeyDown}
-                    aria-label={t('nomenclatureInterpretation')}
-                  />
-                ) : (
-                  <span className="muted nomenclature-description" title={item.interpretation || '—'}>
-                    {item.interpretation || '—'}
-                  </span>
-                )}
-              </div>
-              <div className="cell actions">
-                {isEditing ? (
-                  <div className="action-group">
-                    <button className="primary" onClick={saveEdit}>{t('save')}</button>
-                    <button className="ghost" type="button" onClick={cancelEdit}>
-                      {t('cancel')}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="action-group">
-                    <button className="ghost soft" type="button" onClick={() => startEdit(item)}>
-                      {t('edit')}
-                    </button>
-                    <button className="ghost" type="button" onClick={() => requestDelete(item)}>
-                      {t('delete')}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-        {sortedItems.length === 0 && (
-          <div className="table row muted">{t('noNomenclatureRows')}</div>
-        )}
+        <table className="nomenclature-table">
+          <colgroup>
+            <col className="col-label" />
+            <col className="col-description" />
+            <col className="col-interpretation" />
+            <col className="col-actions" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col" className="label">
+                {t('nomenclatureLabel')}
+              </th>
+              <th scope="col">{t('nomenclatureDescription')}</th>
+              <th scope="col">{t('nomenclatureInterpretation')}</th>
+              <th scope="col" className="actions">
+                {t('actions')}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredItems.map((item) => {
+              const isEditing = editingId === item.id;
+              return (
+                <tr key={item.id}>
+                  <td className="label">
+                    {isEditing ? (
+                      <input
+                        value={draftLabel}
+                        onChange={(e) => setDraftLabel(e.target.value)}
+                        onKeyDown={handleEditKeyDown}
+                        aria-label={t('nomenclatureLabel')}
+                      />
+                    ) : (
+                      <button
+                        className="badge link"
+                        type="button"
+                        onClick={() => onNavigate?.(item.label)}
+                        aria-label={t('searchNomenclature', { label: item.label })}
+                      >
+                        {item.label}
+                      </button>
+                    )}
+                  </td>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        value={draftDescription}
+                        onChange={(e) => setDraftDescription(e.target.value)}
+                        onKeyDown={handleEditKeyDown}
+                        aria-label={t('nomenclatureDescription')}
+                      />
+                    ) : (
+                      <span className="muted nomenclature-description" title={item.description || '—'}>
+                        {item.description || '—'}
+                      </span>
+                    )}
+                  </td>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        value={draftInterpretation}
+                        onChange={(e) => setDraftInterpretation(e.target.value)}
+                        onKeyDown={handleEditKeyDown}
+                        aria-label={t('nomenclatureInterpretation')}
+                      />
+                    ) : (
+                      <span className="muted nomenclature-description" title={item.interpretation || '—'}>
+                        {item.interpretation || '—'}
+                      </span>
+                    )}
+                  </td>
+                  <td className="actions">
+                    {isEditing ? (
+                      <div className="action-group">
+                        <button className="primary" onClick={saveEdit}>{t('save')}</button>
+                        <button className="ghost" type="button" onClick={cancelEdit}>
+                          {t('cancel')}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="action-group">
+                        <button className="ghost soft" type="button" onClick={() => startEdit(item)}>
+                          {t('edit')}
+                        </button>
+                        <button className="ghost" type="button" onClick={() => requestDelete(item)}>
+                          {t('delete')}
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+            {sortedItems.length === 0 && (
+              <tr className="muted">
+                <td colSpan={4}>{t('noNomenclatureRows')}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

@@ -850,19 +850,19 @@ main {
   width: 100%;
 }
 
-.table {
-  display: grid;
-  grid-template-columns: minmax(max-content, max-content) minmax(0, 1fr) minmax(0, 1fr)
-    minmax(max-content, max-content);
-  align-items: center;
-  padding: 12px 14px;
-  gap: 12px;
-  background: var(--surface);
+.nomenclature-table {
   width: 100%;
-  box-sizing: border-box;
+  border-collapse: collapse;
+  background: var(--surface);
+  table-layout: auto;
 }
 
-.table.head {
+.nomenclature-table col.col-description,
+.nomenclature-table col.col-interpretation {
+  width: 50%;
+}
+
+.nomenclature-table thead th {
   font-weight: 600;
   text-transform: uppercase;
   font-size: 12px;
@@ -870,29 +870,43 @@ main {
   background: var(--panel);
 }
 
-.table.row:nth-child(odd) {
+.nomenclature-table thead th,
+.nomenclature-table tbody td {
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.nomenclature-table tbody tr:nth-child(odd) {
   background: var(--panel);
 }
 
-.table.row:nth-child(even) {
+.nomenclature-table tbody tr:nth-child(even) {
   background: var(--surface);
 }
 
-.table.row.muted {
+.nomenclature-table tbody tr.muted td {
   color: var(--muted);
 }
 
-.cell.label {
+.nomenclature-table td.label,
+.nomenclature-table th.label {
   white-space: nowrap;
 }
 
-.cell.actions {
+.nomenclature-table td.actions,
+.nomenclature-table th.actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.nomenclature-table td.actions {
   display: flex;
   justify-content: flex-end;
-  white-space: nowrap;
+  align-items: center;
 }
 
-.table .action-group {
+.nomenclature-table td.actions .action-group {
   flex-wrap: nowrap;
 }
 
