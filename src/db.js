@@ -21,12 +21,12 @@ export function deriveNomenclaturesFromMedia(media) {
   media.forEach((item) => {
     item.tags?.forEach((tag) => {
       if (!collected.has(tag)) {
-        collected.set(tag, { id: `seed-${tag}`, label: tag, description: '' });
+        collected.set(tag, { id: `seed-${tag}`, label: tag, description: '', interpretation: '' });
       }
     });
     item.annotations?.forEach(({ label }) => {
       if (!collected.has(label)) {
-        collected.set(label, { id: `seed-${label}`, label, description: '' });
+        collected.set(label, { id: `seed-${label}`, label, description: '', interpretation: '' });
       }
     });
   });

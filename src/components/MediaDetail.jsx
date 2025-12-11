@@ -171,10 +171,13 @@ export default function MediaDetail({
 
   const mediaSrc = editing ? draftSrc : media.src;
 
-  const findDescription = (label) => {
+  const findDetails = (label) => {
     const found = nomenclatureByLabel.get(label);
-    if (!found) return '';
-    return found.description?.trim() ?? '';
+    if (!found) return { description: '', interpretation: '' };
+    return {
+      description: found.description?.trim() ?? '',
+      interpretation: found.interpretation?.trim() ?? '',
+    };
   };
 
   const handleAnnotationLabelChange = (time, currentLabel, nextValue) => {
@@ -365,7 +368,7 @@ export default function MediaDetail({
             {media.type === 'video' ? (
               <div className="annotation-list">
                 {sortedAnnotations.map(({ time, label }, index) => {
-                  const description = findDescription(label);
+                  const { description, interpretation } = findDetails(label);
                   const rowKey = `${media.id}-${time}-${index}`;
 
                   return (
@@ -401,10 +404,12 @@ export default function MediaDetail({
                             <span className="badge">{label}</span>
                           )}
                         </div>
-                        {!editing &&
-                          description && (
-                            <div className="annotation-description">{description}</div>
-                          )}
+                        {!editing && description && (
+                          <div className="annotation-description">{description}</div>
+                        )}
+                        {!editing && interpretation && (
+                          <div className="annotation-description">{interpretation}</div>
+                        )}
                       </div>
                     </div>
                   );
@@ -416,7 +421,7 @@ export default function MediaDetail({
             ) : (
               <div className="annotation-list">
                 {(editing ? draftTags : media.tags).map((tag, index) => {
-                  const description = findDescription(tag);
+                  const { description, interpretation } = findDetails(tag);
 
                   return (
                     <div
@@ -446,10 +451,12 @@ export default function MediaDetail({
                             <span className="badge">{tag}</span>
                           )}
                         </div>
-                        {!editing &&
-                          description && (
-                            <div className="annotation-description">{description}</div>
-                          )}
+                        {!editing && description && (
+                          <div className="annotation-description">{description}</div>
+                        )}
+                        {!editing && interpretation && (
+                          <div className="annotation-description">{interpretation}</div>
+                        )}
                       </div>
                     </div>
                   );

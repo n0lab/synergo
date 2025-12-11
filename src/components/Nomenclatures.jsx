@@ -13,10 +13,12 @@ export default function Nomenclatures({
 }) {
   const [label, setLabel] = useState('');
   const [description, setDescription] = useState('');
+  const [interpretation, setInterpretation] = useState('');
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [draftLabel, setDraftLabel] = useState('');
   const [draftDescription, setDraftDescription] = useState('');
+  const [draftInterpretation, setDraftInterpretation] = useState('');
   const [query, setQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -32,13 +34,15 @@ export default function Nomenclatures({
     return sortedItems.filter((item) => {
       const labelMatch = item.label.toLowerCase().includes(needle);
       const descriptionMatch = (item.description || '').toLowerCase().includes(needle);
-      return labelMatch || descriptionMatch;
+      const interpretationMatch = (item.interpretation || '').toLowerCase().includes(needle);
+      return labelMatch || descriptionMatch || interpretationMatch;
     });
   }, [query, sortedItems]);
 
   const resetForm = () => {
     setLabel('');
     setDescription('');
+    setInterpretation('');
     setError('');
   };
 
@@ -62,7 +66,7 @@ export default function Nomenclatures({
     event.preventDefault();
     const validLabel = validateLabel(label);
     if (!validLabel) return;
-    onAdd({ label: validLabel, description: description.trim() });
+    onAdd({ label: validLabel, description: description.trim(), interpretation: interpretation.trim() });
     resetForm();
     setShowAddModal(false);
   };
@@ -81,6 +85,7 @@ export default function Nomenclatures({
     setEditingId(item.id);
     setDraftLabel(item.label);
     setDraftDescription(item.description ?? '');
+    setDraftInterpretation(item.interpretation ?? '');
     setError('');
   };
 
@@ -88,13 +93,18 @@ export default function Nomenclatures({
     setEditingId(null);
     setDraftLabel('');
     setDraftDescription('');
+    setDraftInterpretation('');
     setError('');
   };
 
   const saveEdit = () => {
     const validLabel = validateLabel(draftLabel, editingId);
     if (!validLabel) return;
-    onUpdate(editingId, { label: validLabel, description: draftDescription.trim() });
+    onUpdate(editingId, {
+      label: validLabel,
+      description: draftDescription.trim(),
+      interpretation: draftInterpretation.trim(),
+    });
     cancelEdit();
   };
 
@@ -184,6 +194,15 @@ export default function Nomenclatures({
                 placeholder={t('nomenclatureAddDescriptionPlaceholder')}
               />
             </div>
+            <div className="field-group">
+              <label htmlFor="modal-nomenclature-interpretation">{t('nomenclatureInterpretation')}</label>
+              <input
+                id="modal-nomenclature-interpretation"
+                value={interpretation}
+                onChange={(e) => setInterpretation(e.target.value)}
+                placeholder={t('nomenclatureAddInterpretationPlaceholder')}
+              />
+            </div>
             <div className="action-group end">
               <button className="ghost" type="button" onClick={closeAddModal}>
                 {t('cancel')}
@@ -200,6 +219,7 @@ export default function Nomenclatures({
         <div className="table head">
           <div className="cell">{t('nomenclatureLabel')}</div>
           <div className="cell">{t('nomenclatureDescription')}</div>
+          <div className="cell">{t('nomenclatureInterpretation')}</div>
           <div className="cell actions">{t('actions')}</div>
         </div>
         {filteredItems.map((item) => {
@@ -236,6 +256,20 @@ export default function Nomenclatures({
                 ) : (
                   <span className="muted nomenclature-description" title={item.description || '—'}>
                     {item.description || '—'}
+                  </span>
+                )}
+              </div>
+              <div className="cell">
+                {isEditing ? (
+                  <input
+                    value={draftInterpretation}
+                    onChange={(e) => setDraftInterpretation(e.target.value)}
+                    onKeyDown={handleEditKeyDown}
+                    aria-label={t('nomenclatureInterpretation')}
+                  />
+                ) : (
+                  <span className="muted nomenclature-description" title={item.interpretation || '—'}>
+                    {item.interpretation || '—'}
                   </span>
                 )}
               </div>
