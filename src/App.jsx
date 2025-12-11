@@ -44,7 +44,8 @@ const syncNomenclaturesWithMedia = (media, nomenclatures) => {
 
 export default function App() {
   const [theme, setTheme] = useState(palette.dark);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarPinned, setSidebarPinned] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [section, setSection] = useState('oracle');
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -317,7 +318,24 @@ export default function App() {
           setSelectedMedia(null);
         }}
         collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed((c) => !c)}
+        pinned={sidebarPinned}
+        onPinToggle={() =>
+          setSidebarPinned((prev) => {
+            const next = !prev;
+            setSidebarCollapsed(!next);
+            return next;
+          })
+        }
+        onHoverStart={() => {
+          if (!sidebarPinned) {
+            setSidebarCollapsed(false);
+          }
+        }}
+        onHoverEnd={() => {
+          if (!sidebarPinned) {
+            setSidebarCollapsed(true);
+          }
+        }}
       />
       <main>
         <header className="topbar">
