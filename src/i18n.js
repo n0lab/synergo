@@ -204,4 +204,3 @@ export const translate = (language, key, params) => {
   return value ?? key;
 };
 
-export const availableLanguages = ['en', 'fr'];

@@ -78,13 +78,16 @@ export default function App() {
     };
   }, [theme]);
 
-  const stats = useMemo(
-    () => ({
-      videos: db.media.filter((item) => item.type === 'video').length,
-      photos: db.media.filter((item) => item.type === 'photo').length,
-    }),
-    [db.media]
-  );
+  const stats = useMemo(() => {
+    return db.media.reduce(
+      (acc, item) => {
+        if (item.type === 'video') acc.videos += 1;
+        if (item.type === 'photo') acc.photos += 1;
+        return acc;
+      },
+      { videos: 0, photos: 0 }
+    );
+  }, [db.media]);
 
   const orderedMedia = useMemo(() => {
     return [...db.media].sort((a, b) => {
