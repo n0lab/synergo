@@ -7,6 +7,8 @@ export default function Nomenclatures({
   onDelete,
   onNavigate,
   isNomenclatureUsed,
+  t,
+  language,
 }) {
   const [label, setLabel] = useState('');
   const [description, setDescription] = useState('');
@@ -18,8 +20,8 @@ export default function Nomenclatures({
   const [showAddModal, setShowAddModal] = useState(false);
 
   const sortedItems = useMemo(() => {
-    return [...items].sort((a, b) => a.label.localeCompare(b.label, 'fr'));
-  }, [items]);
+    return [...items].sort((a, b) => a.label.localeCompare(b.label, language ?? 'fr'));
+  }, [items, language]);
 
   const filteredItems = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -40,14 +42,14 @@ export default function Nomenclatures({
   const validateLabel = (candidate, excludeId) => {
     const trimmed = candidate.trim();
     if (!trimmed) {
-      setError('La nomenclature ne peut pas être vide.');
+      setError(t('nomenclatureErrorEmpty'));
       return null;
     }
     const exists = items.some(
       (item) => item.id !== excludeId && item.label.toLowerCase() === trimmed.toLowerCase()
     );
     if (exists) {
-      setError('Cette nomenclature existe déjà.');
+      setError(t('nomenclatureErrorExists'));
       return null;
     }
     return trimmed;
@@ -95,13 +97,11 @@ export default function Nomenclatures({
 
   const requestDelete = (item) => {
     if (isNomenclatureUsed?.(item.label)) {
-      setError('Impossible de supprimer une nomenclature utilisée sur une ressource.');
+      setError(t('nomenclatureDeleteBlocked'));
       return;
     }
 
-    const confirmed = window.confirm(
-      `Supprimer la nomenclature "${item.label}" ? Cette action est définitive.`
-    );
+    const confirmed = window.confirm(t('nomenclatureConfirmDelete', { label: item.label }));
     if (confirmed) {
       setError('');
       onDelete(item.id);
@@ -111,26 +111,24 @@ export default function Nomenclatures({
   return (
     <div className="nomenclature-page">
       <header className="page-header">
-        <h2>Nomenclatures</h2>
-        <p className="muted">
-          Gérez les nomenclatures ajoutées via les médias ou directement depuis cette page.
-        </p>
+        <h2>{t('nomenclaturePageTitle')}</h2>
+        <p className="muted">{t('nomenclaturePageSubtitle')}</p>
       </header>
 
       <div className="nomenclature-toolbar">
         <div className="field-group wide">
-          <label htmlFor="nomenclature-search">Rechercher</label>
+          <label htmlFor="nomenclature-search">{t('nomenclatureSearchLabel')}</label>
           <div className="input-with-clear">
             <input
               id="nomenclature-search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Filtrer par nomenclature ou description..."
+              placeholder={t('nomenclatureSearchPlaceholder')}
             />
             <button
               type="button"
               className="clear-button"
-              aria-label="Effacer le filtre"
+              aria-label={t('nomenclatureClearFilter')}
               onClick={() => setQuery('')}
               disabled={!query}
             >
@@ -139,7 +137,7 @@ export default function Nomenclatures({
           </div>
         </div>
         <button className="primary" type="button" onClick={openAddModal}>
-          Ajouter
+          {t('nomenclatureAdd')}
         </button>
       </div>
       {error && <div className="error-banner">{error}</div>}
@@ -147,32 +145,32 @@ export default function Nomenclatures({
       {showAddModal && (
         <div className="modal-backdrop" role="dialog" aria-modal="true">
           <form className="modal" onSubmit={handleAdd}>
-            <h3>Ajouter une nomenclature</h3>
+            <h3>{t('nomenclatureAddTitle')}</h3>
             <div className="field-group">
-              <label htmlFor="modal-nomenclature-label">Nomenclature</label>
+              <label htmlFor="modal-nomenclature-label">{t('nomenclatureLabel')}</label>
               <input
                 id="modal-nomenclature-label"
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
-                placeholder="Ex: R_C_E_3_1"
+                placeholder={t('nomenclatureAddExample')}
                 autoFocus
               />
             </div>
             <div className="field-group">
-              <label htmlFor="modal-nomenclature-description">Description</label>
+              <label htmlFor="modal-nomenclature-description">{t('nomenclatureDescription')}</label>
               <input
                 id="modal-nomenclature-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Contexte, posture, interprétation..."
+                placeholder={t('nomenclatureAddDescriptionPlaceholder')}
               />
             </div>
             <div className="action-group end">
               <button className="ghost" type="button" onClick={closeAddModal}>
-                Annuler
+                {t('cancel')}
               </button>
               <button className="primary" type="submit">
-                Ajouter
+                {t('add')}
               </button>
             </div>
           </form>
@@ -181,9 +179,9 @@ export default function Nomenclatures({
 
       <div className="table-wrapper">
         <div className="table head">
-          <div className="cell">Nomenclature</div>
-          <div className="cell">Description</div>
-          <div className="cell actions">Actions</div>
+          <div className="cell">{t('nomenclatureLabel')}</div>
+          <div className="cell">{t('nomenclatureDescription')}</div>
+          <div className="cell actions">{t('actions')}</div>
         </div>
         {filteredItems.map((item) => {
           const isEditing = editingId === item.id;
@@ -194,14 +192,14 @@ export default function Nomenclatures({
                   <input
                     value={draftLabel}
                     onChange={(e) => setDraftLabel(e.target.value)}
-                    aria-label="Libellé"
+                    aria-label={t('nomenclatureLabel')}
                   />
                 ) : (
                   <button
                     className="badge link"
                     type="button"
                     onClick={() => onNavigate?.(item.label)}
-                    aria-label={`Rechercher ${item.label}`}
+                    aria-label={t('searchNomenclature', { label: item.label })}
                   >
                     {item.label}
                   </button>
@@ -212,7 +210,7 @@ export default function Nomenclatures({
                   <input
                     value={draftDescription}
                     onChange={(e) => setDraftDescription(e.target.value)}
-                    aria-label="Description"
+                    aria-label={t('nomenclatureDescription')}
                   />
                 ) : (
                   <span className="muted">{item.description || '—'}</span>
@@ -221,18 +219,18 @@ export default function Nomenclatures({
               <div className="cell actions">
                 {isEditing ? (
                   <div className="action-group">
-                    <button className="primary" onClick={saveEdit}>Enregistrer</button>
+                    <button className="primary" onClick={saveEdit}>{t('save')}</button>
                     <button className="ghost" type="button" onClick={cancelEdit}>
-                      Annuler
+                      {t('cancel')}
                     </button>
                   </div>
                 ) : (
                   <div className="action-group">
                     <button className="ghost soft" type="button" onClick={() => startEdit(item)}>
-                      Modifier
+                      {t('edit')}
                     </button>
                     <button className="ghost" type="button" onClick={() => requestDelete(item)}>
-                      Supprimer
+                      {t('delete')}
                     </button>
                   </div>
                 )}
@@ -241,7 +239,7 @@ export default function Nomenclatures({
           );
         })}
         {sortedItems.length === 0 && (
-          <div className="table row muted">Aucune nomenclature enregistrée.</div>
+          <div className="table row muted">{t('noNomenclatureRows')}</div>
         )}
       </div>
     </div>

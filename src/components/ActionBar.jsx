@@ -8,17 +8,18 @@ export default function ActionBar({
   onToReview,
   onToQuizz,
   onDelete,
+  t,
 }) {
   return (
     <div className="action-bar">
       {editing && (
         <button className="ghost danger" type="button" onClick={onDelete}>
-          Supprimer
+          {t('actionDelete')}
         </button>
       )}
       {editing && (
         <button className="ghost warning" type="button" onClick={onCancel}>
-          Annuler
+          {t('actionCancel')}
         </button>
       )}
       <button
@@ -26,13 +27,13 @@ export default function ActionBar({
         type="button"
         onClick={editing ? onSave : onStartEdit}
       >
-        {editing ? 'Enregistrer' : 'Éditer'}
+        {editing ? t('actionSave') : t('actionEdit')}
       </button>
       <button className="ghost info" type="button" onClick={onToReview}>
-        To Review
+        {t('actionToReview')}
       </button>
       <button className="ghost purple" type="button" onClick={onToQuizz}>
-        To Quizz
+        {t('actionToQuizz')}
       </button>
     </div>
   );

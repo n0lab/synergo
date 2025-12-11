@@ -1,13 +1,7 @@
 import React from 'react';
 
-const sections = [
-  { key: 'oracle', label: 'Oracle', icon: '🔮' },
-  { key: 'nomenclatures', label: 'Nomenclatures', icon: '🏷️' },
-  { key: 'reviewer', label: 'Reviewer', icon: '📝' },
-  { key: 'quizz', label: 'Quizz', icon: '❓' },
-];
-
 export default function Sidebar({
+  sections,
   activeSection,
   onSelect,
   collapsed,
@@ -15,6 +9,7 @@ export default function Sidebar({
   onPinToggle,
   onHoverStart,
   onHoverEnd,
+  t,
 }) {
   return (
     <aside
@@ -23,7 +18,7 @@ export default function Sidebar({
       onMouseLeave={onHoverEnd}
     >
       <div className="sidebar-header">
-        <button className="ghost" onClick={onPinToggle} aria-label="Verrouiller l'ouverture du menu">
+        <button className="ghost" onClick={onPinToggle} aria-label={t('sidebarLock')}>
           {pinned ? '🔒' : '🔓'}
         </button>
         {!collapsed && <h1>Synergo</h1>}

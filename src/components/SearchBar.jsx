@@ -1,19 +1,19 @@
 import React from 'react';
 
-export default function SearchBar({ value, onChange }) {
+export default function SearchBar({ value, onChange, t }) {
   return (
     <div className="search-bar">
       <div className="input-with-clear">
         <input
           type="search"
-          placeholder="Rechercher"
+          placeholder={t('searchPlaceholder')}
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
         <button
           type="button"
           className="clear-button"
-          aria-label="Réinitialiser la recherche"
+          aria-label={t('clearSearch')}
           onClick={() => onChange('')}
           disabled={!value}
         >

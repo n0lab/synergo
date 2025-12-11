@@ -1,6 +1,13 @@
 import React, { useMemo, useState } from 'react';
 
-export default function AddResource({ onBack, onCreate, detectType, findExistingResource, onNavigateToResource }) {
+export default function AddResource({
+  onBack,
+  onCreate,
+  detectType,
+  findExistingResource,
+  onNavigateToResource,
+  t,
+}) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [link, setLink] = useState('');
@@ -15,7 +22,7 @@ export default function AddResource({ onBack, onCreate, detectType, findExisting
     new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result?.toString() ?? '');
-      reader.onerror = () => reject(new Error("Impossible de lire le fichier."));
+      reader.onerror = () => reject(new Error('Unable to read the file.'));
       reader.readAsDataURL(selectedFile);
     });
 
@@ -26,14 +33,14 @@ export default function AddResource({ onBack, onCreate, detectType, findExisting
     const hasFile = !!file;
 
     if (!title.trim() || (!hasLink && !hasFile)) {
-      setError('Merci de renseigner au minimum un nom et un lien ou un fichier.');
+      setError(t('resourceErrorMissing'));
       return;
     }
 
     if (hasLink) {
       const normalizedLink = trimmedLink.toLowerCase();
       if (normalizedLink.includes('youtube.com') || normalizedLink.includes('youtu.be')) {
-        setError('Les liens YouTube ne sont pas pris en charge.');
+        setError(t('resourceErrorYoutube'));
         return;
       }
     }
@@ -72,7 +79,7 @@ export default function AddResource({ onBack, onCreate, detectType, findExisting
       });
     } catch (uploadError) {
       console.error(uploadError);
-      setError('Le fichier n\'a pas pu être importé. Merci de réessayer.');
+      setError(t('resourceErrorUpload'));
       setIsSubmitting(false);
       return;
     }
@@ -83,13 +90,13 @@ export default function AddResource({ onBack, onCreate, detectType, findExisting
   return (
     <div className="add-resource-page">
       <div className="page-header">
-        <h2>Ajouter une ressource</h2>
-        <p>Créez une nouvelle vidéo ou photo en fonction du lien fourni.</p>
+        <h2>{t('addResourceTitle')}</h2>
+        <p>{t('addResourceSubtitle')}</p>
       </div>
 
       <form className="card form-grid" onSubmit={handleSubmit}>
         <div className="field-group">
-          <label htmlFor="resource-title">Nom de la ressource</label>
+          <label htmlFor="resource-title">{t('resourceNameLabel')}</label>
           <input
             id="resource-title"
             type="text"
@@ -101,7 +108,7 @@ export default function AddResource({ onBack, onCreate, detectType, findExisting
         </div>
 
         <div className="field-group">
-          <label htmlFor="resource-description">Description</label>
+          <label htmlFor="resource-description">{t('resourceDescriptionLabel')}</label>
           <textarea
             id="resource-description"
             value={description}
@@ -112,7 +119,7 @@ export default function AddResource({ onBack, onCreate, detectType, findExisting
         </div>
 
         <div className="field-group">
-          <label htmlFor="resource-link">Lien de la ressource (liens YouTube non pris en charge)</label>
+          <label htmlFor="resource-link">{t('resourceLinkLabel')}</label>
           <input
             id="resource-link"
             type="url"
@@ -122,13 +129,13 @@ export default function AddResource({ onBack, onCreate, detectType, findExisting
           />
           <div className="helper-row">
             <span className="muted">
-              Le type est détecté automatiquement : <strong>{detectedType === 'photo' ? 'Photo' : 'Vidéo'}</strong>
+              {t('resourceTypeDetected', { type: detectedType })}
             </span>
           </div>
         </div>
 
         <div className="field-group">
-          <label htmlFor="resource-file">Ou importer un fichier</label>
+          <label htmlFor="resource-file">{t('resourceFileLabel')}</label>
           <input
             id="resource-file"
             type="file"
@@ -137,16 +144,16 @@ export default function AddResource({ onBack, onCreate, detectType, findExisting
           />
           <div className="helper-row">
             <span className="muted">
-              Ajoutez un lien ou déposez un fichier qui sera conservé localement.
+              {t('resourceFileHelper')}
             </span>
           </div>
         </div>
 
         {(error || duplicateResource) && (
           <div className="error-banner">
-            {duplicateResource ? (
-              <>
-                Désolé cette ressource existe déjà et est utilisé ici :{' '}
+              {duplicateResource ? (
+                <>
+                {t('resourceDuplicate')}{' '}
                 <button
                   type="button"
                   className="resource-link"
@@ -163,10 +170,10 @@ export default function AddResource({ onBack, onCreate, detectType, findExisting
 
         <div className="action-group end">
           <button type="button" className="ghost" onClick={onBack}>
-            Annuler
+            {t('cancel')}
           </button>
           <button type="submit" className="primary" disabled={isSubmitting}>
-            Ajouter la ressource
+            {t('addResourceAction')}
           </button>
         </div>
       </form>
