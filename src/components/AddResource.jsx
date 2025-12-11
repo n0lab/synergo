@@ -18,6 +18,12 @@ export default function AddResource({
 
   const detectedType = useMemo(() => detectType?.(link), [detectType, link]);
 
+  const handleDescriptionKeyDown = (event) => {
+    if (event.key === 'Enter' && event.shiftKey) {
+      event.stopPropagation();
+    }
+  };
+
   const readFileAsDataUrl = (selectedFile) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -113,6 +119,7 @@ export default function AddResource({
             id="resource-description"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
+            onKeyDown={handleDescriptionKeyDown}
             placeholder="Contexte, intention, détails sur la ressource..."
             rows={4}
           />
