@@ -3,7 +3,7 @@ import Sidebar from './components/Sidebar.jsx';
 import OracleOverview from './components/OracleOverview.jsx';
 import MediaDetail from './components/MediaDetail.jsx';
 import Nomenclatures from './components/Nomenclatures.jsx';
-import { loadDatabase, persistDatabase } from './db.js';
+import { getSeedDatabase, loadDatabase, persistDatabase } from './db.js';
 
 const palette = {
   light: 'light',
@@ -17,11 +17,26 @@ export default function App() {
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [selectedMedia, setSelectedMedia] = useState(null);
-  const [db, setDb] = useState(() => loadDatabase());
+  const [db, setDb] = useState(() => getSeedDatabase());
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+    loadDatabase().then((loaded) => {
+      if (!cancelled) {
+        setDb(loaded);
+        setHasLoaded(true);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoaded) return;
     persistDatabase(db);
-  }, [db]);
+  }, [db, hasLoaded]);
 
   const stats = useMemo(
     () => ({

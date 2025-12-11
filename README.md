@@ -1,8 +1,7 @@
 # Synergo
 
 Plateforme dynamique de classification des gestes non verbaux construite avec **Node.js (Vite)** et **React**.
-Toutes les données (médias, nomenclatures, sélections Reviewer/Quizz) sont persistées dans une base locale (localStorage) afin de
-conserver vos ajouts et modifications entre deux sessions.
+Toutes les données (médias, nomenclatures, sélections Reviewer/Quizz) sont désormais persistées dans **Supabase (PostgreSQL)** afin de conserver vos ajouts et modifications entre deux sessions et de recevoir automatiquement les mises à jour du jeu de données livré.
 
 ## Démarrage
 
@@ -12,6 +11,25 @@ npm run dev
 ```
 
 La commande `dev` démarre le serveur Vite en mode développement (hot reload). Ouvrez l’URL fournie (par défaut http://localhost:5173) pour utiliser la plateforme.
+
+Créez un projet Supabase avec une table JSON simple pour stocker l’état global :
+
+```sql
+create table if not exists public.synergo_db (
+  id text primary key,
+  payload jsonb,
+  updated_at timestamptz default now()
+);
+```
+
+Exposez l’URL et la clé `anon` dans un fichier `.env.local` :
+
+```bash
+VITE_SUPABASE_URL="https://<your-project>.supabase.co"
+VITE_SUPABASE_ANON_KEY="<your-anon-key>"
+```
+
+Sans ces variables, l’application fonctionne avec le seed embarqué (lecture seule) mais ne persiste pas les modifications.
 
 ## Fonctionnalités
 - Sidebar rétractable avec navigation Oracle / Reviewer / Quizz / Nomenclatures
