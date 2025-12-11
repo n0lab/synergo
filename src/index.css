@@ -889,6 +889,15 @@ main {
   justify-content: flex-end;
 }
 
+.nomenclature-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
 .action-group {
   display: flex;
   gap: 8px;
