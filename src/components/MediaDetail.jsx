@@ -18,6 +18,7 @@ export default function MediaDetail({
   const [draftTitle, setDraftTitle] = useState(media.title ?? '');
   const [draftDescription, setDraftDescription] = useState(media.description ?? '');
   const [draftSrc, setDraftSrc] = useState(media.src ?? '');
+  const [newNomenclatureLabel, setNewNomenclatureLabel] = useState('');
 
   const fps = media.fps ?? 30;
   const frameDuration = useMemo(() => 1 / fps, [fps]);
@@ -36,6 +37,7 @@ export default function MediaDetail({
     setDraftTitle(media.title ?? '');
     setDraftDescription(media.description ?? '');
     setDraftSrc(media.src ?? '');
+    setNewNomenclatureLabel('');
   }, [media]);
 
   const seekTo = (timeInSeconds) => {
@@ -59,6 +61,7 @@ export default function MediaDetail({
     setDraftTitle(media.title ?? '');
     setDraftDescription(media.description ?? '');
     setDraftSrc(media.src ?? '');
+    setNewNomenclatureLabel('');
     setEditing(true);
   }, [media.annotations, media.description, media.src, media.tags, media.title]);
 
@@ -211,6 +214,36 @@ export default function MediaDetail({
     } else {
       setDraftTags((prev) => (prev ?? []).filter((tag) => tag !== label));
     }
+  };
+
+  const addNomenclatureFromInput = (event) => {
+    event.preventDefault();
+    if (!editing) return;
+
+    const trimmed = newNomenclatureLabel.trim();
+    if (!trimmed) return;
+
+    if (media.type === 'video') {
+      const currentTime = Number((videoRef.current?.currentTime ?? 0).toFixed(1));
+
+      setDraftAnnotations((prev) => {
+        const next = [...(prev ?? [])];
+        const exists = next.some(
+          (ann) => ann.label.trim() === trimmed && ann.time === currentTime
+        );
+        if (exists) return next;
+        return [...next, { time: currentTime, label: trimmed }];
+      });
+    } else {
+      setDraftTags((prev) => {
+        const next = prev ?? [];
+        const exists = next.some((tag) => tag.trim().toLowerCase() === trimmed.toLowerCase());
+        if (exists) return next;
+        return [...next, trimmed];
+      });
+    }
+
+    setNewNomenclatureLabel('');
   };
 
   return (
@@ -399,6 +432,19 @@ export default function MediaDetail({
                 );
               })}
             </div>
+          )}
+          {editing && (
+            <form className="add-nomenclature-form" onSubmit={addNomenclatureFromInput}>
+              <input
+                value={newNomenclatureLabel}
+                onChange={(event) => setNewNomenclatureLabel(event.target.value)}
+                placeholder="Nouvelle nomenclature"
+                aria-label="Nouvelle nomenclature"
+              />
+              <button type="submit" className="primary compact">
+                Ajouter
+              </button>
+            </form>
           )}
         </aside>
       </div>

@@ -8,7 +8,9 @@ export default function ActionBar({ editing, onEdit, onToReview, onToQuizz, onDe
           Supprimer
         </button>
       )}
-      <button className="ghost" onClick={onEdit}>{editing ? 'Sauvegarder' : 'Edit'}</button>
+      <button className={`ghost ${editing ? 'success' : ''}`} onClick={onEdit}>
+        {editing ? 'Sauvegarder' : 'Edit'}
+      </button>
       <button className="ghost" onClick={onToReview}>To Review</button>
       <button className="ghost" onClick={onToQuizz}>To Quizz</button>
     </div>
