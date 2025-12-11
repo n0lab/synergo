@@ -19,10 +19,6 @@ const detectMediaType = (link) => {
   if (normalized.startsWith('data:video')) return 'video';
   if (normalized.startsWith('data:image')) return 'photo';
 
-  if (normalized.includes('youtube.com') || normalized.includes('youtu.be') || normalized.includes('vimeo.com')) {
-    return 'video';
-  }
-
   if (videoExtensions.some((ext) => normalized.includes(ext))) return 'video';
   if (imageExtensions.some((ext) => normalized.includes(ext))) return 'photo';
   return 'video';
@@ -184,6 +180,17 @@ export default function App() {
     });
   };
 
+  const isNomenclatureUsed = (label) => {
+    const normalized = label.trim().toLowerCase();
+    return db.media.some((item) => {
+      const inTags = item.tags?.some((tag) => tag.toLowerCase() === normalized);
+      const inAnnotations = item.annotations?.some(
+        (annotation) => annotation.label.toLowerCase() === normalized
+      );
+      return inTags || inAnnotations;
+    });
+  };
+
   const updateNomenclature = (id, patch) =>
     updateDb((prev) => ({
       ...prev,
@@ -205,6 +212,7 @@ export default function App() {
           onUpdate={updateNomenclature}
           onDelete={deleteNomenclature}
           onNavigate={navigateToOracleWithQuery}
+          isNomenclatureUsed={isNomenclatureUsed}
         />
       );
     }
