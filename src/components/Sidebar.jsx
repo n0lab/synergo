@@ -7,12 +7,24 @@ const sections = [
   { key: 'quizz', label: 'Quizz', icon: '❓' },
 ];
 
-export default function Sidebar({ activeSection, onSelect, collapsed, onToggle }) {
+export default function Sidebar({
+  activeSection,
+  onSelect,
+  collapsed,
+  pinned,
+  onPinToggle,
+  onHoverStart,
+  onHoverEnd,
+}) {
   return (
-    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+    <aside
+      className={`sidebar ${collapsed ? 'collapsed' : ''}`}
+      onMouseEnter={onHoverStart}
+      onMouseLeave={onHoverEnd}
+    >
       <div className="sidebar-header">
-        <button className="ghost" onClick={onToggle} aria-label="Basculer la sidebar">
-          {collapsed ? '➡️' : '⬅️'}
+        <button className="ghost" onClick={onPinToggle} aria-label="Verrouiller l'ouverture du menu">
+          {pinned ? '🔒' : '🔓'}
         </button>
         {!collapsed && <h1>Synergo</h1>}
       </div>
