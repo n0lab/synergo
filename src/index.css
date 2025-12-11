@@ -459,6 +459,21 @@ main {
   gap: 10px;
 }
 
+.add-nomenclature-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.add-nomenclature-form input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+}
+
 .annotation-row {
   display: flex;
   flex-direction: column;
@@ -589,6 +604,16 @@ main {
 .ghost:hover {
   border-color: var(--accent);
   background: var(--badge);
+}
+
+.ghost.success {
+  color: var(--accent-2);
+  border-color: color-mix(in srgb, var(--accent-2) 80%, var(--border));
+}
+
+.ghost.success:hover {
+  border-color: var(--accent-2);
+  background: color-mix(in srgb, var(--accent-2) 12%, var(--badge));
 }
 
 .ghost.soft {
