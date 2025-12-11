@@ -847,15 +847,19 @@ main {
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
+  width: 100%;
 }
 
 .table {
   display: grid;
-  grid-template-columns: 1.2fr 2fr 0.8fr;
+  grid-template-columns: minmax(max-content, max-content) minmax(0, 1fr) minmax(0, 1fr)
+    minmax(max-content, max-content);
   align-items: center;
   padding: 12px 14px;
   gap: 12px;
   background: var(--surface);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .table.head {
@@ -878,9 +882,18 @@ main {
   color: var(--muted);
 }
 
+.cell.label {
+  white-space: nowrap;
+}
+
 .cell.actions {
   display: flex;
   justify-content: flex-end;
+  white-space: nowrap;
+}
+
+.table .action-group {
+  flex-wrap: nowrap;
 }
 
 .nomenclature-description {
