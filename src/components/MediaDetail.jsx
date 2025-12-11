@@ -211,12 +211,12 @@ export default function MediaDetail({
                 onPlay={() => setPaused(false)}
               />
               <div className="video-controls">
-                <button onClick={() => step(-1)} aria-label="Image précédente">
-                  ← Image
+                <button onClick={() => step(-1)} aria-label="Frame précédente">
+                  ← Frame précédente
                 </button>
                 <button onClick={handlePlayPause}>{paused ? 'Lecture' : 'Pause'}</button>
-                <button onClick={() => step(1)} aria-label="Image suivante">
-                  Image →
+                <button onClick={() => step(1)} aria-label="Frame suivante">
+                  Frame suivante →
                 </button>
               </div>
             </div>
