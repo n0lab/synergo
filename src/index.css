@@ -376,6 +376,44 @@ main {
   gap: 20px;
 }
 
+.metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.text-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+}
+
+.resource-link {
+  display: inline-block;
+  color: var(--accent);
+  text-decoration: none;
+  word-break: break-all;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.resource-link:hover,
+.resource-link:focus-visible {
+  border-color: var(--accent);
+  background: var(--badge);
+}
+
+.full-span {
+  grid-column: 1 / -1;
+}
+
 .media-panel {
   background: var(--panel);
   border: 1px solid var(--border);
