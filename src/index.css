@@ -852,7 +852,8 @@ main {
 
 .table {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(max-content, max-content) minmax(0, 1fr) minmax(0, 1fr)
+    minmax(max-content, max-content);
   align-items: center;
   padding: 12px 14px;
   gap: 12px;
@@ -889,6 +890,10 @@ main {
   display: flex;
   justify-content: flex-end;
   white-space: nowrap;
+}
+
+.table .action-group {
+  flex-wrap: nowrap;
 }
 
 .nomenclature-description {
