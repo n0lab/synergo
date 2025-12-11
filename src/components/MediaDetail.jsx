@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ActionBar from './ActionBar.jsx';
 
-const pattern = /^[A-Za-z0-9]+(?:_[A-Za-z0-9]+)*$/;
-
 export default function MediaDetail({
   media,
   nomenclatures,
@@ -10,7 +8,6 @@ export default function MediaDetail({
   onToReview,
   onToQuizz,
   onUpdateMedia,
-  onUpdateNomenclature,
 }) {
   const videoRef = useRef(null);
   const [paused, setPaused] = useState(true);
@@ -92,48 +89,23 @@ export default function MediaDetail({
     return found.description?.trim() ?? '';
   };
 
-  const validateLabel = (candidate, currentId) => {
-    const trimmed = candidate.trim();
-    if (!pattern.test(trimmed)) {
-      window.alert('La nomenclature doit contenir lettres/chiffres séparés par "_".');
-      return null;
-    }
+  const handleAnnotationLabelChange = (time, currentLabel, nextValue) => {
+    const nextLabel = nextValue.trim();
+    if (!nextLabel) return;
 
-    const exists = nomenclatures.some(
-      (item) => item.id !== currentId && item.label.toLowerCase() === trimmed.toLowerCase()
-    );
-
-    if (exists) {
-      window.alert('Cette nomenclature existe déjà.');
-      return null;
-    }
-
-    return trimmed;
-  };
-
-  const handleLabelChange = (label, nextLabel) => {
-    const target = nomenclatureByLabel.get(label);
-    if (!target) return;
-
-    const valid = validateLabel(nextLabel, target.id);
-    if (!valid || valid === label) return;
-
-    onUpdateNomenclature?.(target.id, { label: valid });
     onUpdateMedia?.(media.id, (item) => {
       const updatedAnnotations = (item.annotations ?? []).map((ann) =>
-        ann.label === label ? { ...ann, label: valid } : ann
+        ann.time === time && ann.label === currentLabel ? { ...ann, label: nextLabel } : ann
       );
+
       let updatedTags = item.tags ?? [];
+      const stillUsesOldLabel = updatedAnnotations.some((ann) => ann.label === currentLabel);
+      updatedTags = stillUsesOldLabel
+        ? updatedTags
+        : updatedTags.filter((tag) => tag !== currentLabel);
 
-      if (item.type === 'video') {
-        const stillUsesOldLabel = updatedAnnotations.some((ann) => ann.label === label);
-        if (!stillUsesOldLabel) {
-          updatedTags = updatedTags.filter((tag) => tag !== label);
-        }
-      }
-
-      if (!updatedTags.includes(valid)) {
-        updatedTags = [...updatedTags.filter((tag) => tag !== label), valid];
+      if (!updatedTags.includes(nextLabel)) {
+        updatedTags = [...updatedTags, nextLabel];
       }
 
       return {
@@ -141,6 +113,16 @@ export default function MediaDetail({
         annotations: updatedAnnotations,
         tags: updatedTags,
       };
+    });
+  };
+
+  const handlePhotoTagChange = (index, nextValue) => {
+    const nextLabel = nextValue.trim();
+    if (!nextLabel) return;
+
+    onUpdateMedia?.(media.id, (item) => {
+      const updatedTags = item.tags.map((tag, idx) => (idx === index ? nextLabel : tag));
+      return { ...item, tags: updatedTags };
     });
   };
 
@@ -248,7 +230,7 @@ export default function MediaDetail({
                           <input
                             className="badge editable"
                             value={label}
-                            onChange={(e) => handleLabelChange(label, e.target.value)}
+                            onChange={(e) => handleAnnotationLabelChange(time, label, e.target.value)}
                             aria-label="Nomenclature"
                           />
                         ) : (
@@ -269,11 +251,14 @@ export default function MediaDetail({
             </div>
           ) : (
             <div className="annotation-list">
-              {media.tags.map((tag) => {
+              {media.tags.map((tag, index) => {
                 const description = findDescription(tag);
 
                 return (
-                  <div key={tag} className={`annotation-row ${editing ? 'editing' : ''}`}>
+                  <div
+                    key={`${tag}-${index}`}
+                    className={`annotation-row ${editing ? 'editing' : ''}`}
+                  >
                     {editing && (
                       <button
                         type="button"
@@ -290,7 +275,7 @@ export default function MediaDetail({
                           <input
                             className="badge editable"
                             value={tag}
-                            onChange={(e) => handleLabelChange(tag, e.target.value)}
+                            onChange={(e) => handlePhotoTagChange(index, e.target.value)}
                             aria-label="Nomenclature"
                           />
                         ) : (
