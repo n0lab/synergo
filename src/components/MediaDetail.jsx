@@ -31,15 +31,19 @@ export default function MediaDetail({
     return map;
   }, [nomenclatures]);
 
-  useEffect(() => {
-    setEditing(false);
+  const syncDraftsWithMedia = useCallback(() => {
     setDraftAnnotations(media.annotations ?? []);
     setDraftTags(media.tags ?? []);
     setDraftTitle(media.title ?? '');
     setDraftDescription(media.description ?? '');
     setDraftSrc(media.src ?? '');
     setNewNomenclatureLabel('');
-  }, [media]);
+  }, [media.annotations, media.description, media.src, media.tags, media.title]);
+
+  useEffect(() => {
+    setEditing(false);
+    syncDraftsWithMedia();
+  }, [media, syncDraftsWithMedia]);
 
   const seekTo = (timeInSeconds) => {
     const video = videoRef.current;
@@ -57,24 +61,14 @@ export default function MediaDetail({
   }, [draftAnnotations, editing, media.annotations]);
 
   const startEditing = useCallback(() => {
-    setDraftAnnotations(media.annotations ?? []);
-    setDraftTags(media.tags ?? []);
-    setDraftTitle(media.title ?? '');
-    setDraftDescription(media.description ?? '');
-    setDraftSrc(media.src ?? '');
-    setNewNomenclatureLabel('');
+    syncDraftsWithMedia();
     setEditing(true);
-  }, [media.annotations, media.description, media.src, media.tags, media.title]);
+  }, [syncDraftsWithMedia]);
 
   const cancelEditing = useCallback(() => {
-    setDraftAnnotations(media.annotations ?? []);
-    setDraftTags(media.tags ?? []);
-    setDraftTitle(media.title ?? '');
-    setDraftDescription(media.description ?? '');
-    setDraftSrc(media.src ?? '');
-    setNewNomenclatureLabel('');
+    syncDraftsWithMedia();
     setEditing(false);
-  }, [media.annotations, media.description, media.src, media.tags, media.title]);
+  }, [syncDraftsWithMedia]);
 
   const saveEdits = useCallback(() => {
     const nextTitle = draftTitle.trim() || media.title;
