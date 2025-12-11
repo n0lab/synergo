@@ -24,7 +24,9 @@ function mergeById(seedList, savedList) {
   (savedList ?? []).forEach((item) => {
     const seedItem = map.get(item.id);
     if (seedItem) {
-      map.set(item.id, { ...item, ...seedItem });
+      // Preserve user edits while still applying new seeded fields by letting
+      // the saved item override the seed when both share a property.
+      map.set(item.id, { ...seedItem, ...item });
     } else {
       map.set(item.id, item);
     }
