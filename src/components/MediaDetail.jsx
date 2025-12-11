@@ -15,7 +15,6 @@ export default function MediaDetail({
   const videoRef = useRef(null);
   const [paused, setPaused] = useState(true);
   const [editing, setEditing] = useState(false);
-  const [draftDescriptions, setDraftDescriptions] = useState({});
 
   const fps = media.fps ?? 30;
   const frameDuration = useMemo(() => 1 / fps, [fps]);
@@ -25,14 +24,6 @@ export default function MediaDetail({
       map.set(entry.label, entry);
     });
     return map;
-  }, [nomenclatures]);
-
-  useEffect(() => {
-    const next = {};
-    (nomenclatures ?? []).forEach(({ label, description }) => {
-      next[label] = description ?? '';
-    });
-    setDraftDescriptions(next);
   }, [nomenclatures]);
 
   const toggleEditing = () => setEditing((prev) => !prev);
@@ -98,9 +89,6 @@ export default function MediaDetail({
   const findDescription = (label) => {
     const found = nomenclatureByLabel.get(label);
     if (!found) return '';
-    if (editing) {
-      return draftDescriptions[label] ?? '';
-    }
     return found.description?.trim() ?? '';
   };
 
@@ -121,14 +109,6 @@ export default function MediaDetail({
     }
 
     return trimmed;
-  };
-
-  const handleDescriptionChange = (label, value) => {
-    setDraftDescriptions((prev) => ({ ...prev, [label]: value }));
-    const target = nomenclatureByLabel.get(label);
-    if (target) {
-      onUpdateNomenclature?.(target.id, { description: value });
-    }
   };
 
   const handleLabelChange = (label, nextLabel) => {
@@ -275,18 +255,10 @@ export default function MediaDetail({
                           <span className="badge">{label}</span>
                         )}
                       </div>
-                      {editing ? (
-                        <input
-                          className="annotation-description-input"
-                          value={description}
-                          onChange={(e) => handleDescriptionChange(label, e.target.value)}
-                          placeholder="Ajouter une description"
-                        />
-                      ) : (
+                      {!editing &&
                         description && (
                           <div className="annotation-description">{description}</div>
-                        )
-                      )}
+                        )}
                     </div>
                   </div>
                 );
@@ -325,18 +297,10 @@ export default function MediaDetail({
                           <span className="badge">{tag}</span>
                         )}
                       </div>
-                      {editing ? (
-                        <input
-                          className="annotation-description-input"
-                          value={description}
-                          onChange={(e) => handleDescriptionChange(tag, e.target.value)}
-                          placeholder="Ajouter une description"
-                        />
-                      ) : (
+                      {!editing &&
                         description && (
                           <div className="annotation-description">{description}</div>
-                        )
-                      )}
+                        )}
                     </div>
                   </div>
                 );
