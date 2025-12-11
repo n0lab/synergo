@@ -414,6 +414,18 @@ main {
   background: var(--badge);
 }
 
+.annotation-row.editing {
+  flex-direction: row;
+  gap: 10px;
+}
+
+.annotation-row-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
 .annotation-row-header {
   width: 100%;
   display: flex;
@@ -426,6 +438,37 @@ main {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.4;
+}
+
+.annotation-description-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.badge.editable {
+  width: fit-content;
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  background: var(--panel);
+  color: var(--text);
+}
+
+.delete-annotation {
+  border: 1px solid #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  height: 32px;
+  width: 32px;
+  border-radius: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
 }
 
 .timestamp {

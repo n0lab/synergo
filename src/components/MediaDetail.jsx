@@ -1,9 +1,21 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ActionBar from './ActionBar.jsx';
 
-export default function MediaDetail({ media, nomenclatures, onBack, onToReview, onToQuizz }) {
+const pattern = /^[A-Za-z0-9]+(?:_[A-Za-z0-9]+)*$/;
+
+export default function MediaDetail({
+  media,
+  nomenclatures,
+  onBack,
+  onToReview,
+  onToQuizz,
+  onUpdateMedia,
+  onUpdateNomenclature,
+}) {
   const videoRef = useRef(null);
   const [paused, setPaused] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [draftDescriptions, setDraftDescriptions] = useState({});
 
   const fps = media.fps ?? 30;
   const frameDuration = useMemo(() => 1 / fps, [fps]);
@@ -14,6 +26,17 @@ export default function MediaDetail({ media, nomenclatures, onBack, onToReview, 
     });
     return map;
   }, [nomenclatures]);
+
+  useEffect(() => {
+    const next = {};
+    (nomenclatures ?? []).forEach(({ label, description }) => {
+      next[label] = description ?? '';
+    });
+    setDraftDescriptions(next);
+  }, [nomenclatures]);
+
+  const toggleEditing = () => setEditing((prev) => !prev);
+
   const seekTo = (timeInSeconds) => {
     const video = videoRef.current;
     if (!video) return;
@@ -75,7 +98,98 @@ export default function MediaDetail({ media, nomenclatures, onBack, onToReview, 
   const findDescription = (label) => {
     const found = nomenclatureByLabel.get(label);
     if (!found) return '';
+    if (editing) {
+      return draftDescriptions[label] ?? '';
+    }
     return found.description?.trim() ?? '';
+  };
+
+  const validateLabel = (candidate, currentId) => {
+    const trimmed = candidate.trim();
+    if (!pattern.test(trimmed)) {
+      window.alert('La nomenclature doit contenir lettres/chiffres séparés par "_".');
+      return null;
+    }
+
+    const exists = nomenclatures.some(
+      (item) => item.id !== currentId && item.label.toLowerCase() === trimmed.toLowerCase()
+    );
+
+    if (exists) {
+      window.alert('Cette nomenclature existe déjà.');
+      return null;
+    }
+
+    return trimmed;
+  };
+
+  const handleDescriptionChange = (label, value) => {
+    setDraftDescriptions((prev) => ({ ...prev, [label]: value }));
+    const target = nomenclatureByLabel.get(label);
+    if (target) {
+      onUpdateNomenclature?.(target.id, { description: value });
+    }
+  };
+
+  const handleLabelChange = (label, nextLabel) => {
+    const target = nomenclatureByLabel.get(label);
+    if (!target) return;
+
+    const valid = validateLabel(nextLabel, target.id);
+    if (!valid || valid === label) return;
+
+    onUpdateNomenclature?.(target.id, { label: valid });
+    onUpdateMedia?.(media.id, (item) => {
+      const updatedAnnotations = (item.annotations ?? []).map((ann) =>
+        ann.label === label ? { ...ann, label: valid } : ann
+      );
+      let updatedTags = item.tags ?? [];
+
+      if (item.type === 'video') {
+        const stillUsesOldLabel = updatedAnnotations.some((ann) => ann.label === label);
+        if (!stillUsesOldLabel) {
+          updatedTags = updatedTags.filter((tag) => tag !== label);
+        }
+      }
+
+      if (!updatedTags.includes(valid)) {
+        updatedTags = [...updatedTags.filter((tag) => tag !== label), valid];
+      }
+
+      return {
+        ...item,
+        annotations: updatedAnnotations,
+        tags: updatedTags,
+      };
+    });
+  };
+
+  const requestDelete = (label, time) => {
+    const confirmed = window.confirm(
+      media.type === 'video'
+        ? `Supprimer la nomenclature "${label}" à ${formatTimestamp(time)} ?`
+        : `Supprimer la nomenclature "${label}" de cette photo ?`
+    );
+
+    if (!confirmed) return;
+
+    onUpdateMedia?.(media.id, (item) => {
+      const remainingAnnotations = (item.annotations ?? []).filter(
+        (ann) => !(ann.label === label && ann.time === time)
+      );
+
+      let updatedTags = item.tags ?? [];
+      if (item.type === 'video') {
+        const labelStillUsed = remainingAnnotations.some((ann) => ann.label === label);
+        updatedTags = labelStillUsed
+          ? updatedTags
+          : updatedTags.filter((tag) => tag !== label);
+      } else {
+        updatedTags = updatedTags.filter((tag) => tag !== label);
+      }
+
+      return { ...item, annotations: remainingAnnotations, tags: updatedTags };
+    });
   };
 
   return (
@@ -86,7 +200,8 @@ export default function MediaDetail({ media, nomenclatures, onBack, onToReview, 
           <div className="media-title">{media.title}</div>
         </div>
         <ActionBar
-          onEdit={() => alert('Edition à implémenter')}
+          editing={editing}
+          onEdit={toggleEditing}
           onToReview={() => onToReview(media)}
           onToQuizz={() => onToQuizz(media)}
         />
@@ -123,39 +238,109 @@ export default function MediaDetail({ media, nomenclatures, onBack, onToReview, 
           <h3>Nomenclatures</h3>
           {media.type === 'video' ? (
             <div className="annotation-list">
-              {sortedAnnotations.map(({ time, label }) => (
-                <div key={`${media.id}-${time}-${label}`} className="annotation-row">
-                  <div className="annotation-row-header">
-                    <button
-                      type="button"
-                      className="timestamp link"
-                      onClick={() => seekTo(time)}
-                    >
-                      {formatTimestamp(time)}
-                    </button>
-                    <span className="badge">{label}</span>
+              {sortedAnnotations.map(({ time, label }) => {
+                const description = findDescription(label);
+                const rowKey = `${media.id}-${time}-${label}`;
+
+                return (
+                  <div key={rowKey} className={`annotation-row ${editing ? 'editing' : ''}`}>
+                    {editing && (
+                      <button
+                        type="button"
+                        className="delete-annotation"
+                        aria-label={`Supprimer ${label}`}
+                        onClick={() => requestDelete(label, time)}
+                      >
+                        ×
+                      </button>
+                    )}
+                    <div className="annotation-row-content">
+                      <div className="annotation-row-header">
+                        <button
+                          type="button"
+                          className="timestamp link"
+                          onClick={() => seekTo(time)}
+                          disabled={editing}
+                        >
+                          {formatTimestamp(time)}
+                        </button>
+                        {editing ? (
+                          <input
+                            className="badge editable"
+                            value={label}
+                            onChange={(e) => handleLabelChange(label, e.target.value)}
+                            aria-label="Nomenclature"
+                          />
+                        ) : (
+                          <span className="badge">{label}</span>
+                        )}
+                      </div>
+                      {editing ? (
+                        <input
+                          className="annotation-description-input"
+                          value={description}
+                          onChange={(e) => handleDescriptionChange(label, e.target.value)}
+                          placeholder="Ajouter une description"
+                        />
+                      ) : (
+                        description && (
+                          <div className="annotation-description">{description}</div>
+                        )
+                      )}
+                    </div>
                   </div>
-                  {findDescription(label) && (
-                    <div className="annotation-description">{findDescription(label)}</div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
               {sortedAnnotations.length === 0 && (
                 <div className="muted">Aucune nomenclature horodatée.</div>
               )}
             </div>
           ) : (
             <div className="annotation-list">
-              {media.tags.map((tag) => (
-                <div className="annotation-row" key={tag}>
-                  <div className="annotation-row-header">
-                    <span className="badge">{tag}</span>
+              {media.tags.map((tag) => {
+                const description = findDescription(tag);
+
+                return (
+                  <div key={tag} className={`annotation-row ${editing ? 'editing' : ''}`}>
+                    {editing && (
+                      <button
+                        type="button"
+                        className="delete-annotation"
+                        aria-label={`Supprimer ${tag}`}
+                        onClick={() => requestDelete(tag)}
+                      >
+                        ×
+                      </button>
+                    )}
+                    <div className="annotation-row-content">
+                      <div className="annotation-row-header">
+                        {editing ? (
+                          <input
+                            className="badge editable"
+                            value={tag}
+                            onChange={(e) => handleLabelChange(tag, e.target.value)}
+                            aria-label="Nomenclature"
+                          />
+                        ) : (
+                          <span className="badge">{tag}</span>
+                        )}
+                      </div>
+                      {editing ? (
+                        <input
+                          className="annotation-description-input"
+                          value={description}
+                          onChange={(e) => handleDescriptionChange(tag, e.target.value)}
+                          placeholder="Ajouter une description"
+                        />
+                      ) : (
+                        description && (
+                          <div className="annotation-description">{description}</div>
+                        )
+                      )}
+                    </div>
                   </div>
-                  {findDescription(tag) && (
-                    <div className="annotation-description">{findDescription(tag)}</div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </aside>
