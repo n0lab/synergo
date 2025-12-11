@@ -83,6 +83,20 @@ export default function MediaDetail({
     }
   };
 
+  useEffect(() => {
+    if (!editing) return;
+
+    const handleKey = (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        saveEdits();
+      }
+    };
+
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [editing, saveEdits]);
+
   const handlePlayPause = () => {
     const video = videoRef.current;
     if (!video) return;
