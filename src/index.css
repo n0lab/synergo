@@ -326,6 +326,13 @@ main {
   transition: transform 0.15s ease, border 0.2s ease;
 }
 
+.media-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .media-card h3 {
   margin: 0;
   line-height: 1.3;
@@ -344,6 +351,23 @@ main {
 .media-type {
   font-size: 14px;
   color: var(--muted);
+}
+
+.remove-review {
+  background: transparent;
+  border: none;
+  color: #f87272;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.remove-review:hover {
+  background: color-mix(in srgb, #f87272 10%, var(--badge));
+  color: #ff6b6b;
 }
 
 .description {
