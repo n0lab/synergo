@@ -1,7 +1,5 @@
 import React, { useMemo, useState } from 'react';
 
-const pattern = /^[A-Za-z0-9]+(?:_[A-Za-z0-9]+)*$/;
-
 export default function Nomenclatures({ items, onAdd, onUpdate, onDelete, onNavigate }) {
   const [label, setLabel] = useState('');
   const [description, setDescription] = useState('');
@@ -34,8 +32,8 @@ export default function Nomenclatures({ items, onAdd, onUpdate, onDelete, onNavi
 
   const validateLabel = (candidate, excludeId) => {
     const trimmed = candidate.trim();
-    if (!pattern.test(trimmed)) {
-      setError('La nomenclature doit contenir lettres/chiffres séparés par "_".');
+    if (!trimmed) {
+      setError('La nomenclature ne peut pas être vide.');
       return null;
     }
     const exists = items.some(

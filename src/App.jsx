@@ -203,7 +203,6 @@ export default function App() {
           onToReview={addTo('reviewList')}
           onToQuizz={addTo('quizzList')}
           onUpdateMedia={updateMedia}
-          onUpdateNomenclature={updateNomenclature}
         />
       );
     }
