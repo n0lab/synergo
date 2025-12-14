@@ -927,6 +927,78 @@ main {
   flex-wrap: wrap;
 }
 
+.tree-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tree-header h2 {
+  margin: 4px 0 0;
+}
+
+.tree-content {
+  overflow-x: auto;
+}
+
+.tree-roots {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.tree-node {
+  min-width: 220px;
+}
+
+.tree-card {
+  background: color-mix(in srgb, var(--panel) 80%, var(--badge));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.tree-label {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.tree-text {
+  font-size: 14px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.tree-children {
+  display: flex;
+  gap: 16px;
+  padding-left: 24px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.tree-branch {
+  position: relative;
+}
+
+.tree-connector {
+  position: absolute;
+  top: -8px;
+  left: -18px;
+  width: 16px;
+  height: calc(100% + 16px);
+  display: flex;
+  align-items: center;
+}
+
+.tree-connector span {
+  flex: 1;
+  border-left: 2px solid var(--border);
+  border-bottom: 2px solid var(--border);
+  border-radius: 0 0 0 8px;
+}
+
 .timestamp.link {
   background: transparent;
   border: none;
