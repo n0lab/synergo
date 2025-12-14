@@ -2,7 +2,6 @@ const translations = {
   en: {
     sidebarOracle: 'Oracle',
     sidebarNomenclatures: 'Nomenclatures',
-    sidebarTree: 'Tree',
     sidebarReviewer: 'Reviewer',
     sidebarQuizz: 'Quiz',
     sidebarLock: 'Lock menu open',
@@ -97,14 +96,10 @@ const translations = {
     switchToEnglish: 'Switch to English',
     reviewerTitle: 'Reviewer',
     backToOracle: 'Back',
-    treeTitle: 'Nomenclature tree',
-    treeSubtitle: 'Visualize relationships between nomenclatures.',
-    treeEmpty: 'No nomenclature to display yet.',
   },
   fr: {
     sidebarOracle: 'Oracle',
     sidebarNomenclatures: 'Nomenclatures',
-    sidebarTree: 'Arbre',
     sidebarReviewer: 'Reviewer',
     sidebarQuizz: 'Quizz',
     sidebarLock: "Verrouiller l'ouverture du menu",
@@ -202,9 +197,6 @@ const translations = {
     switchToEnglish: 'Switch to English',
     reviewerTitle: 'Reviewer',
     backToOracle: 'Retour',
-    treeTitle: 'Arbre des nomenclatures',
-    treeSubtitle: 'Visualisez les relations entre les nomenclatures.',
-    treeEmpty: 'Aucune nomenclature à afficher pour le moment.',
   },
 };
 
