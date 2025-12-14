@@ -4,6 +4,7 @@ import OracleOverview from './components/OracleOverview.jsx';
 import ReviewerOverview from './components/ReviewerOverview.jsx';
 import MediaDetail from './components/MediaDetail.jsx';
 import Nomenclatures from './components/Nomenclatures.jsx';
+import NomenclatureTree from './components/NomenclatureTree.jsx';
 import AddResource from './components/AddResource.jsx';
 import { deriveNomenclaturesFromMedia, loadDatabase, persistDatabase } from './db.js';
 import { translate } from './i18n.js';
@@ -285,6 +286,10 @@ export default function App() {
       );
     }
 
+    if (section === 'tree') {
+      return <NomenclatureTree items={db.nomenclatures} t={t} />;
+    }
+
     if (section === 'reviewer') {
       return (
         <ReviewerOverview
@@ -360,6 +365,7 @@ export default function App() {
     () => [
       { key: 'oracle', label: t('sidebarOracle'), icon: '🔮' },
       { key: 'nomenclatures', label: t('sidebarNomenclatures'), icon: '🏷️' },
+      { key: 'tree', label: t('sidebarTree'), icon: '🌳' },
       { key: 'reviewer', label: t('sidebarReviewer'), icon: '📝' },
       { key: 'quizz', label: t('sidebarQuizz'), icon: '❓' },
     ],
