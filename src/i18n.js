@@ -2,6 +2,7 @@ const translations = {
   en: {
     sidebarOracle: 'Oracle',
     sidebarNomenclatures: 'Nomenclatures',
+    sidebarTree: 'Tree',
     sidebarReviewer: 'Reviewer',
     sidebarQuizz: 'Quiz',
     sidebarLock: 'Lock menu open',
@@ -62,6 +63,11 @@ const translations = {
     resourceDuplicate: 'This resource already exists and is used here:',
     cancel: 'Cancel',
     addResourceAction: 'Add resource',
+    treeEyebrow: 'Relations',
+    treeTitle: 'Nomenclature tree',
+    treeSubtitle:
+      'Explore the hierarchical links between nomenclatures based on their identifiers.',
+    treeEmpty: 'No nomenclature to display yet.',
     nomenclaturePageTitle: 'Nomenclatures',
     nomenclaturePageSubtitle: 'Manage nomenclatures added via media or directly from this page.',
     nomenclatureTotalLabel: 'Nomenclatures',
@@ -100,6 +106,7 @@ const translations = {
   fr: {
     sidebarOracle: 'Oracle',
     sidebarNomenclatures: 'Nomenclatures',
+    sidebarTree: 'Arbre',
     sidebarReviewer: 'Reviewer',
     sidebarQuizz: 'Quizz',
     sidebarLock: "Verrouiller l'ouverture du menu",
@@ -161,6 +168,11 @@ const translations = {
     resourceDuplicate: 'Désolé cette ressource existe déjà et est utilisé ici :',
     cancel: 'Annuler',
     addResourceAction: 'Ajouter la ressource',
+    treeEyebrow: 'Relations',
+    treeTitle: 'Arbre des nomenclatures',
+    treeSubtitle:
+      'Visualisez les liens hiérarchiques entre les nomenclatures à partir de leur nommage.',
+    treeEmpty: 'Aucune nomenclature à afficher pour le moment.',
     nomenclaturePageTitle: 'Nomenclatures',
     nomenclaturePageSubtitle:
       'Gérez les nomenclatures ajoutées via les médias ou directement depuis cette page.',
