@@ -1,7 +1,0 @@
-{
-  "name": "relation-graph",
-  "version": "0.0.0",
-  "type": "module",
-  "main": "index.jsx",
-  "module": "index.jsx"
-}
