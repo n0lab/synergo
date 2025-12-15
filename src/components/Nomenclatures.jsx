@@ -238,6 +238,14 @@ export default function Nomenclatures({
           <tbody>
             {filteredItems.map((item) => {
               const isEditing = editingId === item.id;
+              const isDescriptionMissing = !item.description?.trim();
+              const isInterpretationMissing = !item.interpretation?.trim();
+              const labelStatusClass =
+                isDescriptionMissing && isInterpretationMissing
+                  ? 'nomenclature-label-missing-all'
+                  : isDescriptionMissing || isInterpretationMissing
+                    ? 'nomenclature-label-partial'
+                    : '';
               return (
                 <tr key={item.id}>
                   <td className="label">
@@ -250,10 +258,13 @@ export default function Nomenclatures({
                       />
                     ) : (
                       <button
-                        className="badge link"
                         type="button"
                         onClick={() => onNavigate?.(item.label)}
                         aria-label={t('searchNomenclature', { label: item.label })}
+                        data-status={labelStatusClass}
+                        data-missing-description={isDescriptionMissing}
+                        data-missing-interpretation={isInterpretationMissing}
+                        className={`badge link ${labelStatusClass}`.trim()}
                       >
                         {item.label}
                       </button>
