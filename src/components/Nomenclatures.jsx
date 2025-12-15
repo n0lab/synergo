@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import StatsCard from './StatsCard.jsx';
 
 export default function Nomenclatures({
@@ -21,8 +21,6 @@ export default function Nomenclatures({
   const [draftInterpretation, setDraftInterpretation] = useState('');
   const [query, setQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [expandedLabels, setExpandedLabels] = useState(() => new Set());
-  const [collapseAllRequested, setCollapseAllRequested] = useState(false);
 
   const totalNomenclatures = items.length;
 
@@ -30,104 +28,16 @@ export default function Nomenclatures({
     return [...items].sort((a, b) => a.label.localeCompare(b.label, language ?? 'fr'));
   }, [items, language]);
 
-  const parentLabel = (label) => {
-    const separatorIndex = label.lastIndexOf('_');
-    if (separatorIndex === -1) return null;
-    return label.slice(0, separatorIndex);
-  };
-
-  const matchItem = (item, needle) => {
-    const lowered = needle.toLowerCase();
-    return (
-      item.label.toLowerCase().includes(lowered) ||
-      (item.description || '').toLowerCase().includes(lowered) ||
-      (item.interpretation || '').toLowerCase().includes(lowered)
-    );
-  };
-
-  const tree = useMemo(() => {
-    const nodeByLabel = new Map();
-    sortedItems.forEach((item) => {
-      nodeByLabel.set(item.label, { item, children: [] });
+  const filteredItems = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return sortedItems;
+    return sortedItems.filter((item) => {
+      const labelMatch = item.label.toLowerCase().includes(needle);
+      const descriptionMatch = (item.description || '').toLowerCase().includes(needle);
+      const interpretationMatch = (item.interpretation || '').toLowerCase().includes(needle);
+      return labelMatch || descriptionMatch || interpretationMatch;
     });
-
-    const roots = [];
-    sortedItems.forEach((item) => {
-      const parent = parentLabel(item.label);
-      const node = nodeByLabel.get(item.label);
-      const parentNode = parent ? nodeByLabel.get(parent) : null;
-      if (parentNode) {
-        parentNode.children.push(node);
-      } else {
-        roots.push(node);
-      }
-    });
-
-    const sortNodes = (nodes) => {
-      nodes.sort((a, b) => a.item.label.localeCompare(b.item.label, language ?? 'fr'));
-      nodes.forEach((node) => sortNodes(node.children));
-    };
-
-    sortNodes(roots);
-    return roots;
-  }, [sortedItems, language]);
-
-  const { filteredTree, autoExpandedLabels } = useMemo(() => {
-    const needle = query.trim();
-    if (!needle) {
-      return {
-        filteredTree: tree.map((node) => ({ ...node, isMatch: false })),
-        autoExpandedLabels: new Set(),
-      };
-    }
-
-    const expansions = new Set();
-
-    const filterNodes = (nodes, ancestors = []) => {
-      return nodes
-        .map((node) => {
-          const isMatch = matchItem(node.item, needle);
-          const filteredChildren = filterNodes(node.children, [...ancestors, node.item.label]);
-          const keepNode = isMatch || filteredChildren.length > 0;
-
-          if (keepNode) {
-            if (isMatch) {
-              ancestors.forEach((ancestorLabel) => expansions.add(ancestorLabel));
-            }
-            if (filteredChildren.length > 0) {
-              expansions.add(node.item.label);
-            }
-          }
-
-          return keepNode ? { ...node, children: filteredChildren, isMatch } : null;
-        })
-        .filter(Boolean);
-    };
-
-    return { filteredTree: filterNodes(tree), autoExpandedLabels: expansions };
-  }, [query, tree]);
-
-  useEffect(() => {
-    setCollapseAllRequested(false);
-  }, [query]);
-
-  const resolvedExpandedLabels = useMemo(() => {
-    const combined = new Set(expandedLabels);
-    if (query.trim() && !collapseAllRequested) {
-      autoExpandedLabels.forEach((label) => combined.add(label));
-    }
-    return combined;
-  }, [autoExpandedLabels, collapseAllRequested, expandedLabels, query]);
-
-  const collectExpandableLabels = (nodes, collected = []) => {
-    nodes.forEach((node) => {
-      if (node.children.length > 0) {
-        collected.push(node.item.label);
-        collectExpandableLabels(node.children, collected);
-      }
-    });
-    return collected;
-  };
+  }, [query, sortedItems]);
 
   const resetForm = () => {
     setLabel('');
@@ -218,150 +128,6 @@ export default function Nomenclatures({
     }
   };
 
-  const toggleExpansion = (label) => {
-    setExpandedLabels((prev) => {
-      const next = new Set(prev);
-      if (next.has(label)) {
-        next.delete(label);
-      } else {
-        next.add(label);
-      }
-      return next;
-    });
-    setCollapseAllRequested(false);
-  };
-
-  const toggleAll = () => {
-    const hasExpanded = resolvedExpandedLabels.size > 0;
-    if (hasExpanded) {
-      setExpandedLabels(new Set());
-      setCollapseAllRequested(true);
-    } else {
-      const labelsToExpand = collectExpandableLabels(filteredTree);
-      setExpandedLabels(new Set(labelsToExpand));
-      setCollapseAllRequested(false);
-    }
-  };
-
-  const renderNode = (node, depth = 0) => {
-    const isEditing = editingId === node.item.id;
-    const isDescriptionMissing = !node.item.description?.trim();
-    const isInterpretationMissing = !node.item.interpretation?.trim();
-    const labelStatusClass =
-      isDescriptionMissing && isInterpretationMissing
-        ? 'nomenclature-label-missing-all'
-        : isDescriptionMissing || isInterpretationMissing
-          ? 'nomenclature-label-partial'
-          : '';
-    const hasChildren = node.children.length > 0;
-    const isExpanded = resolvedExpandedLabels.has(node.item.label);
-
-    return (
-      <li key={node.item.id} className="nomenclature-node">
-        <div className="nomenclature-node-row" style={{ '--depth': depth }}>
-          <div className="nomenclature-node-main">
-            {hasChildren ? (
-              <button
-                type="button"
-                className="nomenclature-toggle"
-                onClick={() => toggleExpansion(node.item.label)}
-                aria-label={
-                  isExpanded
-                    ? t('nomenclatureCollapse', { label: node.item.label })
-                    : t('nomenclatureExpand', { label: node.item.label })
-                }
-              >
-                {isExpanded ? '▾' : '▸'}
-              </button>
-            ) : (
-              <span className="nomenclature-toggle placeholder" aria-hidden="true">
-                •
-              </span>
-            )}
-            <div className="nomenclature-node-content">
-              <div className="nomenclature-node-header">
-                {isEditing ? (
-                  <input
-                    value={draftLabel}
-                    onChange={(e) => setDraftLabel(e.target.value)}
-                    onKeyDown={handleEditKeyDown}
-                    aria-label={t('nomenclatureLabel')}
-                  />
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => onNavigate?.(node.item.label)}
-                    aria-label={t('searchNomenclature', { label: node.item.label })}
-                    data-status={labelStatusClass}
-                    data-missing-description={isDescriptionMissing}
-                    data-missing-interpretation={isInterpretationMissing}
-                    className={`badge link ${labelStatusClass} ${node.isMatch ? 'is-match' : ''}`.trim()}
-                  >
-                    {node.item.label}
-                  </button>
-                )}
-                <div className="nomenclature-actions">
-                  {isEditing ? (
-                    <div className="action-group">
-                      <button className="primary" onClick={saveEdit}>{t('save')}</button>
-                      <button className="ghost" type="button" onClick={cancelEdit}>
-                        {t('cancel')}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="action-group">
-                      <button className="ghost soft" type="button" onClick={() => startEdit(node.item)}>
-                        {t('edit')}
-                      </button>
-                      <button className="ghost" type="button" onClick={() => requestDelete(node.item)}>
-                        {t('delete')}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="nomenclature-node-details">
-                <div className="detail">
-                  <p className="detail-label">{t('nomenclatureDescription')}</p>
-                  {isEditing ? (
-                    <input
-                      value={draftDescription}
-                      onChange={(e) => setDraftDescription(e.target.value)}
-                      onKeyDown={handleEditKeyDown}
-                      aria-label={t('nomenclatureDescription')}
-                    />
-                  ) : (
-                    <span className="muted nomenclature-description" title={node.item.description || '—'}>
-                      {node.item.description || '—'}
-                    </span>
-                  )}
-                </div>
-                <div className="detail">
-                  <p className="detail-label">{t('nomenclatureInterpretation')}</p>
-                  {isEditing ? (
-                    <input
-                      value={draftInterpretation}
-                      onChange={(e) => setDraftInterpretation(e.target.value)}
-                      onKeyDown={handleEditKeyDown}
-                      aria-label={t('nomenclatureInterpretation')}
-                    />
-                  ) : (
-                    <span className="muted nomenclature-description" title={node.item.interpretation || '—'}>
-                      {node.item.interpretation || '—'}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {hasChildren && isExpanded && (
-          <ul className="nomenclature-children">{node.children.map((child) => renderNode(child, depth + 1))}</ul>
-        )}
-      </li>
-    );
-  };
-
   return (
     <div className="nomenclature-page oracle">
       <div className="header-row">
@@ -402,11 +168,6 @@ export default function Nomenclatures({
             </button>
           </div>
         </div>
-        <button className="ghost soft" type="button" onClick={toggleAll} disabled={sortedItems.length === 0}>
-          {resolvedExpandedLabels.size > 0
-            ? t('nomenclatureCollapseAll')
-            : t('nomenclatureExpandAll')}
-        </button>
       </div>
       {error && <div className="error-banner">{error}</div>}
 
@@ -454,14 +215,118 @@ export default function Nomenclatures({
         </div>
       )}
 
-      <div className="nomenclature-tree-container">
-        {filteredTree.length === 0 ? (
-          <div className="muted empty-tree" role="status">
-            {t('noNomenclatureRows')}
-          </div>
-        ) : (
-          <ul className="nomenclature-tree">{filteredTree.map((node) => renderNode(node))}</ul>
-        )}
+      <div className="table-wrapper">
+        <table className="nomenclature-table">
+          <colgroup>
+            <col className="col-label" />
+            <col className="col-description" />
+            <col className="col-interpretation" />
+            <col className="col-actions" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col" className="label">
+                {t('nomenclatureLabel')}
+              </th>
+              <th scope="col">{t('nomenclatureDescription')}</th>
+              <th scope="col">{t('nomenclatureInterpretation')}</th>
+              <th scope="col" className="actions">
+                {t('actions')}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredItems.map((item) => {
+              const isEditing = editingId === item.id;
+              const isDescriptionMissing = !item.description?.trim();
+              const isInterpretationMissing = !item.interpretation?.trim();
+              const labelStatusClass =
+                isDescriptionMissing && isInterpretationMissing
+                  ? 'nomenclature-label-missing-all'
+                  : isDescriptionMissing || isInterpretationMissing
+                    ? 'nomenclature-label-partial'
+                    : '';
+              return (
+                <tr key={item.id}>
+                  <td className="label">
+                    {isEditing ? (
+                      <input
+                        value={draftLabel}
+                        onChange={(e) => setDraftLabel(e.target.value)}
+                        onKeyDown={handleEditKeyDown}
+                        aria-label={t('nomenclatureLabel')}
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onNavigate?.(item.label)}
+                        aria-label={t('searchNomenclature', { label: item.label })}
+                        data-status={labelStatusClass}
+                        data-missing-description={isDescriptionMissing}
+                        data-missing-interpretation={isInterpretationMissing}
+                        className={`badge link ${labelStatusClass}`.trim()}
+                      >
+                        {item.label}
+                      </button>
+                    )}
+                  </td>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        value={draftDescription}
+                        onChange={(e) => setDraftDescription(e.target.value)}
+                        onKeyDown={handleEditKeyDown}
+                        aria-label={t('nomenclatureDescription')}
+                      />
+                    ) : (
+                      <span className="muted nomenclature-description" title={item.description || '—'}>
+                        {item.description || '—'}
+                      </span>
+                    )}
+                  </td>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        value={draftInterpretation}
+                        onChange={(e) => setDraftInterpretation(e.target.value)}
+                        onKeyDown={handleEditKeyDown}
+                        aria-label={t('nomenclatureInterpretation')}
+                      />
+                    ) : (
+                      <span className="muted nomenclature-description" title={item.interpretation || '—'}>
+                        {item.interpretation || '—'}
+                      </span>
+                    )}
+                  </td>
+                  <td className="actions">
+                    {isEditing ? (
+                      <div className="action-group">
+                        <button className="primary" onClick={saveEdit}>{t('save')}</button>
+                        <button className="ghost" type="button" onClick={cancelEdit}>
+                          {t('cancel')}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="action-group">
+                        <button className="ghost soft" type="button" onClick={() => startEdit(item)}>
+                          {t('edit')}
+                        </button>
+                        <button className="ghost" type="button" onClick={() => requestDelete(item)}>
+                          {t('delete')}
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+            {sortedItems.length === 0 && (
+              <tr className="muted">
+                <td colSpan={4}>{t('noNomenclatureRows')}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

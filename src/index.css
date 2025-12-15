@@ -851,120 +851,64 @@ main {
   width: 100%;
 }
 
-.nomenclature-tree-container {
-  border: 1px solid var(--border);
-  border-radius: 14px;
+.nomenclature-table {
+  width: 100%;
+  border-collapse: collapse;
   background: var(--surface);
-  padding: 12px;
+  table-layout: auto;
 }
 
-.nomenclature-tree {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.nomenclature-table col.col-description,
+.nomenclature-table col.col-interpretation {
+  width: 50%;
 }
 
-.nomenclature-node {
-  list-style: none;
-}
-
-.nomenclature-node-row {
-  display: flex;
-  flex-direction: column;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px;
-  gap: 10px;
-  margin-left: calc(var(--depth, 0) * 12px);
-  box-shadow: var(--shadow);
-}
-
-.nomenclature-node-main {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.nomenclature-toggle {
-  width: 28px;
-  height: 28px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  box-shadow: var(--shadow-soft);
-}
-
-.nomenclature-toggle.placeholder {
-  border: 1px dashed var(--border);
-  color: var(--muted);
-  cursor: default;
-}
-
-.nomenclature-node-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-width: 0;
-}
-
-.nomenclature-node-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.nomenclature-node-header .badge {
-  font-size: 15px;
-}
-
-.nomenclature-actions .action-group {
-  gap: 6px;
-}
-
-.nomenclature-node-details {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 12px;
-}
-
-.nomenclature-node-details .detail {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.nomenclature-node-details .detail-label {
+.nomenclature-table thead th {
   font-weight: 600;
-  color: var(--text);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  background: var(--panel);
 }
 
-.nomenclature-children {
-  list-style: none;
-  margin: 6px 0 0 22px;
-  padding-left: 10px;
-  border-left: 1px dashed var(--border);
+.nomenclature-table thead th,
+.nomenclature-table tbody td {
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.nomenclature-table tbody tr:nth-child(odd) {
+  background: var(--panel);
+}
+
+.nomenclature-table tbody tr:nth-child(even) {
+  background: var(--surface);
+}
+
+.nomenclature-table tbody tr.muted td {
+  color: var(--muted);
+}
+
+.nomenclature-table td.label,
+.nomenclature-table th.label {
+  white-space: nowrap;
+}
+
+.nomenclature-table td.actions,
+.nomenclature-table th.actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.nomenclature-table td.actions {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
 }
 
-.badge.link.is-match {
-  box-shadow: 0 0 0 2px color-mix(in srgb, #4fb8ff 45%, transparent);
-}
-
-.empty-tree {
-  padding: 18px;
+.nomenclature-table td.actions .action-group {
+  flex-wrap: nowrap;
 }
 
 .nomenclature-table .badge.nomenclature-label-missing-all {
