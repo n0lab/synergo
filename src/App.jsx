@@ -26,33 +26,6 @@ const detectMediaType = (link) => {
   return 'video';
 };
 
-const ensureParentNomenclatures = (byLabel) => {
-  let changed = false;
-
-  const addParentChain = (label) => {
-    const separatorIndex = label.lastIndexOf('_');
-    if (separatorIndex === -1) return;
-
-    const parent = label.slice(0, separatorIndex);
-    const parentKey = parent.toLowerCase();
-
-    if (!byLabel.has(parentKey)) {
-      byLabel.set(parentKey, {
-        id: `seed-parent-${parent}`,
-        label: parent,
-        description: '',
-        interpretation: '',
-      });
-      changed = true;
-    }
-
-    addParentChain(parent);
-  };
-
-  Array.from(byLabel.values()).forEach(({ label }) => addParentChain(label));
-  return changed;
-};
-
 const syncNomenclaturesWithMedia = (media, nomenclatures) => {
   const seeds = deriveNomenclaturesFromMedia(media);
   const byLabel = new Map(
@@ -67,9 +40,7 @@ const syncNomenclaturesWithMedia = (media, nomenclatures) => {
     }
   });
 
-  const parentsAdded = ensureParentNomenclatures(byLabel);
-
-  if (!changed && !parentsAdded) return nomenclatures;
+  if (!changed) return nomenclatures;
   return Array.from(byLabel.values());
 };
 
