@@ -911,6 +911,18 @@ main {
   flex-wrap: nowrap;
 }
 
+.nomenclature-table .badge.nomenclature-label-missing-all {
+  color: #f04444;
+  background: color-mix(in srgb, #f04444 12%, var(--badge));
+  border-color: color-mix(in srgb, #f04444 30%, var(--border));
+}
+
+.nomenclature-table .badge.nomenclature-label-partial {
+  color: #ff8b2d;
+  background: color-mix(in srgb, #ff8b2d 12%, var(--badge));
+  border-color: color-mix(in srgb, #ff8b2d 30%, var(--border));
+}
+
 .nomenclature-description {
   display: -webkit-box;
   -webkit-line-clamp: 2;
