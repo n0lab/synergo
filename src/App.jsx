@@ -86,15 +86,15 @@ function AppContent() {
 
   const t = useCallback((key, params) => translate(language, key, params), [language]);
 
-  // Debounce pour la recherche
+  // Debounce for search
   const debouncedQuery = useDebounce(query, 300);
 
-  // Sauvegarder la DB automatiquement
+  // Save DB automatically
   useEffect(() => {
     persistDatabase(db);
   }, [db]);
 
-  // Appliquer le thème
+  // Apply theme
   useEffect(() => {
     const { classList } = document.body;
     classList.remove(...Object.values(palette));
@@ -104,7 +104,7 @@ function AppContent() {
     };
   }, [theme]);
 
-  // Raccourcis clavier
+  // Keyboard shortcuts
   useKeyboardShortcuts({
     'Ctrl+k': () => {
       setSection('oracle');
@@ -146,7 +146,7 @@ function AppContent() {
     });
   }, [db.media]);
 
-  // Enrichir les médias avec les chemins complets
+  // Enrich media with full paths
   const enrichedMedia = useMemo(() => {
     return orderedMedia.map(item => ({
       ...item,
@@ -157,17 +157,17 @@ function AppContent() {
   const filteredMedia = useMemo(() => {
     let result = enrichedMedia;
 
-    // Filtre par type
+    // Filter by type
     if (typeFilter !== 'all') {
       result = result.filter(item => item.type === typeFilter);
     }
 
-    // Filtre par catégorie
+    // Filter by category
     if (categoryFilter) {
       result = filterByCategory(result, categoryFilter);
     }
 
-    // Recherche fuzzy
+    // Fuzzy search
     if (debouncedQuery.trim()) {
       result = fuzzySearch(result, debouncedQuery, {
         keys: ['title', 'description', 'tags'],
@@ -261,7 +261,7 @@ function AppContent() {
     const resolvedType = type || detectMediaType(src);
     const timestamp = Date.now();
     
-    // Stocker uniquement le nom de fichier, pas le chemin complet
+    // Store only the filename, not the full path
     const storedSrc = filename || getFilenameFromPath(src);
     
     const newEntry = {
@@ -301,7 +301,7 @@ function AppContent() {
         if (item.id !== id) return item;
         const patch = typeof updater === 'function' ? updater(item) : updater;
         
-        // Si le src est modifié, s'assurer qu'on stocke seulement le nom de fichier
+        // If src is modified, ensure we only store the filename
         const finalPatch = { ...patch };
         if (finalPatch.src) {
           finalPatch.src = getFilenameFromPath(finalPatch.src);
@@ -384,7 +384,7 @@ function AppContent() {
   };
 
   const renderSection = () => {
-    // Mode Quiz actif
+    // Active Quiz mode
     if (quizMode) {
       const enrichedQuizItems = db.quizzList.map(item => ({
         ...item,
@@ -401,7 +401,7 @@ function AppContent() {
       );
     }
 
-    // Résultats du Quiz
+    // Quiz results
     if (quizResults) {
       return (
         <QuizResults
@@ -416,7 +416,7 @@ function AppContent() {
       );
     }
 
-    // Détail d'une ressource
+    // Resource detail
     if (selectedMedia) {
       return (
         <MediaDetail
@@ -432,7 +432,7 @@ function AppContent() {
       );
     }
 
-    // Sections principales
+    // Main sections
     switch (section) {
       case 'nomenclatures':
         return (

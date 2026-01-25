@@ -13,7 +13,7 @@ export default function Statistics({ media, nomenclatures, t }) {
     const usedNomenclatures = new Set();
     const unusedNomenclatures = [];
 
-    // Calculer les statistiques
+    // Calculate statistics
     media.forEach(item => {
       typeDistribution[item.type]++;
       
@@ -34,25 +34,25 @@ export default function Statistics({ media, nomenclatures, t }) {
       });
     });
 
-    // Nomenclatures non utilisées
+    // Unused nomenclatures
     nomenclatures.forEach(nom => {
       if (!usedNomenclatures.has(nom.label)) {
         unusedNomenclatures.push(nom);
       }
     });
 
-    // Top 10 tags les plus utilisés
+    // Top 10 most used tags
     const mostUsedTags = Object.entries(tagFrequency)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 10)
       .map(([tag, count]) => ({ tag, count }));
 
-    // Distribution par catégorie
+    // Distribution by category
     const categoryStats = Object.entries(categoryDistribution)
       .sort(([, a], [, b]) => b - a)
       .map(([category, count]) => ({ category, count }));
 
-    // Moyennes
+    // Averages
     const avgTagsPerMedia = media.length > 0 ? (totalTags / media.length).toFixed(1) : 0;
     const avgAnnotationsPerVideo = media.filter(m => m.type === 'video').length > 0
       ? (totalAnnotations / media.filter(m => m.type === 'video').length).toFixed(1)
@@ -152,7 +152,7 @@ export default function Statistics({ media, nomenclatures, t }) {
           </div>
         </div>
 
-        {/* Distribution par catégorie */}
+        {/* Distribution by category */}
         {stats.categoryStats.length > 0 && (
           <div className="card stats-card">
             <h3>📂 Distribution par catégorie</h3>
@@ -167,7 +167,7 @@ export default function Statistics({ media, nomenclatures, t }) {
           </div>
         )}
 
-        {/* Nomenclatures non utilisées */}
+        {/* Unused nomenclatures */}
         {stats.unusedNomenclatures.length > 0 && (
           <div className="card stats-card">
             <h3>⚠️ Nomenclatures non utilisées</h3>

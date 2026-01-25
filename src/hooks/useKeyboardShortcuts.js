@@ -2,10 +2,10 @@
 import { useEffect } from 'react';
 
 /**
- * Hook pour gérer les raccourcis clavier
- * @param {Object} shortcuts - Objet mappant les touches aux actions
- * @param {boolean} enabled - Active ou désactive les raccourcis
- * 
+ * Hook to manage keyboard shortcuts
+ * @param {Object} shortcuts - Object mapping keys to actions
+ * @param {boolean} enabled - Enables or disables shortcuts
+ *
  * @example
  * useKeyboardShortcuts({
  *   'Ctrl+k': () => console.log('Search'),
@@ -18,13 +18,13 @@ export function useKeyboardShortcuts(shortcuts, enabled = true) {
     if (!enabled) return;
 
     const handler = (event) => {
-      // Ignore si on est dans un input/textarea
+      // Ignore if we're in an input/textarea
       const target = event.target;
       const isInput = target.tagName === 'INPUT' || 
                      target.tagName === 'TEXTAREA' ||
                      target.isContentEditable;
 
-      // Construire la clé du raccourci
+      // Build the shortcut key
       const parts = [];
       if (event.ctrlKey || event.metaKey) parts.push('Ctrl');
       if (event.altKey) parts.push('Alt');
@@ -34,7 +34,7 @@ export function useKeyboardShortcuts(shortcuts, enabled = true) {
       const key = parts.join('+');
       const action = shortcuts[key];
 
-      // Si on a une action et qu'on n'est pas dans un input, l'exécuter
+      // If we have an action and we're not in an input, execute it
       if (action && (!isInput || key.includes('Ctrl') || key === 'Escape')) {
         event.preventDefault();
         action(event);
@@ -47,7 +47,7 @@ export function useKeyboardShortcuts(shortcuts, enabled = true) {
 }
 
 /**
- * Raccourcis clavier prédéfinis
+ * Predefined keyboard shortcuts
  */
 export const SHORTCUTS = {
   SEARCH: 'Ctrl+k',

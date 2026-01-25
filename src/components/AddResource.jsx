@@ -54,12 +54,12 @@ export default function AddResource({
       let payloadType = detectedType;
 
       if (hasFile) {
-        // Générer un nom de fichier unique
+        // Generate a unique filename
         payloadFilename = generateUniqueFilename?.(file.name) || file.name;
         payloadSrc = payloadFilename;
         payloadType = file.type.startsWith('image/') ? 'photo' : 'video';
 
-        // IMPORTANT: Informer l'utilisateur qu'il doit copier le fichier
+        // IMPORTANT: Inform the user they need to copy the file
         const resourcesPath = window.location.origin + '/resources/';
         const instruction = `⚠️ Action requise:\n\nVeuillez copier manuellement le fichier:\n"${file.name}"\n\nVers le dossier:\n"${resourcesPath}"\n\nEt le renommer en:\n"${payloadFilename}"\n\nLa ressource sera ajoutée à la base de données, mais le fichier doit être placé manuellement dans le dossier /resources/.`;
         
@@ -68,7 +68,7 @@ export default function AddResource({
 
       payloadType = payloadType || detectType?.(payloadSrc);
 
-      // Vérifier les doublons
+      // Check for duplicates
       const existingResource = findExistingResource?.({
         title: title.trim(),
         src: payloadSrc,
@@ -80,7 +80,7 @@ export default function AddResource({
         return;
       }
 
-      // Créer la ressource
+      // Create the resource
       onCreate({
         title: title.trim(),
         description: description.trim(),

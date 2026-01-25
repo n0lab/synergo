@@ -17,11 +17,11 @@ export default function QuizMode({ items, onComplete, onBack, t }) {
   const [showAnswer, setShowAnswer] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
 
-  // Mélanger les items au démarrage
+  // Shuffle items at startup
   const quizItems = useMemo(() => shuffleArray(items), [items]);
   const currentItem = quizItems[currentIndex];
 
-  // Générer des options de réponse
+  // Generate answer options
   const options = useMemo(() => {
     if (!currentItem) return [];
 

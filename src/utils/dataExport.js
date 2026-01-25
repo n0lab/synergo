@@ -1,9 +1,9 @@
 // src/utils/dataExport.js
 
 /**
- * Exporte la base de données en fichier JSON
- * @param {Object} db - La base de données à exporter
- * @param {string} filename - Nom du fichier (optionnel)
+ * Exports the database to a JSON file
+ * @param {Object} db - The database to export
+ * @param {string} filename - File name (optional)
  */
 export function exportDatabase(db, filename = null) {
   const timestamp = new Date().toISOString().split('T')[0];
@@ -24,9 +24,9 @@ export function exportDatabase(db, filename = null) {
 }
 
 /**
- * Importe une base de données depuis un fichier JSON
- * @param {File} file - Le fichier à importer
- * @returns {Promise<Object>} La base de données importée
+ * Imports a database from a JSON file
+ * @param {File} file - The file to import
+ * @returns {Promise<Object>} The imported database
  */
 export function importDatabase(file) {
   return new Promise((resolve, reject) => {
@@ -36,7 +36,7 @@ export function importDatabase(file) {
       try {
         const imported = JSON.parse(event.target.result);
         
-        // Validation basique
+        // Basic validation
         if (!imported.media || !Array.isArray(imported.media)) {
           throw new Error('Format de fichier invalide: média manquant');
         }
@@ -60,8 +60,8 @@ export function importDatabase(file) {
 }
 
 /**
- * Exporte uniquement les nomenclatures en CSV
- * @param {Array} nomenclatures - Liste des nomenclatures
+ * Exports nomenclatures only to CSV
+ * @param {Array} nomenclatures - List of nomenclatures
  */
 export function exportNomenclaturesToCSV(nomenclatures) {
   const headers = ['Label', 'Description', 'Interprétation'];
@@ -90,8 +90,8 @@ export function exportNomenclaturesToCSV(nomenclatures) {
 }
 
 /**
- * Exporte les statistiques en JSON
- * @param {Object} stats - Les statistiques à exporter
+ * Exports statistics to JSON
+ * @param {Object} stats - The statistics to export
  */
 export function exportStatistics(stats) {
   const dataStr = JSON.stringify(stats, null, 2);
