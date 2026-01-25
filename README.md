@@ -21,10 +21,7 @@ All video and photo files must be placed in the **`/public/ressources/`** folder
 synergo/
 ├── public/
 │   └── ressources/
-│       ├── flower.mp4          # Example video
-│       ├── photo-1.jpg         # Example photo
-│       ├── photo-2.jpg
-│       └── ...
+│       └── ...                 # Add your files here
 ├── src/
 ├── package.json
 └── README.md
@@ -55,8 +52,8 @@ synergo/
 
 ### Example Files
 
-The repository includes a sample video file reference (`flower.mp4`). For the app to work properly:
-- Download or add your own media files to `/public/ressources/`
+The repository does not include any default resources or nomenclatures. To use the application:
+- Add your own media files to `/public/ressources/`
 - Or use external URLs (http/https) which will be stored and used directly
 
 ### Benefits of This Approach
@@ -93,7 +90,7 @@ src/
 ├── contexts/           # React contexts (Toast)
 ├── hooks/              # Custom hooks
 ├── utils/              # Utility functions
-├── data.js             # Sample data (references to /ressources/ files)
+├── data.js             # Seed data (empty by default)
 ├── db.js               # Database management + resource path helpers
 ├── i18n.js             # Internationalization
 ├── main.jsx            # App entry point
@@ -101,8 +98,6 @@ src/
 
 public/
 └── ressources/         # 📂 MEDIA FILES GO HERE
-    ├── flower.mp4
-    ├── photo-1.jpg
     └── ...
 ```
 
