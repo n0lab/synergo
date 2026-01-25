@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useToast } from '../contexts/ToastContext.jsx';
 import StatsCard from './StatsCard.jsx';
 
 export default function Nomenclatures({
@@ -14,13 +15,13 @@ export default function Nomenclatures({
   const [label, setLabel] = useState('');
   const [description, setDescription] = useState('');
   const [interpretation, setInterpretation] = useState('');
-  const [error, setError] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [draftLabel, setDraftLabel] = useState('');
   const [draftDescription, setDraftDescription] = useState('');
   const [draftInterpretation, setDraftInterpretation] = useState('');
   const [query, setQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const toast = useToast();
 
   const totalNomenclatures = items.length;
 
@@ -43,20 +44,19 @@ export default function Nomenclatures({
     setLabel('');
     setDescription('');
     setInterpretation('');
-    setError('');
   };
 
   const validateLabel = (candidate, excludeId) => {
     const trimmed = candidate.trim();
     if (!trimmed) {
-      setError(t('nomenclatureErrorEmpty'));
+      toast.error(t('nomenclatureErrorEmpty'));
       return null;
     }
     const exists = items.some(
       (item) => item.id !== excludeId && item.label.toLowerCase() === trimmed.toLowerCase()
     );
     if (exists) {
-      setError(t('nomenclatureErrorExists'));
+      toast.error(t('nomenclatureErrorExists'));
       return null;
     }
     return trimmed;
@@ -86,7 +86,6 @@ export default function Nomenclatures({
     setDraftLabel(item.label);
     setDraftDescription(item.description ?? '');
     setDraftInterpretation(item.interpretation ?? '');
-    setError('');
   };
 
   const cancelEdit = () => {
@@ -94,7 +93,6 @@ export default function Nomenclatures({
     setDraftLabel('');
     setDraftDescription('');
     setDraftInterpretation('');
-    setError('');
   };
 
   const saveEdit = () => {
@@ -117,13 +115,12 @@ export default function Nomenclatures({
 
   const requestDelete = (item) => {
     if (isNomenclatureUsed?.(item.label)) {
-      setError(t('nomenclatureDeleteBlocked'));
+      toast.error(t('nomenclatureDeleteBlocked'));
       return;
     }
 
     const confirmed = window.confirm(t('nomenclatureConfirmDelete', { label: item.label }));
     if (confirmed) {
-      setError('');
       onDelete(item.id);
     }
   };
@@ -169,8 +166,6 @@ export default function Nomenclatures({
           </div>
         </div>
       </div>
-      {error && <div className="error-banner">{error}</div>}
-
       {showAddModal && (
         <div className="modal-backdrop" role="dialog" aria-modal="true">
           <form className="modal" onSubmit={handleAdd}>
