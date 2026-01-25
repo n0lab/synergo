@@ -156,7 +156,7 @@ export default function Settings({ db, onImport, onReset, t }) {
           </div>
         </div>
 
-        {/* Réinitialisation */}
+        {/* Reset */}
         <div className="card settings-section danger-zone">
           <h3>⚠️ Zone dangereuse</h3>
           <p className="muted">

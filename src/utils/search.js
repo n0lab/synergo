@@ -1,11 +1,11 @@
 // src/utils/search.js
 
 /**
- * Recherche fuzzy avec scoring
- * @param {Array} items - Liste des éléments à rechercher
- * @param {string} query - Terme de recherche
- * @param {Object} options - Options de recherche
- * @returns {Array} Items triés par pertinence
+ * Fuzzy search with scoring
+ * @param {Array} items - List of items to search
+ * @param {string} query - Search term
+ * @param {Object} options - Search options
+ * @returns {Array} Items sorted by relevance
  */
 export function fuzzySearch(items, query, options = {}) {
   const {
@@ -36,9 +36,9 @@ export function fuzzySearch(items, query, options = {}) {
       } else if (typeof item[key] === 'string') {
         const value = item[key].toLowerCase();
         if (value.includes(needle)) {
-          // Bonus si match au début
+          // Bonus if match at the beginning
           const bonus = value.startsWith(needle) ? 2 : 1;
-          // Bonus selon la longueur du match
+          // Bonus based on match length
           const lengthBonus = needle.length / value.length;
           score += (key === 'title' ? 3 : 1) * bonus * (1 + lengthBonus);
           matches[key] = true;
@@ -61,9 +61,9 @@ export function fuzzySearch(items, query, options = {}) {
 }
 
 /**
- * Parse un tag hiérarchique
- * @param {string} tag - Tag au format R_C_E_3_1
- * @returns {Object} Composants du tag
+ * Parse a hierarchical tag
+ * @param {string} tag - Tag in R_C_E_3_1 format
+ * @returns {Object} Tag components
  */
 export function parseTag(tag) {
   const parts = tag.split('_');
@@ -80,10 +80,10 @@ export function parseTag(tag) {
 }
 
 /**
- * Filtre par catégorie hiérarchique
- * @param {Array} media - Liste des médias
- * @param {string} categoryPrefix - Préfixe de catégorie (ex: "R_C")
- * @returns {Array} Médias filtrés
+ * Filter by hierarchical category
+ * @param {Array} media - List of media
+ * @param {string} categoryPrefix - Category prefix (e.g., "R_C")
+ * @returns {Array} Filtered media
  */
 export function filterByCategory(media, categoryPrefix) {
   if (!categoryPrefix) return media;
@@ -94,9 +94,9 @@ export function filterByCategory(media, categoryPrefix) {
 }
 
 /**
- * Extrait toutes les catégories uniques
- * @param {Array} media - Liste des médias
- * @returns {Object} Hiérarchie des catégories
+ * Extracts all unique categories
+ * @param {Array} media - List of media
+ * @returns {Object} Category hierarchy
  */
 export function extractCategories(media) {
   const categories = new Map();
@@ -130,7 +130,7 @@ export function extractCategories(media) {
     });
   });
 
-  // Convertir en structure utilisable
+  // Convert to usable structure
   return Array.from(categories.values()).map(cat => ({
     key: cat.key,
     subcategories: Array.from(cat.subcategories.values()).map(sub => ({
@@ -141,11 +141,11 @@ export function extractCategories(media) {
 }
 
 /**
- * Recherche par similarité de tags
- * @param {string} tag - Tag de référence
- * @param {Array} media - Liste des médias
- * @param {number} maxResults - Nombre max de résultats
- * @returns {Array} Médias similaires
+ * Search by tag similarity
+ * @param {string} tag - Reference tag
+ * @param {Array} media - List of media
+ * @param {number} maxResults - Maximum number of results
+ * @returns {Array} Similar media
  */
 export function findSimilarByTag(tag, media, maxResults = 5) {
   const parsed = parseTag(tag);
