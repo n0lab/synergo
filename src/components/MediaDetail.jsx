@@ -49,11 +49,9 @@ export default function MediaDetail({
     const video = videoRef.current;
     if (!video) return;
     video.currentTime = Math.max(0, timeInSeconds);
-    const playPromise = video.play();
-    if (playPromise?.catch) {
-      playPromise.catch(() => null);
+    if (!video.paused) {
+      video.play();
     }
-    setPaused(false);
   };
 
   const sortedAnnotations = useMemo(() => {
