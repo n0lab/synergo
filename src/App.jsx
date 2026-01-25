@@ -10,7 +10,6 @@ import Statistics from './components/Statistics.jsx';
 import QuizMode, { QuizResults } from './components/QuizMode.jsx';
 import Settings from './components/Settings.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
-import CategoryFilter from './components/CategoryFilter.jsx';
 import { ToastProvider, useToast } from './contexts/ToastContext.jsx';
 import { useDebounce } from './hooks/useDebounce.js';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
@@ -21,7 +20,7 @@ import {
 } from './db.js';
 import * as api from './api.js';
 import { translate } from './i18n.js';
-import { fuzzySearch, filterByCategory } from './utils/search.js';
+import { fuzzySearch } from './utils/search.js';
 
 const palette = {
   light: 'light',
@@ -48,7 +47,6 @@ function AppContent() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [section, setSection] = useState('oracle');
   const [query, setQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState(null);
   const [typeFilter, setTypeFilter] = useState('all');
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [language, setLanguage] = useState('en');
@@ -157,11 +155,6 @@ function AppContent() {
       result = result.filter(item => item.type === typeFilter);
     }
 
-    // Filter by category
-    if (categoryFilter) {
-      result = filterByCategory(result, categoryFilter);
-    }
-
     // Fuzzy search
     if (debouncedQuery.trim()) {
       result = fuzzySearch(result, debouncedQuery, {
@@ -170,14 +163,13 @@ function AppContent() {
     }
 
     return result;
-  }, [enrichedMedia, debouncedQuery, typeFilter, categoryFilter]);
+  }, [enrichedMedia, debouncedQuery, typeFilter]);
 
   const navigateToOracleWithQuery = (value) => {
     setSection('oracle');
     setSelectedMedia(null);
     setQuery(value);
     setTypeFilter('all');
-    setCategoryFilter(null);
   };
 
   // Refresh database from server
@@ -655,13 +647,6 @@ function AppContent() {
               t={t}
               language={language}
             />
-            <div style={{ marginTop: '16px' }}>
-              <CategoryFilter
-                media={db.media}
-                onFilterChange={setCategoryFilter}
-                t={t}
-              />
-            </div>
           </>
         );
     }
