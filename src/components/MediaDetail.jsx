@@ -13,6 +13,7 @@ export default function MediaDetail({
 }) {
   const videoRef = useRef(null);
   const [paused, setPaused] = useState(true);
+  const [hidePlayOverlay, setHidePlayOverlay] = useState(false);
   const [editing, setEditing] = useState(false);
   const [draftAnnotations, setDraftAnnotations] = useState(media.annotations ?? []);
   const [draftTags, setDraftTags] = useState(media.tags ?? []);
@@ -49,9 +50,9 @@ export default function MediaDetail({
     const video = videoRef.current;
     if (!video) return;
     video.currentTime = Math.max(0, timeInSeconds);
-    if (!video.paused) {
-      video.play();
-    }
+    video.pause();
+    setPaused(true);
+    setHidePlayOverlay(true);
   };
 
   const sortedAnnotations = useMemo(() => {
@@ -134,6 +135,7 @@ export default function MediaDetail({
     if (video.paused) {
       video.play();
       setPaused(false);
+      setHidePlayOverlay(false);
     } else {
       video.pause();
       setPaused(true);
@@ -351,9 +353,12 @@ export default function MediaDetail({
                 ref={videoRef}
                 src={mediaSrc}
                 controls
-                className="video-player"
+                className={`video-player${hidePlayOverlay ? ' hide-play-overlay' : ''}`}
                 onPause={() => setPaused(true)}
-                onPlay={() => setPaused(false)}
+                onPlay={() => {
+                  setPaused(false);
+                  setHidePlayOverlay(false);
+                }}
               />
               <div className="video-controls">
                 <button onClick={() => step(-1)} aria-label={t('previousFrame')}>
