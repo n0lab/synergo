@@ -1,7 +1,7 @@
 import { mediaLibrary } from './data.js';
 
 const STORAGE_KEY = 'synergo-db';
-const RESOURCES_FOLDER = '/ressources/';
+const RESOURCES_FOLDER = '/resources/';
 
 /**
  * Construit le chemin complet vers une ressource
@@ -16,7 +16,7 @@ export function getResourcePath(filename) {
     return filename;
   }
   
-  // Sinon, construire le chemin vers le dossier ressources
+  // Sinon, construire le chemin vers le dossier resources
   return `${RESOURCES_FOLDER}${filename}`;
 }
 

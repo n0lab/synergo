@@ -33,10 +33,10 @@ Media files are NOT stored in localStorage or the database. The database stores 
 
 ```
 Database stores: "flower.mp4"
-Runtime resolves to: "/ressources/flower.mp4"
+Runtime resolves to: "/resources/flower.mp4"
 ```
 
-Files must be placed in `/public/ressources/`. External URLs (http/https) are stored and used directly.
+Files must be placed in `/public/resources/`. External URLs (http/https) are stored and used directly.
 
 ### Key Modules
 
