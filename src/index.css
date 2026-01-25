@@ -947,11 +947,6 @@ main {
   padding: 0;
 }
 
-.video-player.hide-play-overlay::-webkit-media-controls-overlay-play-button,
-.video-player.hide-play-overlay::-webkit-media-controls-start-playback-button {
-  display: none !important;
-}
-
 @media (max-width: 960px) {
   .app {
     grid-template-columns: 90px 1fr;
