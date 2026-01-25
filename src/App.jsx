@@ -441,6 +441,18 @@ function AppContent() {
     setQuizResults(results);
   };
 
+  const navigation = useMemo(
+    () => [
+      { key: 'oracle', label: t('sidebarOracle'), icon: '🔮' },
+      { key: 'nomenclatures', label: t('sidebarNomenclatures'), icon: '🏷️' },
+      { key: 'reviewer', label: t('sidebarReviewer'), icon: '📝' },
+      { key: 'quizz', label: t('sidebarQuizz'), icon: '❓' },
+      { key: 'statistics', label: t('statisticsTitle') || 'Statistiques', icon: '📊' },
+      { key: 'settings', label: t('settingsTitle') || 'Paramètres', icon: '⚙️' },
+    ],
+    [t]
+  );
+
   // Show loading state
   if (loading) {
     return (
@@ -654,18 +666,6 @@ function AppContent() {
         );
     }
   };
-
-  const navigation = useMemo(
-    () => [
-      { key: 'oracle', label: t('sidebarOracle'), icon: '🔮' },
-      { key: 'nomenclatures', label: t('sidebarNomenclatures'), icon: '🏷️' },
-      { key: 'reviewer', label: t('sidebarReviewer'), icon: '📝' },
-      { key: 'quizz', label: t('sidebarQuizz'), icon: '❓' },
-      { key: 'statistics', label: t('statisticsTitle') || 'Statistiques', icon: '📊' },
-      { key: 'settings', label: t('settingsTitle') || 'Paramètres', icon: '⚙️' },
-    ],
-    [t]
-  );
 
   return (
     <div className={`app ${theme} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
