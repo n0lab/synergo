@@ -1,6 +1,8 @@
-import { mediaLibrary } from './data.js';
+/**
+ * Database utilities for Synergo
+ * Path resolution and filename helpers (no localStorage - data is server-side)
+ */
 
-const STORAGE_KEY = 'synergo-db';
 const RESOURCES_FOLDER = '/resources/';
 
 /**
@@ -10,12 +12,12 @@ const RESOURCES_FOLDER = '/resources/';
  */
 export function getResourcePath(filename) {
   if (!filename) return '';
-  
+
   // If it's already a full URL, return it as-is
   if (filename.startsWith('http://') || filename.startsWith('https://') || filename.startsWith('data:')) {
     return filename;
   }
-  
+
   // Otherwise, build the path to the resources folder
   return `${RESOURCES_FOLDER}${filename}`;
 }
@@ -27,12 +29,12 @@ export function getResourcePath(filename) {
  */
 export function getFilenameFromPath(path) {
   if (!path) return '';
-  
+
   // If it's a data URL or an external URL, return it as-is
   if (path.startsWith('data:') || path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
-  
+
   // Extract the filename
   return path.replace(RESOURCES_FOLDER, '');
 }
@@ -47,24 +49,15 @@ export function generateUniqueFilename(originalName) {
   const random = Math.random().toString(36).substring(2, 8);
   const extension = originalName.split('.').pop();
   const nameWithoutExt = originalName.replace(`.${extension}`, '').replace(/[^a-z0-9]/gi, '_');
-  
+
   return `${nameWithoutExt}_${timestamp}_${random}.${extension}`;
 }
 
-function applyAddedAt(media) {
-  const now = Date.now();
-  return media.map((item, index) => ({
-    ...item,
-    addedAt: typeof item.addedAt === 'number' ? item.addedAt : now - (media.length - index),
-    updatedAt:
-      typeof item.updatedAt === 'number'
-        ? item.updatedAt
-        : typeof item.addedAt === 'number'
-          ? item.addedAt
-          : now - (media.length - index),
-  }));
-}
-
+/**
+ * Derives nomenclatures from media tags and annotations
+ * @param {Array} media - Media items
+ * @returns {Array} Nomenclature entries
+ */
 export function deriveNomenclaturesFromMedia(media) {
   const collected = new Map();
   media.forEach((item) => {
@@ -80,67 +73,4 @@ export function deriveNomenclaturesFromMedia(media) {
     });
   });
   return Array.from(collected.values());
-}
-
-function mergeById(seedList, savedList) {
-  const map = new Map(seedList.map((item) => [item.id, item]));
-  (savedList ?? []).forEach((item) => {
-    const seedItem = map.get(item.id);
-    if (seedItem) {
-      map.set(item.id, { ...seedItem, ...item });
-    } else {
-      map.set(item.id, item);
-    }
-  });
-  return Array.from(map.values());
-}
-
-function buildSeed(media) {
-  const seededMedia = applyAddedAt(media);
-  return {
-    media: seededMedia,
-    nomenclatures: deriveNomenclaturesFromMedia(seededMedia),
-    reviewList: [],
-    quizzList: [],
-  };
-}
-
-export function loadDatabase() {
-  const seed = buildSeed(mediaLibrary);
-  if (typeof localStorage === 'undefined') return seed;
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-    return seed;
-  }
-  try {
-    const parsed = JSON.parse(saved);
-    const seededMedia = applyAddedAt(seed.media);
-    const parsedMedia = applyAddedAt(parsed.media ?? []);
-
-    return {
-      ...seed,
-      ...parsed,
-      media: mergeById(seededMedia, parsedMedia),
-      nomenclatures: mergeById(seed.nomenclatures, parsed.nomenclatures),
-      reviewList: parsed.reviewList ?? seed.reviewList,
-      quizzList: parsed.quizzList ?? seed.quizzList,
-    };
-  } catch (error) {
-    console.warn('Resetting local database after invalid read', error);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-    return seed;
-  }
-}
-
-export function persistDatabase(db) {
-  if (typeof localStorage === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
-}
-
-export function resetDatabase() {
-  if (typeof localStorage === 'undefined') return buildSeed(mediaLibrary);
-  const seed = buildSeed(mediaLibrary);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-  return seed;
 }
