@@ -104,8 +104,6 @@ const translations = {
     statisticsSubtitle: 'Overview of your library',
     settingsTitle: 'Settings',
     settingsSubtitle: 'Manage your data and preferences',
-    filterByCategory: 'Filter by category',
-    categories: 'Categories',
   },
   fr: {
     // Existing translations
@@ -214,8 +212,6 @@ const translations = {
     statisticsSubtitle: 'Vue d\'ensemble de votre bibliothèque',
     settingsTitle: 'Paramètres',
     settingsSubtitle: 'Gérez vos données et préférences',
-    filterByCategory: 'Filtrer par catégorie',
-    categories: 'Catégories',
   },
 };
 

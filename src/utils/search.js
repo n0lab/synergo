@@ -80,67 +80,6 @@ export function parseTag(tag) {
 }
 
 /**
- * Filter by hierarchical category
- * @param {Array} media - List of media
- * @param {string} categoryPrefix - Category prefix (e.g., "R_C")
- * @returns {Array} Filtered media
- */
-export function filterByCategory(media, categoryPrefix) {
-  if (!categoryPrefix) return media;
-  
-  return media.filter(item =>
-    item.tags.some(tag => tag.startsWith(categoryPrefix))
-  );
-}
-
-/**
- * Extracts all unique categories
- * @param {Array} media - List of media
- * @returns {Object} Category hierarchy
- */
-export function extractCategories(media) {
-  const categories = new Map();
-
-  media.forEach(item => {
-    item.tags.forEach(tag => {
-      const parsed = parseTag(tag);
-      if (!parsed.isHierarchical) return;
-
-      const catKey = parsed.category;
-      if (!categories.has(catKey)) {
-        categories.set(catKey, {
-          key: catKey,
-          subcategories: new Map()
-        });
-      }
-
-      const cat = categories.get(catKey);
-      const subKey = `${parsed.category}_${parsed.subcategory}`;
-      
-      if (parsed.subcategory && !cat.subcategories.has(subKey)) {
-        cat.subcategories.set(subKey, {
-          key: subKey,
-          types: new Set()
-        });
-      }
-
-      if (parsed.type && cat.subcategories.has(subKey)) {
-        cat.subcategories.get(subKey).types.add(parsed.type);
-      }
-    });
-  });
-
-  // Convert to usable structure
-  return Array.from(categories.values()).map(cat => ({
-    key: cat.key,
-    subcategories: Array.from(cat.subcategories.values()).map(sub => ({
-      key: sub.key,
-      types: Array.from(sub.types)
-    }))
-  }));
-}
-
-/**
  * Search by tag similarity
  * @param {string} tag - Reference tag
  * @param {Array} media - List of media
