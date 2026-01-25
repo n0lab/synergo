@@ -14,7 +14,7 @@ export function useToast() {
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = useCallback((message, type = 'info', duration = 3000) => {
+  const addToast = useCallback((message, type = 'info', duration = 5000) => {
     const id = Date.now() + Math.random();
     const toast = { id, message, type, duration };
     
@@ -71,4 +71,5 @@ export function ToastProvider({ children }) {
       </div>
     </ToastContext.Provider>
   );
+
 }
