@@ -340,7 +340,7 @@ export default function MediaDetail({
                   placeholder="exemple.mp4"
                 />
                 <span className="muted" style={{ fontSize: '12px', marginTop: '4px' }}>
-                  ℹ️ Chemin complet: /ressources/{draftSrc}
+                  ℹ️ Chemin complet: /resources/{draftSrc}
                 </span>
               </div>
             )}
