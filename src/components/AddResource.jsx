@@ -6,6 +6,7 @@ export default function AddResource({
   detectType,
   findExistingResource,
   generateUniqueFilename,
+  uploadFile,
   onNavigateToResource,
   t,
 }) {
@@ -22,6 +23,17 @@ export default function AddResource({
   const handleDescriptionKeyDown = (event) => {
     if (event.key === 'Enter' && event.shiftKey) {
       event.stopPropagation();
+    }
+  };
+
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files?.[0] ?? null;
+    setFile(selectedFile);
+
+    // Auto-fill the filename field if it's empty and a file was selected
+    if (selectedFile && !link.trim()) {
+      const uniqueFilename = generateUniqueFilename?.(selectedFile.name) || selectedFile.name;
+      setLink(uniqueFilename);
     }
   };
 
@@ -54,16 +66,13 @@ export default function AddResource({
       let payloadType = detectedType;
 
       if (hasFile) {
-        // Generate a unique filename
-        payloadFilename = generateUniqueFilename?.(file.name) || file.name;
+        // Use the filename from the link field, or generate a unique one
+        payloadFilename = trimmedLink || generateUniqueFilename?.(file.name) || file.name;
         payloadSrc = payloadFilename;
         payloadType = file.type.startsWith('image/') ? 'photo' : 'video';
 
-        // IMPORTANT: Inform the user they need to copy the file
-        const resourcesPath = window.location.origin + '/resources/';
-        const instruction = `⚠️ Action requise:\n\nVeuillez copier manuellement le fichier:\n"${file.name}"\n\nVers le dossier:\n"${resourcesPath}"\n\nEt le renommer en:\n"${payloadFilename}"\n\nLa ressource sera ajoutée à la base de données, mais le fichier doit être placé manuellement dans le dossier /resources/.`;
-        
-        alert(instruction);
+        // Upload the file to the server
+        await uploadFile(file, payloadFilename);
       }
 
       payloadType = payloadType || detectType?.(payloadSrc);
@@ -113,19 +122,16 @@ export default function AddResource({
         marginBottom: '16px'
       }}>
         <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: 'var(--accent)' }}>
-          📂 Instructions importantes
+          📂 Comment ajouter une ressource
         </h3>
         <p style={{ margin: '0', fontSize: '14px', lineHeight: '1.6' }}>
-          Les ressources doivent être placées dans le dossier <code style={{
+          • <strong>Option 1:</strong> Entrez le nom d'un fichier déjà présent dans <code style={{
             background: 'var(--panel)',
             padding: '2px 6px',
             borderRadius: '4px',
             fontFamily: 'monospace'
-          }}>/public/resources/</code> de votre projet.
-        </p>
-        <p style={{ margin: '8px 0 0 0', fontSize: '14px', lineHeight: '1.6' }}>
-          • <strong>Option 1:</strong> Ajoutez un lien vers un fichier déjà présent dans /resources/<br/>
-          • <strong>Option 2:</strong> Sélectionnez un fichier local et copiez-le manuellement dans /resources/
+          }}>/resources/</code><br/>
+          • <strong>Option 2:</strong> Sélectionnez un fichier local (il sera automatiquement copié dans /resources/)
         </p>
       </div>
 
@@ -176,11 +182,11 @@ export default function AddResource({
             id="resource-file"
             type="file"
             accept="image/*,video/*"
-            onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+            onChange={handleFileChange}
           />
           <div className="helper-row">
             <span className="muted">
-              ⚠️ Après sélection, vous devrez copier manuellement le fichier dans /resources/
+              Le fichier sera automatiquement copié dans /resources/
             </span>
           </div>
         </div>

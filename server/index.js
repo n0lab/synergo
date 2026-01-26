@@ -8,6 +8,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import mediaRoutes from './routes/media.js';
 import nomenclaturesRoutes from './routes/nomenclatures.js';
 import listsRoutes from './routes/lists.js';
+import uploadRoutes from './routes/upload.js';
 import {
   getFullDatabase,
   importDatabase,
@@ -74,6 +75,7 @@ app.use('/resources', express.static(join(__dirname, '..', 'public', 'resources'
 app.use('/api/media', mediaRoutes);
 app.use('/api/nomenclatures', nomenclaturesRoutes);
 app.use('/api/lists', listsRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // GET /api/database - Get full database (for initial load)
 app.get('/api/database', (req, res, next) => {
