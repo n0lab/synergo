@@ -1,14 +1,23 @@
 // src/components/Statistics.jsx
-import React, { useMemo } from 'react';
-import { parseTag } from '../utils/search.js';
+import React, { useMemo, useState, useEffect } from 'react';
+import { getResourceFiles } from '../api.js';
 
 export default function Statistics({ media, nomenclatures, t }) {
+  const [resourceFiles, setResourceFiles] = useState([]);
+
+  // Fetch resource files on mount
+  useEffect(() => {
+    getResourceFiles()
+      .then(data => setResourceFiles(data.files || []))
+      .catch(() => setResourceFiles([]));
+  }, []);
+
   const stats = useMemo(() => {
     const tagFrequency = {};
-    const categoryDistribution = {};
     const typeDistribution = { video: 0, photo: 0 };
-    
+
     let totalAnnotations = 0;
+    let totalPhotoAnnotations = 0;
     let totalTags = 0;
     const usedNomenclatures = new Set();
     const unusedNomenclatures = [];
@@ -16,21 +25,18 @@ export default function Statistics({ media, nomenclatures, t }) {
     // Calculate statistics
     media.forEach(item => {
       typeDistribution[item.type]++;
-      
+
       if (item.annotations) {
         totalAnnotations += item.annotations.length;
+        if (item.type === 'photo') {
+          totalPhotoAnnotations += item.annotations.length;
+        }
       }
-      
+
       item.tags.forEach(tag => {
         totalTags++;
         tagFrequency[tag] = (tagFrequency[tag] || 0) + 1;
         usedNomenclatures.add(tag);
-        
-        const parsed = parseTag(tag);
-        if (parsed.category) {
-          categoryDistribution[parsed.category] = 
-            (categoryDistribution[parsed.category] || 0) + 1;
-        }
       });
     });
 
@@ -47,15 +53,15 @@ export default function Statistics({ media, nomenclatures, t }) {
       .slice(0, 10)
       .map(([tag, count]) => ({ tag, count }));
 
-    // Distribution by category
-    const categoryStats = Object.entries(categoryDistribution)
-      .sort(([, a], [, b]) => b - a)
-      .map(([category, count]) => ({ category, count }));
-
     // Averages
     const avgTagsPerMedia = media.length > 0 ? (totalTags / media.length).toFixed(1) : 0;
-    const avgAnnotationsPerVideo = media.filter(m => m.type === 'video').length > 0
-      ? (totalAnnotations / media.filter(m => m.type === 'video').length).toFixed(1)
+    const videoCount = media.filter(m => m.type === 'video').length;
+    const photoCount = media.filter(m => m.type === 'photo').length;
+    const avgAnnotationsPerVideo = videoCount > 0
+      ? (totalAnnotations / videoCount).toFixed(1)
+      : 0;
+    const avgAnnotationsPerPhoto = photoCount > 0
+      ? (totalPhotoAnnotations / photoCount).toFixed(1)
       : 0;
 
     return {
@@ -65,15 +71,29 @@ export default function Statistics({ media, nomenclatures, t }) {
       totalTags,
       typeDistribution,
       mostUsedTags,
-      categoryStats,
       unusedNomenclatures,
       avgTagsPerMedia,
       avgAnnotationsPerVideo,
-      usageRate: nomenclatures.length > 0 
+      avgAnnotationsPerPhoto,
+      usageRate: nomenclatures.length > 0
         ? ((usedNomenclatures.size / nomenclatures.length) * 100).toFixed(1)
         : 0
     };
   }, [media, nomenclatures]);
+
+  // Calculate unused files (files in resources not used in media)
+  const unusedFiles = useMemo(() => {
+    // Get all filenames used in media (local files only, not external URLs)
+    const usedFilenames = new Set();
+    media.forEach(item => {
+      if (item.filename && !item.filename.startsWith('http')) {
+        usedFilenames.add(item.filename);
+      }
+    });
+
+    // Filter resource files that are not used
+    return resourceFiles.filter(file => !usedFilenames.has(file));
+  }, [media, resourceFiles]);
 
   return (
     <div className="statistics-page oracle">
@@ -118,6 +138,10 @@ export default function Statistics({ media, nomenclatures, t }) {
             <span className="stat-value">{stats.avgTagsPerMedia}</span>
           </div>
           <div className="stat-row">
+            <span className="stat-label">Annotations par photo</span>
+            <span className="stat-value">{stats.avgAnnotationsPerPhoto}</span>
+          </div>
+          <div className="stat-row">
             <span className="stat-label">Annotations par vidéo</span>
             <span className="stat-value">{stats.avgAnnotationsPerVideo}</span>
           </div>
@@ -125,6 +149,22 @@ export default function Statistics({ media, nomenclatures, t }) {
             <span className="stat-label">Taux d'utilisation</span>
             <span className="stat-value">{stats.usageRate}%</span>
           </div>
+        </div>
+
+        {/* Fichiers non utilisés */}
+        <div className="card stats-card double-width">
+          <h3>📁 Fichiers non utilisés</h3>
+          {unusedFiles.length > 0 ? (
+            <div className="unused-files-list">
+              {unusedFiles.map(file => (
+                <div key={file} className="unused-file-item">
+                  <span className="file-name">{file}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="muted">Tous les fichiers sont utilisés</div>
+          )}
         </div>
 
         {/* Top tags */}
@@ -151,21 +191,6 @@ export default function Statistics({ media, nomenclatures, t }) {
             )}
           </div>
         </div>
-
-        {/* Distribution by category */}
-        {stats.categoryStats.length > 0 && (
-          <div className="card stats-card">
-            <h3>📂 Distribution par catégorie</h3>
-            <div className="category-list">
-              {stats.categoryStats.map(({ category, count }) => (
-                <div key={category} className="stat-row">
-                  <span className="badge">{category}</span>
-                  <span className="stat-value">{count}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Unused nomenclatures */}
         {stats.unusedNomenclatures.length > 0 && (
