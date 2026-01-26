@@ -259,7 +259,7 @@ export default function AddResource({
             type="text"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            placeholder="Ex: Regard déterminé"
+            placeholder={t('resourceTitlePlaceholder')}
             required
           />
         </div>
@@ -306,7 +306,7 @@ export default function AddResource({
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             onKeyDown={handleDescriptionKeyDown}
-            placeholder="Contexte, intention, détails sur la ressource..."
+            placeholder={t('resourceDescriptionPlaceholder')}
             rows={4}
           />
         </div>
@@ -361,7 +361,7 @@ export default function AddResource({
               <div>
                 <p style={{ margin: 0, fontWeight: 500 }}>{file.name}</p>
                 <p style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--muted)' }}>
-                  {(file.size / (1024 * 1024)).toFixed(2)} MB • {detectedType === 'photo' ? 'Photo' : 'Video'}
+                  {(file.size / (1024 * 1024)).toFixed(2)} MB • {detectedType === 'photo' ? t('fileTypePhoto') : t('fileTypeVideo')}
                 </p>
               </div>
             ) : (

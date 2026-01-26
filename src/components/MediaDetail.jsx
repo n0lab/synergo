@@ -330,17 +330,17 @@ export default function MediaDetail({
             {editing && (
               <div className="field-group full-span resource-field">
                 <label className="muted" htmlFor="link-input">
-                  {t('linkLabel')} (nom du fichier)
+                  {t('linkLabel')} {t('linkLabelFilename')}
                 </label>
                 <input
                   id="link-input"
                   value={draftSrc}
                   onChange={(event) => setDraftSrc(event.target.value)}
                   className="text-input"
-                  placeholder="exemple.mp4"
+                  placeholder={t('linkPlaceholder')}
                 />
                 <span className="muted" style={{ fontSize: '12px', marginTop: '4px' }}>
-                  ℹ️ Chemin complet: /resources/{draftSrc}
+                  {t('fullPathInfo', { first: draftSrc })}
                 </span>
               </div>
             )}
