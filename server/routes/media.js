@@ -4,92 +4,76 @@ import {
   getMediaById,
   createMedia,
   updateMedia,
-  deleteMedia
+  deleteMedia,
+  getMediaPaginated
 } from '../db.js';
+import { ApiError, asyncHandler } from '../middleware/errorHandler.js';
+import { validateMedia, validateIdParam } from '../middleware/validate.js';
 
 const router = Router();
 
-// GET /api/media - Get all media
-router.get('/', (req, res) => {
-  try {
+// GET /api/media - Get all media (with optional pagination)
+router.get('/', asyncHandler(async (req, res) => {
+  const { limit, offset } = req.query;
+
+  // If pagination params provided, use paginated query
+  if (limit !== undefined || offset !== undefined) {
+    const parsedLimit = Math.min(parseInt(limit) || 50, 1000);
+    const parsedOffset = parseInt(offset) || 0;
+    const result = getMediaPaginated(parsedLimit, parsedOffset);
+    res.json(result);
+  } else {
     const media = getAllMedia();
     res.json(media);
-  } catch (error) {
-    console.error('Error fetching media:', error);
-    res.status(500).json({ error: 'Failed to fetch media' });
   }
-});
+}));
 
 // GET /api/media/:id - Get single media
-router.get('/:id', (req, res) => {
-  try {
-    const media = getMediaById(req.params.id);
-    if (!media) {
-      return res.status(404).json({ error: 'Media not found' });
-    }
-    res.json(media);
-  } catch (error) {
-    console.error('Error fetching media:', error);
-    res.status(500).json({ error: 'Failed to fetch media' });
+router.get('/:id', validateIdParam, asyncHandler(async (req, res) => {
+  const media = getMediaById(req.params.id);
+  if (!media) {
+    throw ApiError.notFound('Media not found');
   }
-});
+  res.json(media);
+}));
 
 // POST /api/media - Create new media
-router.post('/', (req, res) => {
-  try {
-    const { title, description, src, type, tags, annotations, fps } = req.body;
+router.post('/', validateMedia, asyncHandler(async (req, res) => {
+  const { title, description, src, type, tags, annotations, fps } = req.body;
 
-    if (!title || !src || !type) {
-      return res.status(400).json({ error: 'Title, src and type are required' });
-    }
+  const timestamp = Date.now();
+  const media = createMedia({
+    id: `user-media-${timestamp}`,
+    title,
+    description: description || '',
+    src,
+    type,
+    tags: tags || [],
+    annotations: annotations || [],
+    fps: fps || 30,
+    addedAt: timestamp,
+    updatedAt: timestamp
+  });
 
-    const timestamp = Date.now();
-    const media = createMedia({
-      id: `user-media-${timestamp}`,
-      title,
-      description: description || '',
-      src,
-      type,
-      tags: tags || [],
-      annotations: annotations || [],
-      fps: fps || 30,
-      addedAt: timestamp,
-      updatedAt: timestamp
-    });
-
-    res.status(201).json(media);
-  } catch (error) {
-    console.error('Error creating media:', error);
-    res.status(500).json({ error: 'Failed to create media' });
-  }
-});
+  res.status(201).json(media);
+}));
 
 // PUT /api/media/:id - Update media
-router.put('/:id', (req, res) => {
-  try {
-    const media = updateMedia(req.params.id, req.body);
-    if (!media) {
-      return res.status(404).json({ error: 'Media not found' });
-    }
-    res.json(media);
-  } catch (error) {
-    console.error('Error updating media:', error);
-    res.status(500).json({ error: 'Failed to update media' });
+router.put('/:id', validateIdParam, validateMedia, asyncHandler(async (req, res) => {
+  const media = updateMedia(req.params.id, req.body);
+  if (!media) {
+    throw ApiError.notFound('Media not found');
   }
-});
+  res.json(media);
+}));
 
 // DELETE /api/media/:id - Delete media
-router.delete('/:id', (req, res) => {
-  try {
-    const deleted = deleteMedia(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({ error: 'Media not found' });
-    }
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting media:', error);
-    res.status(500).json({ error: 'Failed to delete media' });
+router.delete('/:id', validateIdParam, asyncHandler(async (req, res) => {
+  const deleted = deleteMedia(req.params.id);
+  if (!deleted) {
+    throw ApiError.notFound('Media not found');
   }
-});
+  res.json({ success: true });
+}));
 
 export default router;

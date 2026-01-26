@@ -1,5 +1,6 @@
 // src/contexts/ToastContext.jsx
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { TOAST_DURATION } from '../constants.js';
 
 const ToastContext = createContext(null);
 
@@ -14,10 +15,14 @@ export function useToast() {
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = useCallback((message, type = 'info', duration = 5000) => {
-    const id = Date.now() + Math.random();
+  const addToast = useCallback((message, type = 'info', duration = TOAST_DURATION) => {
+    // Use crypto.randomUUID for better ID generation
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
     const toast = { id, message, type, duration };
-    
+
     setToasts(prev => [...prev, toast]);
 
     if (duration > 0) {
@@ -52,14 +57,29 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={{ addToast, removeToast, success, error, warning, info }}>
       {children}
-      <div className="toast-container">
+      {/* Accessible toast container with ARIA live region */}
+      <div
+        className="toast-container"
+        role="region"
+        aria-label="Notifications"
+        aria-live="polite"
+        aria-atomic="false"
+      >
         {toasts.map(toast => (
-          <div 
-            key={toast.id} 
+          <div
+            key={toast.id}
             className={`toast toast-${toast.type} toast-show`}
             onClick={() => removeToast(toast.id)}
+            role="status"
+            aria-live="polite"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                removeToast(toast.id);
+              }
+            }}
           >
-            <span className="toast-icon">
+            <span className="toast-icon" aria-hidden="true">
               {toast.type === 'success' && '✓'}
               {toast.type === 'error' && '✕'}
               {toast.type === 'warning' && '⚠'}
@@ -71,5 +91,4 @@ export function ToastProvider({ children }) {
       </div>
     </ToastContext.Provider>
   );
-
 }
