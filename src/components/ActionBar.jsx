@@ -29,12 +29,16 @@ export default function ActionBar({
       >
         {editing ? t('actionSave') : t('actionEdit')}
       </button>
-      <button className="ghost info" type="button" onClick={onToReview}>
-        {t('actionToReview')}
-      </button>
-      <button className="ghost purple" type="button" onClick={onToQuizz}>
-        {t('actionToQuizz')}
-      </button>
+      {!editing && (
+        <button className="ghost info" type="button" onClick={onToReview}>
+          {t('actionToReview')}
+        </button>
+      )}
+      {!editing && (
+        <button className="ghost purple" type="button" onClick={onToQuizz}>
+          {t('actionToQuizz')}
+        </button>
+      )}
     </div>
   );
 }
