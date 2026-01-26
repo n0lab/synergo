@@ -1,6 +1,6 @@
 # Synergo
 
-Synergo is an interactive catalog for non-verbal gesture resources built with **Vite** and **React**. Media nomenclatures, Reviewer/Quiz selections are stored in the browser (localStorage), while media files (videos and photos) are served from a local **`/public/ressources/`** folder.
+Synergo is an interactive catalog for non-verbal gesture resources built with **Vite** and **React**. Media nomenclatures, Reviewer/Quiz selections are stored in the browser (localStorage), while media files (videos and photos) are served from a local **`/public/resources/`** folder.
 
 ## Getting started
 
@@ -15,12 +15,12 @@ The `dev` script starts the Vite development server with hot reload. Open the pr
 
 ### Media Storage Structure
 
-All video and photo files must be placed in the **`/public/ressources/`** folder:
+All video and photo files must be placed in the **`/public/resources/`** folder:
 
 ```
 synergo/
 ├── public/
-│   └── ressources/
+│   └── resources/
 │       └── ...                 # Add your files here
 ├── src/
 ├── package.json
@@ -29,17 +29,17 @@ synergo/
 
 ### How It Works
 
-1. **Files Location**: Place all your media files (videos/photos) in `/public/ressources/`
+1. **Files Location**: Place all your media files (videos/photos) in `/public/resources/`
 2. **Database Storage**: Only the **filename** is stored in the database (e.g., `"flower.mp4"`)
-3. **Path Resolution**: The app automatically constructs the full path `/ressources/filename` when displaying media
+3. **Path Resolution**: The app automatically constructs the full path `/resources/filename` when displaying media
 4. **No Base64**: Unlike the previous version, files are NOT converted to base64 or stored in localStorage
 
 ### Adding New Resources
 
-**Option 1: Add existing file from `/ressources/`**
-1. Place your file in `/public/ressources/`
+**Option 1: Add existing file from `/resources/`**
+1. Place your file in `/public/resources/`
 2. In the app, go to "Add Resource"
-3. Enter the filename in the "File name in /ressources/" field (e.g., `my-video.mp4`)
+3. Enter the filename in the "File name in /resources/" field (e.g., `my-video.mp4`)
 4. Fill in title and description
 5. Click "Add Resource"
 
@@ -47,13 +47,13 @@ synergo/
 1. In the app, go to "Add Resource"
 2. Use the file picker to select a file from your computer
 3. The app will generate a unique filename
-4. **IMPORTANT**: You must manually copy the file to `/public/ressources/` with the generated name
+4. **IMPORTANT**: You must manually copy the file to `/public/resources/` with the generated name
 5. The app will show you the exact filename to use
 
 ### Example Files
 
 The repository does not include any default resources or nomenclatures. To use the application:
-- Add your own media files to `/public/ressources/`
+- Add your own media files to `/public/resources/`
 - Or use external URLs (http/https) which will be stored and used directly
 
 ### Benefits of This Approach
@@ -62,7 +62,7 @@ The repository does not include any default resources or nomenclatures. To use t
 ✅ **Better performance**: Files are cached by the browser naturally  
 ✅ **Easier to manage**: Simple file system organization  
 ✅ **Works offline**: Once files are in the folder, no internet needed  
-✅ **Version control friendly**: Can exclude `/public/ressources/` from git if needed
+✅ **Version control friendly**: Can exclude `/public/resources/` from git if needed
 
 ## Features
 
@@ -73,7 +73,7 @@ The repository does not include any default resources or nomenclatures. To use t
 - Detail view with 70/30 layout, video player (play/pause, frame-by-frame, keyboard navigation) or photo display, clickable nomenclatures, and action bar (Edit, To Review, To Quiz)
 - Nomenclatures section with table-based management (add, edit, delete with confirmation) covering tags detected from media and manually created entries
 - Reviewer and Quiz lists fed from Oracle filters or detail actions
-- **Resource files stored in `/public/ressources/` folder**
+- **Resource files stored in `/public/resources/` folder**
 - Only metadata and references stored in localStorage
 
 ## Scripts
@@ -97,13 +97,13 @@ src/
 └── index.css           # Global styles
 
 public/
-└── ressources/         # 📂 MEDIA FILES GO HERE
+└── resources/          # 📂 MEDIA FILES GO HERE
     └── ...
 ```
 
 ## Notes
 
 - Database (metadata, nomenclatures, lists) is stored in **localStorage** under the key `synergo-db`
-- Media files are served from `/public/ressources/` and referenced by filename
-- The app works fully offline once files are in the `/ressources/` folder
-- For production deployment, ensure the `/ressources/` folder is included in your build
+- Media files are served from `/public/resources/` and referenced by filename
+- The app works fully offline once files are in the `/resources/` folder
+- For production deployment, ensure the `/resources/` folder is included in your build

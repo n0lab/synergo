@@ -172,7 +172,7 @@ export default function MediaDetail({
     return `${minutes}:${paddedSeconds}`;
   };
 
-  // Utiliser displaySrc pour l'affichage, src brut pour l'édition
+  // Use displaySrc for display, raw src for editing
   const displaySrc = media.displaySrc || media.src;
   const mediaSrc = editing ? draftSrc : displaySrc;
 
@@ -340,7 +340,7 @@ export default function MediaDetail({
                   placeholder="exemple.mp4"
                 />
                 <span className="muted" style={{ fontSize: '12px', marginTop: '4px' }}>
-                  ℹ️ Chemin complet: /ressources/{draftSrc}
+                  ℹ️ Chemin complet: /resources/{draftSrc}
                 </span>
               </div>
             )}

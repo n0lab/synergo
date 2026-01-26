@@ -1,4 +1,4 @@
-// src/App.jsx (Enhanced Version with Resources Folder)
+// src/App.jsx (Server-side database version)
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import OracleOverview from './components/OracleOverview.jsx';
@@ -10,21 +10,17 @@ import Statistics from './components/Statistics.jsx';
 import QuizMode, { QuizResults } from './components/QuizMode.jsx';
 import Settings from './components/Settings.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
-import CategoryFilter from './components/CategoryFilter.jsx';
 import { ToastProvider, useToast } from './contexts/ToastContext.jsx';
 import { useDebounce } from './hooks/useDebounce.js';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
-import { 
-  deriveNomenclaturesFromMedia, 
-  loadDatabase, 
-  persistDatabase, 
-  resetDatabase,
+import {
   getResourcePath,
   getFilenameFromPath,
   generateUniqueFilename
 } from './db.js';
+import * as api from './api.js';
 import { translate } from './i18n.js';
-import { fuzzySearch, filterByCategory } from './utils/search.js';
+import { fuzzySearch } from './utils/search.js';
 
 const palette = {
   light: 'light',
@@ -44,24 +40,6 @@ const detectMediaType = (link) => {
   return 'video';
 };
 
-const syncNomenclaturesWithMedia = (media, nomenclatures) => {
-  const seeds = deriveNomenclaturesFromMedia(media);
-  const byLabel = new Map(
-    (nomenclatures ?? []).map((entry) => [entry.label.toLowerCase(), entry])
-  );
-  let changed = false;
-
-  seeds.forEach((seed) => {
-    if (!byLabel.has(seed.label.toLowerCase())) {
-      byLabel.set(seed.label.toLowerCase(), seed);
-      changed = true;
-    }
-  });
-
-  if (!changed) return nomenclatures;
-  return Array.from(byLabel.values());
-};
-
 function AppContent() {
   const toast = useToast();
   const [theme, setTheme] = useState(palette.dark);
@@ -69,32 +47,47 @@ function AppContent() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [section, setSection] = useState('oracle');
   const [query, setQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState(null);
   const [typeFilter, setTypeFilter] = useState('all');
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [language, setLanguage] = useState('en');
   const [quizMode, setQuizMode] = useState(false);
   const [quizResults, setQuizResults] = useState(null);
-  
-  const [db, setDb] = useState(() => {
-    const initial = loadDatabase();
-    return {
-      ...initial,
-      nomenclatures: syncNomenclaturesWithMedia(initial.media, initial.nomenclatures),
-    };
+
+  // Database state
+  const [db, setDb] = useState({
+    media: [],
+    nomenclatures: [],
+    reviewList: [],
+    quizzList: []
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const t = useCallback((key, params) => translate(language, key, params), [language]);
 
-  // Debounce pour la recherche
+  // Load database from server on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const data = await api.loadDatabase();
+        setDb(data);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load database:', err);
+        setError(err.message);
+        toast.error('Erreur de connexion au serveur');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  // Debounce for search
   const debouncedQuery = useDebounce(query, 300);
 
-  // Sauvegarder la DB automatiquement
-  useEffect(() => {
-    persistDatabase(db);
-  }, [db]);
-
-  // Appliquer le thème
+  // Apply theme
   useEffect(() => {
     const { classList } = document.body;
     classList.remove(...Object.values(palette));
@@ -104,7 +97,7 @@ function AppContent() {
     };
   }, [theme]);
 
-  // Raccourcis clavier
+  // Keyboard shortcuts
   useKeyboardShortcuts({
     'Ctrl+k': () => {
       setSection('oracle');
@@ -146,7 +139,7 @@ function AppContent() {
     });
   }, [db.media]);
 
-  // Enrichir les médias avec les chemins complets
+  // Enrich media with full paths
   const enrichedMedia = useMemo(() => {
     return orderedMedia.map(item => ({
       ...item,
@@ -157,17 +150,12 @@ function AppContent() {
   const filteredMedia = useMemo(() => {
     let result = enrichedMedia;
 
-    // Filtre par type
+    // Filter by type
     if (typeFilter !== 'all') {
       result = result.filter(item => item.type === typeFilter);
     }
 
-    // Filtre par catégorie
-    if (categoryFilter) {
-      result = filterByCategory(result, categoryFilter);
-    }
-
-    // Recherche fuzzy
+    // Fuzzy search
     if (debouncedQuery.trim()) {
       result = fuzzySearch(result, debouncedQuery, {
         keys: ['title', 'description', 'tags'],
@@ -175,75 +163,120 @@ function AppContent() {
     }
 
     return result;
-  }, [enrichedMedia, debouncedQuery, typeFilter, categoryFilter]);
+  }, [enrichedMedia, debouncedQuery, typeFilter]);
 
   const navigateToOracleWithQuery = (value) => {
     setSection('oracle');
     setSelectedMedia(null);
     setQuery(value);
     setTypeFilter('all');
-    setCategoryFilter(null);
   };
 
-  const updateDb = (updater) => {
-    setDb((prev) => {
-      const next = typeof updater === 'function' ? updater(prev) : updater;
-      const syncedNomenclatures = syncNomenclaturesWithMedia(
-        next.media,
-        next.nomenclatures
-      );
+  // Refresh database from server
+  const refreshDb = async () => {
+    try {
+      const data = await api.loadDatabase();
+      setDb(data);
+    } catch (err) {
+      console.error('Failed to refresh database:', err);
+      toast.error('Erreur de synchronisation');
+    }
+  };
 
-      if (syncedNomenclatures !== next.nomenclatures) {
-        return { ...next, nomenclatures: syncedNomenclatures };
+  // Sync nomenclatures when tags/annotations are added
+  const syncNomenclaturesFromMedia = async (media) => {
+    const tags = new Set();
+    media.tags?.forEach(tag => tags.add(tag));
+    media.annotations?.forEach(ann => tags.add(ann.label));
+
+    for (const label of tags) {
+      try {
+        await api.syncNomenclature({
+          id: `seed-${label}`,
+          label,
+          description: '',
+          interpretation: ''
+        });
+      } catch (err) {
+        // Ignore errors for sync
       }
-
-      return next;
-    });
+    }
   };
 
-  const addTo = (listKey) => (item) => {
-    updateDb((prev) => {
-      const exists = prev[listKey].some((entry) => entry.id === item.id);
+  const addTo = (listKey) => async (item) => {
+    try {
+      const exists = db[listKey].some((entry) => entry.id === item.id);
       if (exists) {
         toast.warning(`Déjà dans ${listKey === 'reviewList' ? 'Reviewer' : 'Quiz'}`);
-        return prev;
+        return;
       }
+
+      if (listKey === 'reviewList') {
+        await api.addToReviewList(item.id);
+      } else {
+        await api.addToQuizList(item.id);
+      }
+
+      await refreshDb();
       toast.success(`Ajouté à ${listKey === 'reviewList' ? 'Reviewer' : 'Quiz'}`);
-      return { ...prev, [listKey]: [...prev[listKey], item] };
-    });
+    } catch (err) {
+      console.error('Error adding to list:', err);
+      toast.error('Erreur lors de l\'ajout');
+    }
   };
 
-  const addManyToList = (listKey, items) => {
+  const addManyToList = async (listKey, items) => {
     if (!items?.length) return;
 
-    updateDb((prev) => {
-      const existingIds = new Set(prev[listKey].map((entry) => entry.id));
+    try {
+      const existingIds = new Set(db[listKey].map((entry) => entry.id));
       const additions = items.filter((item) => !existingIds.has(item.id));
 
       if (additions.length === 0) {
         toast.info('Tous les éléments sont déjà dans la liste');
-        return prev;
+        return;
       }
-      
+
+      const mediaIds = additions.map(item => item.id);
+
+      if (listKey === 'reviewList') {
+        await api.addManyToReviewList(mediaIds);
+      } else {
+        await api.addManyToQuizList(mediaIds);
+      }
+
+      await refreshDb();
       toast.success(`${additions.length} élément(s) ajouté(s)`);
-      return { ...prev, [listKey]: [...prev[listKey], ...additions] };
-    });
+    } catch (err) {
+      console.error('Error adding to list:', err);
+      toast.error('Erreur lors de l\'ajout');
+    }
   };
 
-  const removeFromList = (listKey) => (id) => {
-    updateDb((prev) => ({
-      ...prev,
-      [listKey]: prev[listKey].filter((entry) => entry.id !== id),
-    }));
-    toast.info('Élément retiré');
+  const removeFromList = (listKey) => async (id) => {
+    try {
+      if (listKey === 'reviewList') {
+        await api.removeFromReviewList(id);
+      } else {
+        await api.removeFromQuizList(id);
+      }
+      await refreshDb();
+      toast.info('Élément retiré');
+    } catch (err) {
+      console.error('Error removing from list:', err);
+      toast.error('Erreur lors de la suppression');
+    }
   };
 
-  const addNomenclature = (entry) => {
-    updateDb((prev) => ({
-      ...prev,
-      nomenclatures: [...prev.nomenclatures, { id: `user-${Date.now()}-${entry.label}`, ...entry }],
-    }));
-    toast.success('Nomenclature ajoutée');
+  const addNomenclature = async (entry) => {
+    try {
+      await api.createNomenclature(entry);
+      await refreshDb();
+      toast.success('Nomenclature ajoutée');
+    } catch (err) {
+      console.error('Error adding nomenclature:', err);
+      toast.error('Erreur lors de l\'ajout');
+    }
   };
 
   const findExistingResource = ({ title, src }) => {
@@ -257,70 +290,76 @@ function AppContent() {
     });
   };
 
-  const addResource = ({ title, description, src, filename, type }) => {
-    const resolvedType = type || detectMediaType(src);
-    const timestamp = Date.now();
-    
-    // Stocker uniquement le nom de fichier, pas le chemin complet
-    const storedSrc = filename || getFilenameFromPath(src);
-    
-    const newEntry = {
-      id: `user-media-${timestamp}`,
-      title,
-      description,
-      src: storedSrc,
-      type: resolvedType,
-      tags: [],
-      annotations: [],
-      addedAt: timestamp,
-      updatedAt: timestamp,
-      ...(resolvedType === 'video' ? { fps: 30 } : {}),
-    };
+  const addResource = async ({ title, description, src, filename, type }) => {
+    try {
+      const resolvedType = type || detectMediaType(src);
+      const storedSrc = filename || getFilenameFromPath(src);
 
-    updateDb((prev) => ({ ...prev, media: [newEntry, ...prev.media] }));
-    toast.success('Ressource ajoutée');
-  };
-
-  const deleteResource = (id) => {
-    updateDb((prev) => ({
-      ...prev,
-      media: prev.media.filter((item) => item.id !== id),
-      reviewList: prev.reviewList.filter((item) => item.id !== id),
-      quizzList: prev.quizzList.filter((item) => item.id !== id),
-    }));
-
-    setSelectedMedia((prev) => (prev?.id === id ? null : prev));
-    toast.success('Ressource supprimée');
-  };
-
-  const updateMedia = (id, updater) => {
-    let updatedItem = null;
-    updateDb((prev) => {
-      const timestamp = Date.now();
-      const nextMedia = prev.media.map((item) => {
-        if (item.id !== id) return item;
-        const patch = typeof updater === 'function' ? updater(item) : updater;
-        
-        // Si le src est modifié, s'assurer qu'on stocke seulement le nom de fichier
-        const finalPatch = { ...patch };
-        if (finalPatch.src) {
-          finalPatch.src = getFilenameFromPath(finalPatch.src);
-        }
-        
-        updatedItem = { ...item, ...finalPatch, updatedAt: timestamp };
-        return updatedItem;
+      const newMedia = await api.createMedia({
+        title,
+        description: description || '',
+        src: storedSrc,
+        type: resolvedType,
+        tags: [],
+        annotations: [],
+        fps: resolvedType === 'video' ? 30 : undefined
       });
-      return { ...prev, media: nextMedia };
-    });
 
-    setSelectedMedia((prev) => {
-      if (prev?.id === id && updatedItem) {
-        return { ...updatedItem, displaySrc: getResourcePath(updatedItem.src) };
+      await refreshDb();
+      toast.success('Ressource ajoutée');
+      return newMedia;
+    } catch (err) {
+      console.error('Error adding resource:', err);
+      toast.error('Erreur lors de l\'ajout');
+    }
+  };
+
+  const deleteResource = async (id) => {
+    try {
+      await api.deleteMedia(id);
+      await refreshDb();
+      setSelectedMedia((prev) => (prev?.id === id ? null : prev));
+      toast.success('Ressource supprimée');
+    } catch (err) {
+      console.error('Error deleting resource:', err);
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const updateMediaItem = async (id, updater) => {
+    try {
+      const currentItem = db.media.find(m => m.id === id);
+      if (!currentItem) return;
+
+      const patch = typeof updater === 'function' ? updater(currentItem) : updater;
+
+      // If src is modified, ensure we only store the filename
+      const finalPatch = { ...patch };
+      if (finalPatch.src) {
+        finalPatch.src = getFilenameFromPath(finalPatch.src);
       }
-      return prev;
-    });
-    
-    toast.success('Modifications enregistrées');
+
+      const updatedItem = await api.updateMedia(id, finalPatch);
+
+      // Sync nomenclatures if tags/annotations changed
+      if (patch.tags || patch.annotations) {
+        await syncNomenclaturesFromMedia({ ...currentItem, ...finalPatch });
+      }
+
+      await refreshDb();
+
+      setSelectedMedia((prev) => {
+        if (prev?.id === id && updatedItem) {
+          return { ...updatedItem, displaySrc: getResourcePath(updatedItem.src) };
+        }
+        return prev;
+      });
+
+      toast.success('Modifications enregistrées');
+    } catch (err) {
+      console.error('Error updating media:', err);
+      toast.error('Erreur lors de la mise à jour');
+    }
   };
 
   const isNomenclatureUsed = (label) => {
@@ -334,39 +373,50 @@ function AppContent() {
     });
   };
 
-  const updateNomenclature = (id, patch) => {
-    updateDb((prev) => ({
-      ...prev,
-      nomenclatures: prev.nomenclatures.map((item) => (item.id === id ? { ...item, ...patch } : item)),
-    }));
-    toast.success('Nomenclature mise à jour');
+  const updateNomenclatureItem = async (id, patch) => {
+    try {
+      await api.updateNomenclature(id, patch);
+      await refreshDb();
+      toast.success('Nomenclature mise à jour');
+    } catch (err) {
+      console.error('Error updating nomenclature:', err);
+      toast.error('Erreur lors de la mise à jour');
+    }
   };
 
-  const deleteNomenclature = (id) => {
-    updateDb((prev) => ({
-      ...prev,
-      nomenclatures: prev.nomenclatures.filter((item) => item.id !== id),
-    }));
-    toast.success('Nomenclature supprimée');
+  const deleteNomenclatureItem = async (id) => {
+    try {
+      await api.deleteNomenclature(id);
+      await refreshDb();
+      toast.success('Nomenclature supprimée');
+    } catch (err) {
+      console.error('Error deleting nomenclature:', err);
+      toast.error('Erreur lors de la suppression');
+    }
   };
 
-  const handleImportDatabase = (imported) => {
-    setDb({
-      ...imported,
-      nomenclatures: syncNomenclaturesWithMedia(imported.media, imported.nomenclatures),
-    });
-    toast.success('Base de données importée');
+  const handleImportDatabase = async (imported) => {
+    try {
+      await api.importDatabase(imported);
+      await refreshDb();
+      toast.success('Base de données importée');
+    } catch (err) {
+      console.error('Error importing database:', err);
+      toast.error('Erreur lors de l\'import');
+    }
   };
 
-  const handleResetDatabase = () => {
-    const fresh = resetDatabase();
-    setDb({
-      ...fresh,
-      nomenclatures: syncNomenclaturesWithMedia(fresh.media, fresh.nomenclatures),
-    });
-    setSection('oracle');
-    setSelectedMedia(null);
-    toast.warning('Base de données réinitialisée');
+  const handleResetDatabase = async () => {
+    try {
+      await api.resetDatabase();
+      await refreshDb();
+      setSection('oracle');
+      setSelectedMedia(null);
+      toast.warning('Base de données réinitialisée');
+    } catch (err) {
+      console.error('Error resetting database:', err);
+      toast.error('Erreur lors de la réinitialisation');
+    }
   };
 
   const startQuiz = () => {
@@ -383,14 +433,51 @@ function AppContent() {
     setQuizResults(results);
   };
 
+  const navigation = useMemo(
+    () => [
+      { key: 'oracle', label: t('sidebarOracle'), icon: '🔮' },
+      { key: 'nomenclatures', label: t('sidebarNomenclatures'), icon: '🏷️' },
+      { key: 'reviewer', label: t('sidebarReviewer'), icon: '📝' },
+      { key: 'quizz', label: t('sidebarQuizz'), icon: '❓' },
+      { key: 'statistics', label: t('statisticsTitle') || 'Statistiques', icon: '📊' },
+      { key: 'settings', label: t('settingsTitle') || 'Paramètres', icon: '⚙️' },
+    ],
+    [t]
+  );
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className={`app ${theme}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2>Chargement...</h2>
+          <p>Connexion au serveur</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className={`app ${theme}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2>Erreur de connexion</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()}>Réessayer</button>
+        </div>
+      </div>
+    );
+  }
+
   const renderSection = () => {
-    // Mode Quiz actif
+    // Active Quiz mode
     if (quizMode) {
       const enrichedQuizItems = db.quizzList.map(item => ({
         ...item,
         displaySrc: getResourcePath(item.src)
       }));
-      
+
       return (
         <QuizMode
           items={enrichedQuizItems}
@@ -401,7 +488,7 @@ function AppContent() {
       );
     }
 
-    // Résultats du Quiz
+    // Quiz results
     if (quizResults) {
       return (
         <QuizResults
@@ -416,7 +503,7 @@ function AppContent() {
       );
     }
 
-    // Détail d'une ressource
+    // Resource detail
     if (selectedMedia) {
       return (
         <MediaDetail
@@ -425,22 +512,22 @@ function AppContent() {
           onBack={() => setSelectedMedia(null)}
           onToReview={addTo('reviewList')}
           onToQuizz={addTo('quizzList')}
-          onUpdateMedia={updateMedia}
+          onUpdateMedia={updateMediaItem}
           onDeleteMedia={deleteResource}
           t={t}
         />
       );
     }
 
-    // Sections principales
+    // Main sections
     switch (section) {
       case 'nomenclatures':
         return (
           <Nomenclatures
             items={db.nomenclatures}
             onAdd={addNomenclature}
-            onUpdate={updateNomenclature}
-            onDelete={deleteNomenclature}
+            onUpdate={updateNomenclatureItem}
+            onDelete={deleteNomenclatureItem}
             onNavigate={navigateToOracleWithQuery}
             isNomenclatureUsed={isNomenclatureUsed}
             t={t}
@@ -453,7 +540,7 @@ function AppContent() {
           ...item,
           displaySrc: getResourcePath(item.src)
         }));
-        
+
         return (
           <ReviewerOverview
             items={enrichedReviewList}
@@ -471,7 +558,7 @@ function AppContent() {
           ...item,
           displaySrc: getResourcePath(item.src)
         }));
-        
+
         return (
           <div className="placeholder oracle">
             <div className="header-row">
@@ -479,8 +566,8 @@ function AppContent() {
                 <h2>{t('quizzTitle')}</h2>
                 <p>{t('quizzPlaceholder')}</p>
               </div>
-              <button 
-                className="primary" 
+              <button
+                className="primary"
                 onClick={startQuiz}
                 disabled={db.quizzList.length === 0}
               >
@@ -560,29 +647,10 @@ function AppContent() {
               t={t}
               language={language}
             />
-            <div style={{ marginTop: '16px' }}>
-              <CategoryFilter
-                media={db.media}
-                onFilterChange={setCategoryFilter}
-                t={t}
-              />
-            </div>
           </>
         );
     }
   };
-
-  const navigation = useMemo(
-    () => [
-      { key: 'oracle', label: t('sidebarOracle'), icon: '🔮' },
-      { key: 'nomenclatures', label: t('sidebarNomenclatures'), icon: '🏷️' },
-      { key: 'reviewer', label: t('sidebarReviewer'), icon: '📝' },
-      { key: 'quizz', label: t('sidebarQuizz'), icon: '❓' },
-      { key: 'statistics', label: t('statisticsTitle') || 'Statistiques', icon: '📊' },
-      { key: 'settings', label: t('settingsTitle') || 'Paramètres', icon: '⚙️' },
-    ],
-    [t]
-  );
 
   return (
     <div className={`app ${theme} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>

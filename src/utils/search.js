@@ -1,11 +1,11 @@
 // src/utils/search.js
 
 /**
- * Recherche fuzzy avec scoring
- * @param {Array} items - Liste des éléments à rechercher
- * @param {string} query - Terme de recherche
- * @param {Object} options - Options de recherche
- * @returns {Array} Items triés par pertinence
+ * Fuzzy search with scoring
+ * @param {Array} items - List of items to search
+ * @param {string} query - Search term
+ * @param {Object} options - Search options
+ * @returns {Array} Items sorted by relevance
  */
 export function fuzzySearch(items, query, options = {}) {
   const {
@@ -36,9 +36,9 @@ export function fuzzySearch(items, query, options = {}) {
       } else if (typeof item[key] === 'string') {
         const value = item[key].toLowerCase();
         if (value.includes(needle)) {
-          // Bonus si match au début
+          // Bonus if match at the beginning
           const bonus = value.startsWith(needle) ? 2 : 1;
-          // Bonus selon la longueur du match
+          // Bonus based on match length
           const lengthBonus = needle.length / value.length;
           score += (key === 'title' ? 3 : 1) * bonus * (1 + lengthBonus);
           matches[key] = true;
@@ -61,9 +61,9 @@ export function fuzzySearch(items, query, options = {}) {
 }
 
 /**
- * Parse un tag hiérarchique
- * @param {string} tag - Tag au format R_C_E_3_1
- * @returns {Object} Composants du tag
+ * Parse a hierarchical tag
+ * @param {string} tag - Tag in R_C_E_3_1 format
+ * @returns {Object} Tag components
  */
 export function parseTag(tag) {
   const parts = tag.split('_');
@@ -80,72 +80,11 @@ export function parseTag(tag) {
 }
 
 /**
- * Filtre par catégorie hiérarchique
- * @param {Array} media - Liste des médias
- * @param {string} categoryPrefix - Préfixe de catégorie (ex: "R_C")
- * @returns {Array} Médias filtrés
- */
-export function filterByCategory(media, categoryPrefix) {
-  if (!categoryPrefix) return media;
-  
-  return media.filter(item =>
-    item.tags.some(tag => tag.startsWith(categoryPrefix))
-  );
-}
-
-/**
- * Extrait toutes les catégories uniques
- * @param {Array} media - Liste des médias
- * @returns {Object} Hiérarchie des catégories
- */
-export function extractCategories(media) {
-  const categories = new Map();
-
-  media.forEach(item => {
-    item.tags.forEach(tag => {
-      const parsed = parseTag(tag);
-      if (!parsed.isHierarchical) return;
-
-      const catKey = parsed.category;
-      if (!categories.has(catKey)) {
-        categories.set(catKey, {
-          key: catKey,
-          subcategories: new Map()
-        });
-      }
-
-      const cat = categories.get(catKey);
-      const subKey = `${parsed.category}_${parsed.subcategory}`;
-      
-      if (parsed.subcategory && !cat.subcategories.has(subKey)) {
-        cat.subcategories.set(subKey, {
-          key: subKey,
-          types: new Set()
-        });
-      }
-
-      if (parsed.type && cat.subcategories.has(subKey)) {
-        cat.subcategories.get(subKey).types.add(parsed.type);
-      }
-    });
-  });
-
-  // Convertir en structure utilisable
-  return Array.from(categories.values()).map(cat => ({
-    key: cat.key,
-    subcategories: Array.from(cat.subcategories.values()).map(sub => ({
-      key: sub.key,
-      types: Array.from(sub.types)
-    }))
-  }));
-}
-
-/**
- * Recherche par similarité de tags
- * @param {string} tag - Tag de référence
- * @param {Array} media - Liste des médias
- * @param {number} maxResults - Nombre max de résultats
- * @returns {Array} Médias similaires
+ * Search by tag similarity
+ * @param {string} tag - Reference tag
+ * @param {Array} media - List of media
+ * @param {number} maxResults - Maximum number of results
+ * @returns {Array} Similar media
  */
 export function findSimilarByTag(tag, media, maxResults = 5) {
   const parsed = parseTag(tag);

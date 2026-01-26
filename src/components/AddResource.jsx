@@ -54,21 +54,21 @@ export default function AddResource({
       let payloadType = detectedType;
 
       if (hasFile) {
-        // Générer un nom de fichier unique
+        // Generate a unique filename
         payloadFilename = generateUniqueFilename?.(file.name) || file.name;
         payloadSrc = payloadFilename;
         payloadType = file.type.startsWith('image/') ? 'photo' : 'video';
 
-        // IMPORTANT: Informer l'utilisateur qu'il doit copier le fichier
-        const resourcesPath = window.location.origin + '/ressources/';
-        const instruction = `⚠️ Action requise:\n\nVeuillez copier manuellement le fichier:\n"${file.name}"\n\nVers le dossier:\n"${resourcesPath}"\n\nEt le renommer en:\n"${payloadFilename}"\n\nLa ressource sera ajoutée à la base de données, mais le fichier doit être placé manuellement dans le dossier /ressources/.`;
+        // IMPORTANT: Inform the user they need to copy the file
+        const resourcesPath = window.location.origin + '/resources/';
+        const instruction = `⚠️ Action requise:\n\nVeuillez copier manuellement le fichier:\n"${file.name}"\n\nVers le dossier:\n"${resourcesPath}"\n\nEt le renommer en:\n"${payloadFilename}"\n\nLa ressource sera ajoutée à la base de données, mais le fichier doit être placé manuellement dans le dossier /resources/.`;
         
         alert(instruction);
       }
 
       payloadType = payloadType || detectType?.(payloadSrc);
 
-      // Vérifier les doublons
+      // Check for duplicates
       const existingResource = findExistingResource?.({
         title: title.trim(),
         src: payloadSrc,
@@ -80,7 +80,7 @@ export default function AddResource({
         return;
       }
 
-      // Créer la ressource
+      // Create the resource
       onCreate({
         title: title.trim(),
         description: description.trim(),
@@ -121,11 +121,11 @@ export default function AddResource({
             padding: '2px 6px',
             borderRadius: '4px',
             fontFamily: 'monospace'
-          }}>/public/ressources/</code> de votre projet.
+          }}>/public/resources/</code> de votre projet.
         </p>
         <p style={{ margin: '8px 0 0 0', fontSize: '14px', lineHeight: '1.6' }}>
-          • <strong>Option 1:</strong> Ajoutez un lien vers un fichier déjà présent dans /ressources/<br/>
-          • <strong>Option 2:</strong> Sélectionnez un fichier local et copiez-le manuellement dans /ressources/
+          • <strong>Option 1:</strong> Ajoutez un lien vers un fichier déjà présent dans /resources/<br/>
+          • <strong>Option 2:</strong> Sélectionnez un fichier local et copiez-le manuellement dans /resources/
         </p>
       </div>
 
@@ -155,7 +155,7 @@ export default function AddResource({
         </div>
 
         <div className="field-group">
-          <label htmlFor="resource-link">Nom du fichier dans /ressources/</label>
+          <label htmlFor="resource-link">Nom du fichier dans /resources/</label>
           <input
             id="resource-link"
             type="text"
@@ -180,7 +180,7 @@ export default function AddResource({
           />
           <div className="helper-row">
             <span className="muted">
-              ⚠️ Après sélection, vous devrez copier manuellement le fichier dans /ressources/
+              ⚠️ Après sélection, vous devrez copier manuellement le fichier dans /resources/
             </span>
           </div>
         </div>
