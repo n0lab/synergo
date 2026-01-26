@@ -1,6 +1,7 @@
 // src/components/Statistics.jsx
 import React, { useMemo, useState, useEffect } from 'react';
 import { getResourceFiles } from '../api.js';
+import { getFilenameFromPath } from '../db.js';
 
 export default function Statistics({ media, nomenclatures, t }) {
   const [resourceFiles, setResourceFiles] = useState([]);
@@ -86,8 +87,9 @@ export default function Statistics({ media, nomenclatures, t }) {
     // Get all filenames used in media (local files only, not external URLs)
     const usedFilenames = new Set();
     media.forEach(item => {
-      if (item.filename && !item.filename.startsWith('http')) {
-        usedFilenames.add(item.filename);
+      if (item.src && !item.src.startsWith('http')) {
+        // Normalize the path to get just the filename
+        usedFilenames.add(getFilenameFromPath(item.src));
       }
     });
 
