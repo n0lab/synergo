@@ -42,6 +42,10 @@ export async function resetDatabase() {
 
 // ============ UPLOAD OPERATIONS ============
 
+export async function getResourceFiles() {
+  return fetchApi('/upload/files');
+}
+
 export async function uploadFile(file, filename) {
   const formData = new FormData();
   // IMPORTANT: filename must be appended BEFORE file for multer to read it
