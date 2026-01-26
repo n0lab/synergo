@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { fileURLToPath } from 'url';
 import { dirname, join, extname } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync } from 'fs';
 import { asyncHandler, ApiError } from '../middleware/errorHandler.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -69,6 +69,18 @@ const upload = multer({
     files: 1
   }
 });
+
+// GET /api/upload/files - List all files in /public/resources/
+router.get('/files', asyncHandler(async (req, res) => {
+  try {
+    const files = readdirSync(resourcesDir);
+    // Filter out hidden files and directories
+    const filteredFiles = files.filter(f => !f.startsWith('.'));
+    res.json({ files: filteredFiles });
+  } catch (error) {
+    res.json({ files: [] });
+  }
+}));
 
 // POST /api/upload - Upload a file to /public/resources/
 router.post('/', upload.single('file'), asyncHandler(async (req, res) => {
