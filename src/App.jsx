@@ -608,6 +608,7 @@ function AppContent() {
             detectType={detectMediaType}
             findExistingResource={findExistingResource}
             generateUniqueFilename={generateUniqueFilename}
+            uploadFile={api.uploadFile}
             t={t}
             onNavigateToResource={(resource) => {
               const enriched = { ...resource, displaySrc: getResourcePath(resource.src) };
