@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import StatsCard from './StatsCard.jsx';
 import SearchBar from './SearchBar.jsx';
+import MediaCard from './MediaCard.jsx';
 
-export default function OracleOverview({
+/**
+ * OracleOverview - Main media browsing view
+ * Uses memoized MediaCard components for better performance
+ */
+const OracleOverview = memo(function OracleOverview({
   stats,
   query,
   onQueryChange,
@@ -17,8 +22,12 @@ export default function OracleOverview({
 }) {
   const hasQuery = query.trim().length > 0;
 
+  // Memoize labels to prevent MediaCard re-renders
+  const videoLabel = useMemo(() => t('oracleVideoTag'), [t]);
+  const photoLabel = useMemo(() => t('oraclePhotoTag'), [t]);
+
   return (
-    <div className="oracle">
+    <div className="oracle" role="main" aria-label="Media library">
       <div className="header-row">
         <div>
           <h2>{t('oracleTitle')}</h2>
@@ -32,6 +41,7 @@ export default function OracleOverview({
                 type="button"
                 onClick={onAddResultsToReview}
                 disabled={items.length === 0}
+                aria-label={`${t('oracleToReviewer')} (${items.length} items)`}
               >
                 {t('oracleToReviewer')}
               </button>
@@ -40,6 +50,7 @@ export default function OracleOverview({
                 type="button"
                 onClick={onAddResultsToQuizz}
                 disabled={items.length === 0}
+                aria-label={`${t('oracleToQuizz')} (${items.length} items)`}
               >
                 {t('oracleToQuizz')}
               </button>
@@ -76,23 +87,28 @@ export default function OracleOverview({
         </div>
       </div>
 
-      <div className="grid">
+      <div
+        className="grid"
+        role="grid"
+        aria-label={`Media items (${items.length} results)`}
+      >
         {items.map((item) => (
-          <div className="card media-card" key={item.id} onClick={() => onSelect(item)}>
-            <div className="media-type">{item.type === 'video' ? t('oracleVideoTag') : t('oraclePhotoTag')}</div>
-            <h3>{item.title}</h3>
-            <p className="description">{item.description}</p>
-            <div className="tags">
-              {item.tags.map((tag) => (
-                <span className="badge" key={`${item.id}-${tag}`}>
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
+          <MediaCard
+            key={item.id}
+            item={item}
+            onSelect={onSelect}
+            videoLabel={videoLabel}
+            photoLabel={photoLabel}
+          />
         ))}
-        {items.length === 0 && <div className="muted">{t('oracleNoResults')}</div>}
+        {items.length === 0 && (
+          <div className="muted" role="status">
+            {t('oracleNoResults')}
+          </div>
+        )}
       </div>
     </div>
   );
-}
+});
+
+export default OracleOverview;

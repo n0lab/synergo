@@ -12,51 +12,121 @@ const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
 
 /**
- * Initialize the database schema
+ * Safe JSON parse with fallback
+ * Prevents crashes from corrupted JSON data
+ */
+function safeJsonParse(str, fallback = []) {
+  if (!str) return fallback;
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    console.error('JSON parse error:', e.message, 'Input:', str?.substring(0, 100));
+    return fallback;
+  }
+}
+
+/**
+ * Parse media row from database
+ */
+function parseMediaRow(row) {
+  if (!row) return null;
+  return {
+    ...row,
+    tags: safeJsonParse(row.tags, []),
+    annotations: safeJsonParse(row.annotations, [])
+  };
+}
+
+/**
+ * Initialize the database schema using migrations
  */
 export function initDatabase() {
-  db.exec(`
-    -- Media table
-    CREATE TABLE IF NOT EXISTS media (
-      id TEXT PRIMARY KEY,
-      title TEXT NOT NULL,
-      description TEXT DEFAULT '',
-      src TEXT NOT NULL,
-      type TEXT CHECK(type IN ('video', 'photo')) NOT NULL,
-      tags TEXT DEFAULT '[]',
-      annotations TEXT DEFAULT '[]',
-      fps INTEGER DEFAULT 30,
-      added_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
-    );
+  // Import and run migrations
+  import('./migrations/index.js').then(({ runMigrations }) => {
+    try {
+      runMigrations(db);
+    } catch (error) {
+      console.error('Migration failed, falling back to basic init:', error.message);
+      // Fallback to basic schema creation
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS media (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          description TEXT DEFAULT '',
+          src TEXT NOT NULL,
+          type TEXT CHECK(type IN ('video', 'photo')) NOT NULL,
+          tags TEXT DEFAULT '[]',
+          annotations TEXT DEFAULT '[]',
+          fps INTEGER DEFAULT 30,
+          added_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL
+        );
 
-    -- Nomenclatures table
-    CREATE TABLE IF NOT EXISTS nomenclatures (
-      id TEXT PRIMARY KEY,
-      label TEXT NOT NULL,
-      description TEXT DEFAULT '',
-      interpretation TEXT DEFAULT ''
-    );
+        CREATE TABLE IF NOT EXISTS nomenclatures (
+          id TEXT PRIMARY KEY,
+          label TEXT NOT NULL,
+          description TEXT DEFAULT '',
+          interpretation TEXT DEFAULT ''
+        );
 
-    -- Review list table
-    CREATE TABLE IF NOT EXISTS review_list (
-      media_id TEXT PRIMARY KEY,
-      added_at INTEGER NOT NULL,
-      FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE
-    );
+        CREATE TABLE IF NOT EXISTS review_list (
+          media_id TEXT PRIMARY KEY,
+          added_at INTEGER NOT NULL,
+          FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE
+        );
 
-    -- Quiz list table
-    CREATE TABLE IF NOT EXISTS quiz_list (
-      media_id TEXT PRIMARY KEY,
-      added_at INTEGER NOT NULL,
-      FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE
-    );
+        CREATE TABLE IF NOT EXISTS quiz_list (
+          media_id TEXT PRIMARY KEY,
+          added_at INTEGER NOT NULL,
+          FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE
+        );
 
-    -- Create indexes for better performance
-    CREATE INDEX IF NOT EXISTS idx_media_type ON media(type);
-    CREATE INDEX IF NOT EXISTS idx_media_added_at ON media(added_at);
-    CREATE INDEX IF NOT EXISTS idx_nomenclatures_label ON nomenclatures(label);
-  `);
+        CREATE INDEX IF NOT EXISTS idx_media_type ON media(type);
+        CREATE INDEX IF NOT EXISTS idx_media_added_at ON media(added_at);
+        CREATE INDEX IF NOT EXISTS idx_nomenclatures_label ON nomenclatures(label);
+      `);
+    }
+  }).catch((error) => {
+    // If migrations module fails to load, use inline schema
+    console.error('Could not load migrations module:', error.message);
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS media (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT DEFAULT '',
+        src TEXT NOT NULL,
+        type TEXT CHECK(type IN ('video', 'photo')) NOT NULL,
+        tags TEXT DEFAULT '[]',
+        annotations TEXT DEFAULT '[]',
+        fps INTEGER DEFAULT 30,
+        added_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS nomenclatures (
+        id TEXT PRIMARY KEY,
+        label TEXT NOT NULL,
+        description TEXT DEFAULT '',
+        interpretation TEXT DEFAULT ''
+      );
+
+      CREATE TABLE IF NOT EXISTS review_list (
+        media_id TEXT PRIMARY KEY,
+        added_at INTEGER NOT NULL,
+        FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS quiz_list (
+        media_id TEXT PRIMARY KEY,
+        added_at INTEGER NOT NULL,
+        FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_media_type ON media(type);
+      CREATE INDEX IF NOT EXISTS idx_media_added_at ON media(added_at);
+      CREATE INDEX IF NOT EXISTS idx_nomenclatures_label ON nomenclatures(label);
+    `);
+  });
 }
 
 // ============ MEDIA OPERATIONS ============
@@ -68,11 +138,33 @@ export function getAllMedia() {
     FROM media
     ORDER BY updated_at DESC
   `);
-  return stmt.all().map(row => ({
-    ...row,
-    tags: JSON.parse(row.tags),
-    annotations: JSON.parse(row.annotations)
-  }));
+  return stmt.all().map(parseMediaRow);
+}
+
+/**
+ * Get media with pagination support
+ */
+export function getMediaPaginated(limit = 50, offset = 0) {
+  const countStmt = db.prepare('SELECT COUNT(*) as total FROM media');
+  const { total } = countStmt.get();
+
+  const stmt = db.prepare(`
+    SELECT id, title, description, src, type, tags, annotations, fps,
+           added_at as addedAt, updated_at as updatedAt
+    FROM media
+    ORDER BY updated_at DESC
+    LIMIT ? OFFSET ?
+  `);
+
+  const items = stmt.all(limit, offset).map(parseMediaRow);
+
+  return {
+    items,
+    total,
+    limit,
+    offset,
+    hasMore: offset + items.length < total
+  };
 }
 
 export function getMediaById(id) {
@@ -81,13 +173,7 @@ export function getMediaById(id) {
            added_at as addedAt, updated_at as updatedAt
     FROM media WHERE id = ?
   `);
-  const row = stmt.get(id);
-  if (!row) return null;
-  return {
-    ...row,
-    tags: JSON.parse(row.tags),
-    annotations: JSON.parse(row.annotations)
-  };
+  return parseMediaRow(stmt.get(id));
 }
 
 export function createMedia(media) {
@@ -208,11 +294,7 @@ export function getReviewList() {
     JOIN media m ON r.media_id = m.id
     ORDER BY r.added_at DESC
   `);
-  return stmt.all().map(row => ({
-    ...row,
-    tags: JSON.parse(row.tags),
-    annotations: JSON.parse(row.annotations)
-  }));
+  return stmt.all().map(parseMediaRow);
 }
 
 export function addToReviewList(mediaId) {
@@ -245,11 +327,7 @@ export function getQuizList() {
     JOIN media m ON q.media_id = m.id
     ORDER BY q.added_at DESC
   `);
-  return stmt.all().map(row => ({
-    ...row,
-    tags: JSON.parse(row.tags),
-    annotations: JSON.parse(row.annotations)
-  }));
+  return stmt.all().map(parseMediaRow);
 }
 
 export function addToQuizList(mediaId) {

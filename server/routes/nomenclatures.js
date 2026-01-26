@@ -7,106 +7,72 @@ import {
   deleteNomenclature,
   upsertNomenclature
 } from '../db.js';
+import { ApiError, asyncHandler } from '../middleware/errorHandler.js';
+import { validateNomenclature, validateIdParam } from '../middleware/validate.js';
 
 const router = Router();
 
 // GET /api/nomenclatures - Get all nomenclatures
-router.get('/', (req, res) => {
-  try {
-    const nomenclatures = getAllNomenclatures();
-    res.json(nomenclatures);
-  } catch (error) {
-    console.error('Error fetching nomenclatures:', error);
-    res.status(500).json({ error: 'Failed to fetch nomenclatures' });
-  }
-});
+router.get('/', asyncHandler(async (req, res) => {
+  const nomenclatures = getAllNomenclatures();
+  // Add cache header for nomenclatures (they don't change often)
+  res.set('Cache-Control', 'private, max-age=60');
+  res.json(nomenclatures);
+}));
 
 // GET /api/nomenclatures/:id - Get single nomenclature
-router.get('/:id', (req, res) => {
-  try {
-    const nomenclature = getNomenclatureById(req.params.id);
-    if (!nomenclature) {
-      return res.status(404).json({ error: 'Nomenclature not found' });
-    }
-    res.json(nomenclature);
-  } catch (error) {
-    console.error('Error fetching nomenclature:', error);
-    res.status(500).json({ error: 'Failed to fetch nomenclature' });
+router.get('/:id', validateIdParam, asyncHandler(async (req, res) => {
+  const nomenclature = getNomenclatureById(req.params.id);
+  if (!nomenclature) {
+    throw ApiError.notFound('Nomenclature not found');
   }
-});
+  res.json(nomenclature);
+}));
 
 // POST /api/nomenclatures - Create new nomenclature
-router.post('/', (req, res) => {
-  try {
-    const { label, description, interpretation } = req.body;
+router.post('/', validateNomenclature, asyncHandler(async (req, res) => {
+  const { label, description, interpretation } = req.body;
 
-    if (!label) {
-      return res.status(400).json({ error: 'Label is required' });
-    }
+  const nomenclature = createNomenclature({
+    id: `user-${Date.now()}-${label}`,
+    label,
+    description: description || '',
+    interpretation: interpretation || ''
+  });
 
-    const nomenclature = createNomenclature({
-      id: `user-${Date.now()}-${label}`,
-      label,
-      description: description || '',
-      interpretation: interpretation || ''
-    });
-
-    res.status(201).json(nomenclature);
-  } catch (error) {
-    console.error('Error creating nomenclature:', error);
-    res.status(500).json({ error: 'Failed to create nomenclature' });
-  }
-});
+  res.status(201).json(nomenclature);
+}));
 
 // POST /api/nomenclatures/sync - Upsert nomenclature (for auto-sync)
-router.post('/sync', (req, res) => {
-  try {
-    const { id, label, description, interpretation } = req.body;
+router.post('/sync', validateNomenclature, asyncHandler(async (req, res) => {
+  const { id, label, description, interpretation } = req.body;
 
-    if (!id || !label) {
-      return res.status(400).json({ error: 'Id and label are required' });
-    }
+  const nomenclature = upsertNomenclature({
+    id,
+    label,
+    description: description || '',
+    interpretation: interpretation || ''
+  });
 
-    const nomenclature = upsertNomenclature({
-      id,
-      label,
-      description: description || '',
-      interpretation: interpretation || ''
-    });
-
-    res.json(nomenclature);
-  } catch (error) {
-    console.error('Error syncing nomenclature:', error);
-    res.status(500).json({ error: 'Failed to sync nomenclature' });
-  }
-});
+  res.json(nomenclature);
+}));
 
 // PUT /api/nomenclatures/:id - Update nomenclature
-router.put('/:id', (req, res) => {
-  try {
-    const nomenclature = updateNomenclature(req.params.id, req.body);
-    if (!nomenclature) {
-      return res.status(404).json({ error: 'Nomenclature not found' });
-    }
-    res.json(nomenclature);
-  } catch (error) {
-    console.error('Error updating nomenclature:', error);
-    res.status(500).json({ error: 'Failed to update nomenclature' });
+router.put('/:id', validateIdParam, validateNomenclature, asyncHandler(async (req, res) => {
+  const nomenclature = updateNomenclature(req.params.id, req.body);
+  if (!nomenclature) {
+    throw ApiError.notFound('Nomenclature not found');
   }
-});
+  res.json(nomenclature);
+}));
 
 // DELETE /api/nomenclatures/:id - Delete nomenclature
-router.delete('/:id', (req, res) => {
-  try {
-    const deleted = deleteNomenclature(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({ error: 'Nomenclature not found' });
-    }
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting nomenclature:', error);
-    res.status(500).json({ error: 'Failed to delete nomenclature' });
+router.delete('/:id', validateIdParam, asyncHandler(async (req, res) => {
+  const deleted = deleteNomenclature(req.params.id);
+  if (!deleted) {
+    throw ApiError.notFound('Nomenclature not found');
   }
-});
+  res.json({ success: true });
+}));
 
 export default router;
