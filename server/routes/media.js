@@ -13,15 +13,15 @@ import { validateMedia, validateIdParam } from '../middleware/validate.js';
 
 const router = Router();
 
-// GET /api/media/next-id - Get next available resource ID for a given date and source
+// GET /api/media/next-id - Get next available resource ID for a given date, source and subject
 router.get('/next-id', asyncHandler(async (req, res) => {
-  const { datePrefix, sourcePrefix } = req.query;
+  const { datePrefix, sourcePrefix, subjectPrefix } = req.query;
 
-  if (!datePrefix || !sourcePrefix) {
-    throw ApiError.badRequest('datePrefix and sourcePrefix are required');
+  if (!datePrefix || !sourcePrefix || !subjectPrefix) {
+    throw ApiError.badRequest('datePrefix, sourcePrefix and subjectPrefix are required');
   }
 
-  const nextNumber = getNextResourceNumber(datePrefix, sourcePrefix);
+  const nextNumber = getNextResourceNumber(datePrefix, sourcePrefix, subjectPrefix);
   res.json({ nextNumber });
 }));
 

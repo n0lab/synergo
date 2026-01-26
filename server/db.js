@@ -238,12 +238,12 @@ export function deleteMedia(id) {
 }
 
 /**
- * Get the next available resource number for a given date and source prefix
+ * Get the next available resource number for a given date, source and subject prefix
  * Returns the next 3-digit ID (e.g., "001", "002", etc.)
  */
-export function getNextResourceNumber(datePrefix, sourcePrefix) {
-  // Pattern: YYYYMMDD_source_NNN
-  const pattern = `${datePrefix}_${sourcePrefix}_%`;
+export function getNextResourceNumber(datePrefix, sourcePrefix, subjectPrefix) {
+  // Pattern: YYYYMMDD_source_subject_NNN
+  const pattern = `${datePrefix}_${sourcePrefix}_${subjectPrefix}_%`;
   const stmt = db.prepare(`
     SELECT src FROM media
     WHERE src LIKE ?
