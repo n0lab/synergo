@@ -15,8 +15,7 @@ import { useDebounce } from './hooks/useDebounce.js';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
 import {
   getResourcePath,
-  getFilenameFromPath,
-  generateUniqueFilename
+  getFilenameFromPath
 } from './db.js';
 import * as api from './api.js';
 import { translate } from './i18n.js';
@@ -290,7 +289,7 @@ function AppContent() {
     });
   };
 
-  const addResource = async ({ title, description, src, filename, type }) => {
+  const addResource = async ({ title, description, src, filename, type, source, publicationDate }) => {
     try {
       const resolvedType = type || detectMediaType(src);
       const storedSrc = filename || getFilenameFromPath(src);
@@ -302,7 +301,9 @@ function AppContent() {
         type: resolvedType,
         tags: [],
         annotations: [],
-        fps: resolvedType === 'video' ? 30 : undefined
+        fps: resolvedType === 'video' ? 30 : undefined,
+        source: source || '',
+        publicationDate: publicationDate || ''
       });
 
       await refreshDb();
@@ -607,7 +608,6 @@ function AppContent() {
           <AddResource
             detectType={detectMediaType}
             findExistingResource={findExistingResource}
-            generateUniqueFilename={generateUniqueFilename}
             uploadFile={api.uploadFile}
             t={t}
             onNavigateToResource={(resource) => {

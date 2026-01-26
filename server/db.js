@@ -33,7 +33,9 @@ function parseMediaRow(row) {
   return {
     ...row,
     tags: safeJsonParse(row.tags, []),
-    annotations: safeJsonParse(row.annotations, [])
+    annotations: safeJsonParse(row.annotations, []),
+    source: row.source || '',
+    publicationDate: row.publication_date || row.publicationDate || ''
   };
 }
 
@@ -134,7 +136,8 @@ export function initDatabase() {
 export function getAllMedia() {
   const stmt = db.prepare(`
     SELECT id, title, description, src, type, tags, annotations, fps,
-           added_at as addedAt, updated_at as updatedAt
+           added_at as addedAt, updated_at as updatedAt,
+           source, publication_date as publicationDate
     FROM media
     ORDER BY updated_at DESC
   `);
@@ -150,7 +153,8 @@ export function getMediaPaginated(limit = 50, offset = 0) {
 
   const stmt = db.prepare(`
     SELECT id, title, description, src, type, tags, annotations, fps,
-           added_at as addedAt, updated_at as updatedAt
+           added_at as addedAt, updated_at as updatedAt,
+           source, publication_date as publicationDate
     FROM media
     ORDER BY updated_at DESC
     LIMIT ? OFFSET ?
@@ -170,7 +174,8 @@ export function getMediaPaginated(limit = 50, offset = 0) {
 export function getMediaById(id) {
   const stmt = db.prepare(`
     SELECT id, title, description, src, type, tags, annotations, fps,
-           added_at as addedAt, updated_at as updatedAt
+           added_at as addedAt, updated_at as updatedAt,
+           source, publication_date as publicationDate
     FROM media WHERE id = ?
   `);
   return parseMediaRow(stmt.get(id));
@@ -178,8 +183,8 @@ export function getMediaById(id) {
 
 export function createMedia(media) {
   const stmt = db.prepare(`
-    INSERT INTO media (id, title, description, src, type, tags, annotations, fps, added_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO media (id, title, description, src, type, tags, annotations, fps, added_at, updated_at, source, publication_date)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   stmt.run(
     media.id,
@@ -191,7 +196,9 @@ export function createMedia(media) {
     JSON.stringify(media.annotations || []),
     media.fps || 30,
     media.addedAt,
-    media.updatedAt
+    media.updatedAt,
+    media.source || '',
+    media.publicationDate || ''
   );
   return getMediaById(media.id);
 }
@@ -204,7 +211,8 @@ export function updateMedia(id, updates) {
   const stmt = db.prepare(`
     UPDATE media SET
       title = ?, description = ?, src = ?, type = ?,
-      tags = ?, annotations = ?, fps = ?, updated_at = ?
+      tags = ?, annotations = ?, fps = ?, updated_at = ?,
+      source = ?, publication_date = ?
     WHERE id = ?
   `);
   stmt.run(
@@ -216,6 +224,8 @@ export function updateMedia(id, updates) {
     JSON.stringify(updates.annotations ?? current.annotations),
     updates.fps ?? current.fps,
     updatedAt,
+    updates.source ?? current.source ?? '',
+    updates.publicationDate ?? current.publicationDate ?? '',
     id
   );
   return getMediaById(id);
@@ -225,6 +235,37 @@ export function deleteMedia(id) {
   const stmt = db.prepare('DELETE FROM media WHERE id = ?');
   const result = stmt.run(id);
   return result.changes > 0;
+}
+
+/**
+ * Get the next available resource number for a given date and source prefix
+ * Returns the next 3-digit ID (e.g., "001", "002", etc.)
+ */
+export function getNextResourceNumber(datePrefix, sourcePrefix) {
+  // Pattern: YYYYMMDD_source_NNN
+  const pattern = `${datePrefix}_${sourcePrefix}_%`;
+  const stmt = db.prepare(`
+    SELECT src FROM media
+    WHERE src LIKE ?
+    ORDER BY src DESC
+  `);
+  const results = stmt.all(pattern);
+
+  if (results.length === 0) {
+    return '001';
+  }
+
+  // Extract the highest number
+  let maxNum = 0;
+  for (const row of results) {
+    const match = row.src.match(/_(\d{3})\.[^.]+$/);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (num > maxNum) maxNum = num;
+    }
+  }
+
+  return String(maxNum + 1).padStart(3, '0');
 }
 
 // ============ NOMENCLATURES OPERATIONS ============
@@ -289,7 +330,8 @@ export function upsertNomenclature(nomenclature) {
 export function getReviewList() {
   const stmt = db.prepare(`
     SELECT m.id, m.title, m.description, m.src, m.type, m.tags, m.annotations, m.fps,
-           m.added_at as addedAt, m.updated_at as updatedAt
+           m.added_at as addedAt, m.updated_at as updatedAt,
+           m.source, m.publication_date as publicationDate
     FROM review_list r
     JOIN media m ON r.media_id = m.id
     ORDER BY r.added_at DESC
@@ -322,7 +364,8 @@ export function clearReviewList() {
 export function getQuizList() {
   const stmt = db.prepare(`
     SELECT m.id, m.title, m.description, m.src, m.type, m.tags, m.annotations, m.fps,
-           m.added_at as addedAt, m.updated_at as updatedAt
+           m.added_at as addedAt, m.updated_at as updatedAt,
+           m.source, m.publication_date as publicationDate
     FROM quiz_list q
     JOIN media m ON q.media_id = m.id
     ORDER BY q.added_at DESC

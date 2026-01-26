@@ -104,6 +104,19 @@ const translations = {
     statisticsSubtitle: 'Overview of your library',
     settingsTitle: 'Settings',
     settingsSubtitle: 'Manage your data and preferences',
+
+    // Add resource form
+    resourceSourceLabel: 'Source',
+    resourceSourcePlaceholder: 'e.g., TV show, social network, documentary...',
+    resourceDateLabel: 'Publication date',
+    resourceGeneratedFilenameLabel: 'Platform filename',
+    resourceGeneratedFilenameHelper: 'Auto-generated unique filename',
+    resourceDropzoneText: 'Drag & drop a file here or click to browse',
+    resourceDropzoneActive: 'Drop the file here...',
+    addNewResourceAction: 'Add new resource',
+    resourceErrorMissingSource: 'Please provide a source.',
+    resourceErrorMissingDate: 'Please provide a publication date.',
+    resourceErrorMissingFile: 'Please select a file to upload.',
   },
   fr: {
     // Existing translations
@@ -212,6 +225,19 @@ const translations = {
     statisticsSubtitle: 'Vue d\'ensemble de votre bibliothèque',
     settingsTitle: 'Paramètres',
     settingsSubtitle: 'Gérez vos données et préférences',
+
+    // Add resource form
+    resourceSourceLabel: 'Source',
+    resourceSourcePlaceholder: 'Ex : émission télé, réseau social, documentaire...',
+    resourceDateLabel: 'Date de publication',
+    resourceGeneratedFilenameLabel: 'Nom du fichier sur la plateforme',
+    resourceGeneratedFilenameHelper: 'Nom de fichier unique généré automatiquement',
+    resourceDropzoneText: 'Glissez-déposez un fichier ici ou cliquez pour parcourir',
+    resourceDropzoneActive: 'Déposez le fichier ici...',
+    addNewResourceAction: 'Ajouter la nouvelle ressource',
+    resourceErrorMissingSource: 'Veuillez renseigner une source.',
+    resourceErrorMissingDate: 'Veuillez renseigner une date de publication.',
+    resourceErrorMissingFile: 'Veuillez sélectionner un fichier à importer.',
   },
 };
 

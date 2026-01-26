@@ -23,7 +23,7 @@ export function sanitizeFilename(filename) {
 
 // Validate media creation/update payload
 export function validateMedia(req, res, next) {
-  const { title, src, type, tags, annotations, fps } = req.body;
+  const { title, src, type, tags, annotations, fps, source, publicationDate } = req.body;
 
   // Required fields for creation
   if (req.method === 'POST') {
@@ -76,6 +76,16 @@ export function validateMedia(req, res, next) {
     throw ApiError.badRequest('FPS must be a positive number');
   }
 
+  // Validate source if provided (must be a string)
+  if (source !== undefined && typeof source !== 'string') {
+    throw ApiError.badRequest('Source must be a string');
+  }
+
+  // Validate publicationDate if provided (must be a string in ISO format or empty)
+  if (publicationDate !== undefined && typeof publicationDate !== 'string') {
+    throw ApiError.badRequest('Publication date must be a string');
+  }
+
   // Sanitize src filename if provided
   if (req.body.src && !req.body.src.startsWith('http')) {
     req.body.src = sanitizeFilename(req.body.src);
@@ -84,6 +94,7 @@ export function validateMedia(req, res, next) {
   // Sanitize strings
   if (req.body.title) req.body.title = sanitizeString(req.body.title);
   if (req.body.description) req.body.description = sanitizeString(req.body.description);
+  if (req.body.source) req.body.source = sanitizeString(req.body.source);
 
   next();
 }
