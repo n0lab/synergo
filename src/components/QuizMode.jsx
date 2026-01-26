@@ -36,10 +36,10 @@ export default function QuizMode({ items, onComplete, onBack, t }) {
 
   const handleAnswer = useCallback((option) => {
     const isCorrect = option === currentItem.title;
-    
+
     setSelectedOption(option);
     setShowAnswer(true);
-    
+
     if (isCorrect) {
       setScore(prev => prev + 1);
     }
@@ -80,9 +80,9 @@ export default function QuizMode({ items, onComplete, onBack, t }) {
   if (!currentItem) {
     return (
       <div className="quiz-empty placeholder">
-        <h2>Quiz vide</h2>
-        <p>Aucune ressource disponible pour le quiz.</p>
-        <button className="ghost" onClick={onBack}>Retour</button>
+        <h2>{t('quizEmpty')}</h2>
+        <p>{t('quizNoResources')}</p>
+        <button className="ghost" onClick={onBack}>{t('quizBack')}</button>
       </div>
     );
   }
@@ -93,41 +93,41 @@ export default function QuizMode({ items, onComplete, onBack, t }) {
   return (
     <div className="quiz-mode">
       <div className="quiz-header">
-        <button className="ghost" onClick={onBack}>← Quitter le quiz</button>
+        <button className="ghost" onClick={onBack}>{t('quizExit')}</button>
         <div className="quiz-progress">
           <span className="quiz-counter">
-            Question {currentIndex + 1} / {quizItems.length}
+            {t('quizQuestion')} {currentIndex + 1} / {quizItems.length}
           </span>
           <div className="progress-bar">
             <div className="progress-fill" style={{ width: `${progress}%` }} />
           </div>
-          <span className="quiz-score">Score: {score}</span>
+          <span className="quiz-score">{t('quizScore')}: {score}</span>
         </div>
       </div>
 
       <div className="quiz-content card">
         <div className="quiz-media">
           {currentItem.type === 'video' ? (
-            <video 
+            <video
               src={mediaSrc}
-              controls 
+              controls
               className="quiz-video"
               key={currentItem.id}
             />
           ) : (
-            <img 
+            <img
               src={mediaSrc}
-              alt="Quiz question" 
+              alt="Quiz question"
               className="quiz-image"
             />
           )}
         </div>
 
         <div className="quiz-question">
-          <h2>Quel est le nom de ce geste non-verbal ?</h2>
-          
+          <h2>{t('quizQuestionTitle')}</h2>
+
           {currentItem.description && !showAnswer && (
-            <p className="quiz-hint muted">💡 Indice: {currentItem.description}</p>
+            <p className="quiz-hint muted">{t('quizHint', { first: currentItem.description })}</p>
           )}
 
           <div className="quiz-options">
@@ -157,11 +157,11 @@ export default function QuizMode({ items, onComplete, onBack, t }) {
             <div className="quiz-feedback">
               {selectedOption === currentItem.title ? (
                 <div className="feedback-correct">
-                  <h3>🎉 Correct !</h3>
+                  <h3>{t('quizCorrect')}</h3>
                   <p>{currentItem.description}</p>
                   {currentItem.tags.length > 0 && (
                     <div className="feedback-tags">
-                      <strong>Tags:</strong>
+                      <strong>{t('quizTags')}</strong>
                       <div className="tags">
                         {currentItem.tags.map(tag => (
                           <span key={tag} className="badge">{tag}</span>
@@ -172,8 +172,8 @@ export default function QuizMode({ items, onComplete, onBack, t }) {
                 </div>
               ) : (
                 <div className="feedback-wrong">
-                  <h3>❌ Incorrect</h3>
-                  <p>La bonne réponse était: <strong>{currentItem.title}</strong></p>
+                  <h3>{t('quizIncorrect')}</h3>
+                  <p>{t('quizCorrectAnswerWas', { first: currentItem.title })}</p>
                   <p className="muted">{currentItem.description}</p>
                 </div>
               )}
@@ -183,11 +183,11 @@ export default function QuizMode({ items, onComplete, onBack, t }) {
           <div className="quiz-actions">
             {!showAnswer ? (
               <button className="ghost" onClick={skipQuestion}>
-                Passer
+                {t('quizSkip')}
               </button>
             ) : (
               <button className="primary" onClick={nextQuestion}>
-                {currentIndex < quizItems.length - 1 ? 'Question suivante' : 'Voir les résultats'}
+                {currentIndex < quizItems.length - 1 ? t('quizNextQuestion') : t('quizSeeResults')}
               </button>
             )}
           </div>
@@ -200,16 +200,16 @@ export default function QuizMode({ items, onComplete, onBack, t }) {
 export function QuizResults({ results, onRestart, onBack, t }) {
   const { score, total, answers, percentage } = results;
 
-  const grade = percentage >= 80 ? 'excellent' : 
-                percentage >= 60 ? 'good' : 
+  const grade = percentage >= 80 ? 'excellent' :
+                percentage >= 60 ? 'good' :
                 percentage >= 40 ? 'average' : 'poor';
 
   return (
     <div className="quiz-results oracle">
       <div className="header-row">
         <div>
-          <h2>🎯 Résultats du Quiz</h2>
-          <p>Vous avez répondu à {total} questions</p>
+          <h2>{t('quizResultsTitle')}</h2>
+          <p>{t('quizResultsAnswered', { first: total })}</p>
         </div>
       </div>
 
@@ -221,26 +221,26 @@ export function QuizResults({ results, onRestart, onBack, t }) {
           <div className="grade-details">
             <h3>{score} / {total}</h3>
             <p className="muted">
-              {grade === 'excellent' && '🌟 Excellent travail !'}
-              {grade === 'good' && '👍 Bon travail !'}
-              {grade === 'average' && '📚 Continuez à pratiquer !'}
-              {grade === 'poor' && '💪 Il faut réviser !'}
+              {grade === 'excellent' && t('quizGradeExcellent')}
+              {grade === 'good' && t('quizGradeGood')}
+              {grade === 'average' && t('quizGradeAverage')}
+              {grade === 'poor' && t('quizGradePoor')}
             </p>
           </div>
         </div>
 
         <div className="results-actions">
           <button className="primary" onClick={onRestart}>
-            Recommencer le quiz
+            {t('quizRestart')}
           </button>
           <button className="ghost" onClick={onBack}>
-            Retour
+            {t('quizBack')}
           </button>
         </div>
       </div>
 
       <div className="card">
-        <h3>📋 Détails des réponses</h3>
+        <h3>{t('quizAnswerDetails')}</h3>
         <div className="results-list">
           {answers.map((answer, index) => (
             <div key={index} className={`result-item ${answer.isCorrect ? 'correct' : 'wrong'}`}>
@@ -249,11 +249,11 @@ export function QuizResults({ results, onRestart, onBack, t }) {
                 <h4>{answer.item.title}</h4>
                 {!answer.isCorrect && answer.selectedAnswer && (
                   <p className="result-answer">
-                    Votre réponse: <span className="wrong-answer">{answer.selectedAnswer}</span>
+                    {t('quizYourAnswer')} <span className="wrong-answer">{answer.selectedAnswer}</span>
                   </p>
                 )}
                 {!answer.selectedAnswer && (
-                  <p className="result-answer muted">Question passée</p>
+                  <p className="result-answer muted">{t('quizSkipped')}</p>
                 )}
               </div>
               <div className="result-icon">

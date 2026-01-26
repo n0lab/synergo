@@ -13,7 +13,7 @@ export default function Settings({ db, onImport, onReset, t }) {
       exportDatabase(db);
     } catch (error) {
       console.error('Export error:', error);
-      alert('Erreur lors de l\'export');
+      alert(t('settingsExportError'));
     }
   };
 
@@ -22,7 +22,7 @@ export default function Settings({ db, onImport, onReset, t }) {
       exportNomenclaturesToCSV(db.nomenclatures);
     } catch (error) {
       console.error('Export CSV error:', error);
-      alert('Erreur lors de l\'export CSV');
+      alert(t('settingsExportCSVError'));
     }
   };
 
@@ -40,7 +40,7 @@ export default function Settings({ db, onImport, onReset, t }) {
     try {
       const imported = await importDatabase(file);
       onImport?.(imported);
-      alert('Import réussi !');
+      alert(t('settingsImportSuccess'));
     } catch (error) {
       console.error('Import error:', error);
       setImportError(error.message);
@@ -56,7 +56,7 @@ export default function Settings({ db, onImport, onReset, t }) {
     if (showResetConfirm) {
       onReset?.();
       setShowResetConfirm(false);
-      alert('Base de données réinitialisée');
+      alert(t('settingsDatabaseReset'));
     } else {
       setShowResetConfirm(true);
     }
@@ -70,47 +70,47 @@ export default function Settings({ db, onImport, onReset, t }) {
     <div className="settings-page oracle">
       <div className="header-row">
         <div>
-          <h2>{t?.('settingsTitle') || 'Paramètres'}</h2>
-          <p>{t?.('settingsSubtitle') || 'Gérez vos données et préférences'}</p>
+          <h2>{t('settingsTitle')}</h2>
+          <p>{t('settingsSubtitle')}</p>
         </div>
       </div>
 
       <div className="settings-grid">
         {/* Export */}
         <div className="card settings-section">
-          <h3>📤 Export des données</h3>
+          <h3>{t('settingsExportTitle')}</h3>
           <p className="muted">
-            Exportez votre bibliothèque pour la sauvegarder ou la partager
+            {t('settingsExportDescription')}
           </p>
           <div className="settings-actions">
             <button className="ghost success" onClick={handleExportJSON}>
-              Export JSON complet
+              {t('settingsExportJSON')}
             </button>
             <button className="ghost" onClick={handleExportCSV}>
-              Export nomenclatures (CSV)
+              {t('settingsExportCSV')}
             </button>
           </div>
           <div className="settings-info">
             <small className="muted">
-              • JSON: Sauvegarde complète (média + nomenclatures + listes)<br/>
-              • CSV: Nomenclatures uniquement pour Excel/Sheets
+              {t('settingsExportInfo1')}<br/>
+              {t('settingsExportInfo2')}
             </small>
           </div>
         </div>
 
         {/* Import */}
         <div className="card settings-section">
-          <h3>📥 Import de données</h3>
+          <h3>{t('settingsImportTitle')}</h3>
           <p className="muted">
-            Importez une sauvegarde précédente (format JSON)
+            {t('settingsImportDescription')}
           </p>
           <div className="settings-actions">
-            <button 
-              className="ghost info" 
+            <button
+              className="ghost info"
               onClick={handleImportClick}
               disabled={isImporting}
             >
-              {isImporting ? 'Import en cours...' : 'Importer un fichier'}
+              {isImporting ? t('settingsImporting') : t('settingsImportButton')}
             </button>
             <input
               ref={fileInputRef}
@@ -122,35 +122,35 @@ export default function Settings({ db, onImport, onReset, t }) {
           </div>
           {importError && (
             <div className="error-banner">
-              Erreur d'import: {importError}
+              {t('settingsImportError', { first: importError })}
             </div>
           )}
           <div className="settings-info">
             <small className="muted">
-              ⚠️ L'import remplacera toutes vos données actuelles
+              {t('settingsImportWarning')}
             </small>
           </div>
         </div>
 
-        {/* Statistiques stockage */}
+        {/* Storage statistics */}
         <div className="card settings-section">
-          <h3>💾 Stockage local</h3>
-          <p className="muted">Informations sur votre base de données</p>
+          <h3>{t('settingsStorageTitle')}</h3>
+          <p className="muted">{t('settingsStorageDescription')}</p>
           <div className="storage-stats">
             <div className="stat-row">
-              <span className="stat-label">Ressources</span>
+              <span className="stat-label">{t('settingsStorageResources')}</span>
               <span className="stat-value">{db.media?.length || 0}</span>
             </div>
             <div className="stat-row">
-              <span className="stat-label">Nomenclatures</span>
+              <span className="stat-label">{t('settingsStorageNomenclatures')}</span>
               <span className="stat-value">{db.nomenclatures?.length || 0}</span>
             </div>
             <div className="stat-row">
-              <span className="stat-label">Reviewer</span>
+              <span className="stat-label">{t('settingsStorageReview')}</span>
               <span className="stat-value">{db.reviewList?.length || 0}</span>
             </div>
             <div className="stat-row">
-              <span className="stat-label">Quiz</span>
+              <span className="stat-label">{t('settingsStorageQuiz')}</span>
               <span className="stat-value">{db.quizzList?.length || 0}</span>
             </div>
           </div>
@@ -158,58 +158,58 @@ export default function Settings({ db, onImport, onReset, t }) {
 
         {/* Reset */}
         <div className="card settings-section danger-zone">
-          <h3>⚠️ Zone dangereuse</h3>
+          <h3>{t('settingsDangerZone')}</h3>
           <p className="muted">
-            Réinitialiser complètement la base de données
+            {t('settingsDangerDescription')}
           </p>
           {showResetConfirm ? (
             <div className="confirm-reset">
               <p className="warning-text">
-                ⚠️ Cette action est irréversible. Toutes vos données seront perdues.
+                {t('settingsDangerWarning')}
               </p>
               <div className="settings-actions">
                 <button className="ghost danger" onClick={handleReset}>
-                  Confirmer la réinitialisation
+                  {t('settingsConfirmReset')}
                 </button>
                 <button className="ghost" onClick={cancelReset}>
-                  Annuler
+                  {t('settingsCancelButton')}
                 </button>
               </div>
             </div>
           ) : (
             <button className="ghost danger" onClick={handleReset}>
-              Réinitialiser la base de données
+              {t('settingsResetButton')}
             </button>
           )}
         </div>
 
-        {/* Raccourcis clavier */}
+        {/* Keyboard shortcuts */}
         <div className="card settings-section full-width">
-          <h3>⌨️ Raccourcis clavier</h3>
+          <h3>{t('settingsShortcutsTitle')}</h3>
           <div className="shortcuts-grid">
             <div className="shortcut-item">
               <kbd>Ctrl</kbd> + <kbd>K</kbd>
-              <span className="muted">Aller à Oracle</span>
+              <span className="muted">{t('settingsShortcutOracle')}</span>
             </div>
             <div className="shortcut-item">
               <kbd>Ctrl</kbd> + <kbd>N</kbd>
-              <span className="muted">Nouvelle ressource</span>
+              <span className="muted">{t('settingsShortcutNewResource')}</span>
             </div>
             <div className="shortcut-item">
               <kbd>Ctrl</kbd> + <kbd>S</kbd>
-              <span className="muted">Sauvegarder (en édition)</span>
+              <span className="muted">{t('settingsShortcutSave')}</span>
             </div>
             <div className="shortcut-item">
               <kbd>Escape</kbd>
-              <span className="muted">Fermer / Retour</span>
+              <span className="muted">{t('settingsShortcutClose')}</span>
             </div>
             <div className="shortcut-item">
               <kbd>←</kbd> / <kbd>→</kbd>
-              <span className="muted">Frame précédente/suivante (vidéo)</span>
+              <span className="muted">{t('settingsShortcutFrames')}</span>
             </div>
             <div className="shortcut-item">
               <kbd>Space</kbd>
-              <span className="muted">Play/Pause (vidéo)</span>
+              <span className="muted">{t('settingsShortcutPlayPause')}</span>
             </div>
           </div>
         </div>

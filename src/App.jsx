@@ -75,7 +75,7 @@ function AppContent() {
       } catch (err) {
         console.error('Failed to load database:', err);
         setError(err.message);
-        toast.error('Erreur de connexion au serveur');
+        toast.error(translate(language, 'toastServerConnectionError'));
       } finally {
         setLoading(false);
       }
@@ -178,7 +178,7 @@ function AppContent() {
       setDb(data);
     } catch (err) {
       console.error('Failed to refresh database:', err);
-      toast.error('Erreur de synchronisation');
+      toast.error(t('toastSyncError'));
     }
   };
 
@@ -205,8 +205,9 @@ function AppContent() {
   const addTo = (listKey) => async (item) => {
     try {
       const exists = db[listKey].some((entry) => entry.id === item.id);
+      const listName = listKey === 'reviewList' ? t('sidebarReviewer') : t('sidebarQuizz');
       if (exists) {
-        toast.warning(`Déjà dans ${listKey === 'reviewList' ? 'Reviewer' : 'Quiz'}`);
+        toast.warning(t('toastAlreadyInList', { first: listName }));
         return;
       }
 
@@ -217,10 +218,10 @@ function AppContent() {
       }
 
       await refreshDb();
-      toast.success(`Ajouté à ${listKey === 'reviewList' ? 'Reviewer' : 'Quiz'}`);
+      toast.success(t('toastAddedToList', { first: listName }));
     } catch (err) {
       console.error('Error adding to list:', err);
-      toast.error('Erreur lors de l\'ajout');
+      toast.error(t('toastAddError'));
     }
   };
 
@@ -232,7 +233,7 @@ function AppContent() {
       const additions = items.filter((item) => !existingIds.has(item.id));
 
       if (additions.length === 0) {
-        toast.info('Tous les éléments sont déjà dans la liste');
+        toast.info(t('toastAllItemsAlreadyInList'));
         return;
       }
 
@@ -245,10 +246,10 @@ function AppContent() {
       }
 
       await refreshDb();
-      toast.success(`${additions.length} élément(s) ajouté(s)`);
+      toast.success(t('toastItemsAdded', { first: additions.length }));
     } catch (err) {
       console.error('Error adding to list:', err);
-      toast.error('Erreur lors de l\'ajout');
+      toast.error(t('toastAddError'));
     }
   };
 
@@ -260,10 +261,10 @@ function AppContent() {
         await api.removeFromQuizList(id);
       }
       await refreshDb();
-      toast.info('Élément retiré');
+      toast.info(t('toastItemRemoved'));
     } catch (err) {
       console.error('Error removing from list:', err);
-      toast.error('Erreur lors de la suppression');
+      toast.error(t('toastDeleteError'));
     }
   };
 
@@ -271,10 +272,10 @@ function AppContent() {
     try {
       await api.createNomenclature(entry);
       await refreshDb();
-      toast.success('Nomenclature ajoutée');
+      toast.success(t('toastNomenclatureAdded'));
     } catch (err) {
       console.error('Error adding nomenclature:', err);
-      toast.error('Erreur lors de l\'ajout');
+      toast.error(t('toastAddError'));
     }
   };
 
@@ -307,11 +308,11 @@ function AppContent() {
       });
 
       await refreshDb();
-      toast.success('Ressource ajoutée');
+      toast.success(t('toastResourceAdded'));
       return newMedia;
     } catch (err) {
       console.error('Error adding resource:', err);
-      toast.error('Erreur lors de l\'ajout');
+      toast.error(t('toastAddError'));
     }
   };
 
@@ -320,10 +321,10 @@ function AppContent() {
       await api.deleteMedia(id);
       await refreshDb();
       setSelectedMedia((prev) => (prev?.id === id ? null : prev));
-      toast.success('Ressource supprimée');
+      toast.success(t('toastResourceDeleted'));
     } catch (err) {
       console.error('Error deleting resource:', err);
-      toast.error('Erreur lors de la suppression');
+      toast.error(t('toastDeleteError'));
     }
   };
 
@@ -356,10 +357,10 @@ function AppContent() {
         return prev;
       });
 
-      toast.success('Modifications enregistrées');
+      toast.success(t('toastChangesSaved'));
     } catch (err) {
       console.error('Error updating media:', err);
-      toast.error('Erreur lors de la mise à jour');
+      toast.error(t('toastUpdateError'));
     }
   };
 
@@ -378,10 +379,10 @@ function AppContent() {
     try {
       await api.updateNomenclature(id, patch);
       await refreshDb();
-      toast.success('Nomenclature mise à jour');
+      toast.success(t('toastNomenclatureUpdated'));
     } catch (err) {
       console.error('Error updating nomenclature:', err);
-      toast.error('Erreur lors de la mise à jour');
+      toast.error(t('toastUpdateError'));
     }
   };
 
@@ -389,10 +390,10 @@ function AppContent() {
     try {
       await api.deleteNomenclature(id);
       await refreshDb();
-      toast.success('Nomenclature supprimée');
+      toast.success(t('toastNomenclatureDeleted'));
     } catch (err) {
       console.error('Error deleting nomenclature:', err);
-      toast.error('Erreur lors de la suppression');
+      toast.error(t('toastDeleteError'));
     }
   };
 
@@ -400,10 +401,10 @@ function AppContent() {
     try {
       await api.importDatabase(imported);
       await refreshDb();
-      toast.success('Base de données importée');
+      toast.success(t('toastDatabaseImported'));
     } catch (err) {
       console.error('Error importing database:', err);
-      toast.error('Erreur lors de l\'import');
+      toast.error(t('toastImportError'));
     }
   };
 
@@ -413,16 +414,16 @@ function AppContent() {
       await refreshDb();
       setSection('oracle');
       setSelectedMedia(null);
-      toast.warning('Base de données réinitialisée');
+      toast.warning(t('toastDatabaseReset'));
     } catch (err) {
       console.error('Error resetting database:', err);
-      toast.error('Erreur lors de la réinitialisation');
+      toast.error(t('toastResetError'));
     }
   };
 
   const startQuiz = () => {
     if (db.quizzList.length === 0) {
-      toast.warning('Aucune ressource dans la liste Quiz');
+      toast.warning(t('toastNoQuizResources'));
       return;
     }
     setQuizMode(true);
@@ -440,8 +441,8 @@ function AppContent() {
       { key: 'nomenclatures', label: t('sidebarNomenclatures'), icon: '🏷️' },
       { key: 'reviewer', label: t('sidebarReviewer'), icon: '📝' },
       { key: 'quizz', label: t('sidebarQuizz'), icon: '❓' },
-      { key: 'statistics', label: t('statisticsTitle') || 'Statistiques', icon: '📊' },
-      { key: 'settings', label: t('settingsTitle') || 'Paramètres', icon: '⚙️' },
+      { key: 'statistics', label: t('statisticsTitle'), icon: '📊' },
+      { key: 'settings', label: t('settingsTitle'), icon: '⚙️' },
     ],
     [t]
   );
@@ -451,8 +452,8 @@ function AppContent() {
     return (
       <div className={`app ${theme}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <h2>Chargement...</h2>
-          <p>Connexion au serveur</p>
+          <h2>{t('loadingTitle')}</h2>
+          <p>{t('loadingSubtitle')}</p>
         </div>
       </div>
     );
@@ -463,9 +464,9 @@ function AppContent() {
     return (
       <div className={`app ${theme}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <h2>Erreur de connexion</h2>
+          <h2>{t('connectionErrorTitle')}</h2>
           <p>{error}</p>
-          <button onClick={() => window.location.reload()}>Réessayer</button>
+          <button onClick={() => window.location.reload()}>{t('retryButton')}</button>
         </div>
       </div>
     );
@@ -572,7 +573,7 @@ function AppContent() {
                 onClick={startQuiz}
                 disabled={db.quizzList.length === 0}
               >
-                🎯 Démarrer le Quiz ({db.quizzList.length})
+                {t('startQuizButton', { first: db.quizzList.length })}
               </button>
             </div>
             <div className="grid">
