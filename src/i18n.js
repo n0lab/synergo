@@ -117,6 +117,9 @@ const translations = {
     resourceErrorMissingSource: 'Please provide a source.',
     resourceErrorMissingDate: 'Please provide a publication date.',
     resourceErrorMissingFile: 'Please select a file to upload.',
+    resourceSubjectNameLabel: 'Name of the subject',
+    resourceSubjectNamePlaceholder: "Use 'Unknown' if you do not know the name of the subject",
+    resourceErrorMissingSubjectName: 'Please provide the name of the subject.',
   },
   fr: {
     // Existing translations
@@ -238,6 +241,9 @@ const translations = {
     resourceErrorMissingSource: 'Veuillez renseigner une source.',
     resourceErrorMissingDate: 'Veuillez renseigner une date de publication.',
     resourceErrorMissingFile: 'Veuillez sélectionner un fichier à importer.',
+    resourceSubjectNameLabel: 'Nom du sujet',
+    resourceSubjectNamePlaceholder: "Utilisez 'Inconnu' si vous ne connaissez pas le nom du sujet",
+    resourceErrorMissingSubjectName: 'Veuillez renseigner le nom du sujet.',
   },
 };
 

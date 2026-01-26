@@ -57,6 +57,7 @@ export default function AddResource({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [source, setSource] = useState('');
+  const [subjectName, setSubjectName] = useState('');
   const [publicationDate, setPublicationDate] = useState('');
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
@@ -65,24 +66,25 @@ export default function AddResource({
   const [isDragActive, setIsDragActive] = useState(false);
   const [nextNumber, setNextNumber] = useState('001');
 
-  // Fetch next available number when source or date changes
+  // Fetch next available number when source, subject name or date changes
   useEffect(() => {
     const fetchNextNumber = async () => {
-      if (!source.trim() || !publicationDate) {
+      if (!source.trim() || !subjectName.trim() || !publicationDate) {
         setNextNumber('001');
         return;
       }
 
       const datePrefix = formatDateForFilename(publicationDate);
       const sourcePrefix = formatSourceForFilename(source);
+      const subjectPrefix = formatSourceForFilename(subjectName);
 
-      if (!datePrefix || !sourcePrefix) {
+      if (!datePrefix || !sourcePrefix || !subjectPrefix) {
         setNextNumber('001');
         return;
       }
 
       try {
-        const result = await api.getNextResourceNumber(datePrefix, sourcePrefix);
+        const result = await api.getNextResourceNumber(datePrefix, sourcePrefix, subjectPrefix);
         setNextNumber(result.nextNumber || '001');
       } catch (err) {
         console.error('Error fetching next number:', err);
@@ -91,24 +93,25 @@ export default function AddResource({
     };
 
     fetchNextNumber();
-  }, [source, publicationDate]);
+  }, [source, subjectName, publicationDate]);
 
   // Generate the platform filename
   const generatedFilename = useMemo(() => {
-    if (!source.trim() || !publicationDate || !file) {
+    if (!source.trim() || !subjectName.trim() || !publicationDate || !file) {
       return '';
     }
 
     const datePrefix = formatDateForFilename(publicationDate);
     const sourcePrefix = formatSourceForFilename(source);
+    const subjectPrefix = formatSourceForFilename(subjectName);
     const extension = getFileExtension(file.name);
 
-    if (!datePrefix || !sourcePrefix) {
+    if (!datePrefix || !sourcePrefix || !subjectPrefix) {
       return '';
     }
 
-    return `${datePrefix}_${sourcePrefix}_${nextNumber}${extension}`;
-  }, [source, publicationDate, file, nextNumber]);
+    return `${datePrefix}_${sourcePrefix}_${subjectPrefix}_${nextNumber}${extension}`;
+  }, [source, subjectName, publicationDate, file, nextNumber]);
 
   const detectedType = useMemo(() => {
     if (file) {
@@ -174,6 +177,11 @@ export default function AddResource({
 
     if (!source.trim()) {
       setError(t('resourceErrorMissingSource'));
+      return;
+    }
+
+    if (!subjectName.trim()) {
+      setError(t('resourceErrorMissingSubjectName'));
       return;
     }
 
@@ -264,6 +272,18 @@ export default function AddResource({
             value={source}
             onChange={(event) => setSource(event.target.value)}
             placeholder={t('resourceSourcePlaceholder')}
+            required
+          />
+        </div>
+
+        <div className="field-group">
+          <label htmlFor="resource-subject-name">{t('resourceSubjectNameLabel')}</label>
+          <input
+            id="resource-subject-name"
+            type="text"
+            value={subjectName}
+            onChange={(event) => setSubjectName(event.target.value)}
+            placeholder={t('resourceSubjectNamePlaceholder')}
             required
           />
         </div>
