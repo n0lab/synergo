@@ -40,6 +40,31 @@ export async function resetDatabase() {
   });
 }
 
+// ============ UPLOAD OPERATIONS ============
+
+export async function uploadFile(file, filename) {
+  const formData = new FormData();
+  // IMPORTANT: filename must be appended BEFORE file for multer to read it
+  // during the filename callback (multipart fields are processed sequentially)
+  if (filename) {
+    formData.append('filename', filename);
+  }
+  formData.append('file', file);
+
+  const response = await fetch(`${API_BASE}/upload`, {
+    method: 'POST',
+    body: formData,
+    // Don't set Content-Type header - browser will set it with boundary for multipart/form-data
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Upload failed' }));
+    throw new Error(error.error || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
 // ============ MEDIA OPERATIONS ============
 
 export async function getAllMedia() {
