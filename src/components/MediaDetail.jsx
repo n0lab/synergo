@@ -151,6 +151,14 @@ export default function MediaDetail({
   useEffect(() => {
     const handleKey = (event) => {
       if (media.type !== 'video') return;
+
+      // Ignore if we're in an input/textarea
+      const target = event.target;
+      const isInput = target.tagName === 'INPUT' ||
+                     target.tagName === 'TEXTAREA' ||
+                     target.isContentEditable;
+      if (isInput) return;
+
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
         step(-1);
@@ -158,6 +166,10 @@ export default function MediaDetail({
       if (event.key === 'ArrowRight') {
         event.preventDefault();
         step(1);
+      }
+      if (event.key === ' ' || event.code === 'Space') {
+        event.preventDefault();
+        handlePlayPause();
       }
     };
 

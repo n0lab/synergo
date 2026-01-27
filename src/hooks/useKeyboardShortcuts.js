@@ -50,8 +50,6 @@ export function useKeyboardShortcuts(shortcuts, enabled = true) {
  * Predefined keyboard shortcuts
  */
 export const SHORTCUTS = {
-  SEARCH: 'Ctrl+k',
-  NEW: 'Ctrl+n',
   SAVE: 'Ctrl+s',
   CLOSE: 'Escape',
   HELP: '?',
