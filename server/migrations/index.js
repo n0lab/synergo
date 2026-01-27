@@ -128,6 +128,21 @@ const migrations = [
       `);
       */
     }
+  },
+  {
+    id: 4,
+    description: 'Add source and publication_date fields to media',
+    up: (db) => {
+      db.exec(`
+        ALTER TABLE media ADD COLUMN source TEXT DEFAULT '';
+        ALTER TABLE media ADD COLUMN publication_date TEXT DEFAULT '';
+      `);
+    },
+    down: (db) => {
+      // SQLite doesn't support DROP COLUMN in older versions
+      // For rollback, we'd need to recreate the table
+      console.log('Migration 4 rollback: source and publication_date columns remain (SQLite limitation)');
+    }
   }
 ];
 

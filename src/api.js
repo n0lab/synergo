@@ -99,6 +99,10 @@ export async function deleteMedia(id) {
   });
 }
 
+export async function getNextResourceNumber(datePrefix, sourcePrefix, subjectPrefix) {
+  return fetchApi(`/media/next-id?datePrefix=${encodeURIComponent(datePrefix)}&sourcePrefix=${encodeURIComponent(sourcePrefix)}&subjectPrefix=${encodeURIComponent(subjectPrefix)}`);
+}
+
 // ============ NOMENCLATURES OPERATIONS ============
 
 export async function getAllNomenclatures() {

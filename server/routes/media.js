@@ -5,12 +5,25 @@ import {
   createMedia,
   updateMedia,
   deleteMedia,
-  getMediaPaginated
+  getMediaPaginated,
+  getNextResourceNumber
 } from '../db.js';
 import { ApiError, asyncHandler } from '../middleware/errorHandler.js';
 import { validateMedia, validateIdParam } from '../middleware/validate.js';
 
 const router = Router();
+
+// GET /api/media/next-id - Get next available resource ID for a given date, source and subject
+router.get('/next-id', asyncHandler(async (req, res) => {
+  const { datePrefix, sourcePrefix, subjectPrefix } = req.query;
+
+  if (!datePrefix || !sourcePrefix || !subjectPrefix) {
+    throw ApiError.badRequest('datePrefix, sourcePrefix and subjectPrefix are required');
+  }
+
+  const nextNumber = getNextResourceNumber(datePrefix, sourcePrefix, subjectPrefix);
+  res.json({ nextNumber });
+}));
 
 // GET /api/media - Get all media (with optional pagination)
 router.get('/', asyncHandler(async (req, res) => {
@@ -39,7 +52,7 @@ router.get('/:id', validateIdParam, asyncHandler(async (req, res) => {
 
 // POST /api/media - Create new media
 router.post('/', validateMedia, asyncHandler(async (req, res) => {
-  const { title, description, src, type, tags, annotations, fps } = req.body;
+  const { title, description, src, type, tags, annotations, fps, source, publicationDate } = req.body;
 
   const timestamp = Date.now();
   const media = createMedia({
@@ -52,7 +65,9 @@ router.post('/', validateMedia, asyncHandler(async (req, res) => {
     annotations: annotations || [],
     fps: fps || 30,
     addedAt: timestamp,
-    updatedAt: timestamp
+    updatedAt: timestamp,
+    source: source || '',
+    publicationDate: publicationDate || ''
   });
 
   res.status(201).json(media);
