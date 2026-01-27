@@ -1,5 +1,6 @@
 // src/contexts/ToastContext.jsx
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { TOAST_DURATION } from '../constants.js';
 
 const ToastContext = createContext(null);
@@ -11,6 +12,13 @@ export function useToast() {
   }
   return context;
 }
+
+const toastIcons = {
+  success: CheckCircle,
+  error: XCircle,
+  warning: AlertTriangle,
+  info: Info,
+};
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
@@ -65,29 +73,47 @@ export function ToastProvider({ children }) {
         aria-live="polite"
         aria-atomic="false"
       >
-        {toasts.map(toast => (
-          <div
-            key={toast.id}
-            className={`toast toast-${toast.type} toast-show`}
-            onClick={() => removeToast(toast.id)}
-            role="status"
-            aria-live="polite"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                removeToast(toast.id);
-              }
-            }}
-          >
-            <span className="toast-icon" aria-hidden="true">
-              {toast.type === 'success' && '✓'}
-              {toast.type === 'error' && '✕'}
-              {toast.type === 'warning' && '⚠'}
-              {toast.type === 'info' && 'ℹ'}
-            </span>
-            <span className="toast-message">{toast.message}</span>
-          </div>
-        ))}
+        {toasts.map(toast => {
+          const IconComponent = toastIcons[toast.type] || Info;
+          return (
+            <div
+              key={toast.id}
+              className={`toast toast-${toast.type} toast-show glass`}
+              onClick={() => removeToast(toast.id)}
+              role="status"
+              aria-live="polite"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  removeToast(toast.id);
+                }
+              }}
+            >
+              <span className="toast-icon" aria-hidden="true">
+                <IconComponent size={20} />
+              </span>
+              <span className="toast-message">{toast.message}</span>
+              <button
+                className="toast-close"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeToast(toast.id);
+                }}
+                aria-label="Close notification"
+              >
+                <X size={16} />
+              </button>
+              <div className="toast-progress">
+                <div
+                  className="toast-progress-bar"
+                  style={{
+                    animationDuration: `${toast.duration}ms`
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })}
       </div>
     </ToastContext.Provider>
   );
