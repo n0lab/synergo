@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { Plus, ListPlus, HelpCircle } from 'lucide-react';
 import StatsCard from './StatsCard.jsx';
 import SearchBar from './SearchBar.jsx';
@@ -6,6 +6,8 @@ import MediaCard from './MediaCard.jsx';
 import ViewToggle from './ViewToggle.jsx';
 import FilterPanel from './FilterPanel.jsx';
 import { SkeletonGrid } from './SkeletonLoader.jsx';
+
+const GRID_SIZE_KEY = 'synergo-grid-size';
 
 /**
  * OracleOverview - Main media browsing view with modern UI
@@ -32,8 +34,16 @@ const OracleOverview = memo(function OracleOverview({
   t,
 }) {
   const [viewMode, setViewMode] = useState('grid');
-  const [gridSize, setGridSize] = useState('medium');
+  const [gridSize, setGridSize] = useState(() => {
+    const saved = localStorage.getItem(GRID_SIZE_KEY);
+    return saved && ['small', 'medium', 'large'].includes(saved) ? saved : 'medium';
+  });
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+
+  // Save grid size to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem(GRID_SIZE_KEY, gridSize);
+  }, [gridSize]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [sortBy, setSortBy] = useState('date');
   const [sortOrder, setSortOrder] = useState('desc');

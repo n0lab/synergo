@@ -98,16 +98,6 @@ function AppContent() {
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
-    'Ctrl+k': () => {
-      setSection('oracle');
-      setSelectedMedia(null);
-      setQuizMode(false);
-      setQuizResults(null);
-    },
-    'Ctrl+n': () => {
-      setSection('add-resource');
-      setSelectedMedia(null);
-    },
     'Escape': () => {
       if (quizMode) {
         setQuizMode(false);
