@@ -134,20 +134,6 @@ const translations = {
     fileTypePhoto: 'Photo',
     fileTypeVideo: 'Video',
 
-    // Resource selection
-    resourceSelectionTitle: 'How would you like to add a resource?',
-    resourceSelectionSubtitle: 'Choose to upload a new file or use an existing unused file from the server.',
-    resourceOptionUpload: 'Upload new file',
-    resourceOptionUploadDesc: 'Upload a new video or photo from your device',
-    resourceOptionExisting: 'Use existing file',
-    resourceOptionExistingDesc: 'Select from unused files already on the server',
-    resourceSelectFile: 'Select a file',
-    resourceSelectFilePlaceholder: 'Choose an unused file...',
-    resourcePreviewLabel: 'Preview',
-    resourceConfirmSelection: 'Use this file',
-    resourceChangeSelection: 'Change selection',
-    resourceBackToChoice: 'Back to selection',
-
     // Nomenclature page
     nomenclaturePageTitle: 'Nomenclatures',
     nomenclaturePageSubtitle: 'Manage nomenclatures added via media or directly from this page.',
@@ -435,20 +421,6 @@ const translations = {
     resourceDescriptionPlaceholder: 'Contexte, intention, détails sur la ressource...',
     fileTypePhoto: 'Photo',
     fileTypeVideo: 'Vidéo',
-
-    // Resource selection
-    resourceSelectionTitle: 'Comment souhaitez-vous ajouter une ressource ?',
-    resourceSelectionSubtitle: 'Choisissez d\'importer un nouveau fichier ou d\'utiliser un fichier existant non utilisé sur le serveur.',
-    resourceOptionUpload: 'Importer un nouveau fichier',
-    resourceOptionUploadDesc: 'Importer une nouvelle vidéo ou photo depuis votre appareil',
-    resourceOptionExisting: 'Utiliser un fichier existant',
-    resourceOptionExistingDesc: 'Sélectionner parmi les fichiers non utilisés déjà présents sur le serveur',
-    resourceSelectFile: 'Sélectionner un fichier',
-    resourceSelectFilePlaceholder: 'Choisir un fichier non utilisé...',
-    resourcePreviewLabel: 'Aperçu',
-    resourceConfirmSelection: 'Utiliser ce fichier',
-    resourceChangeSelection: 'Changer la sélection',
-    resourceBackToChoice: 'Retour à la sélection',
 
     // Nomenclature page
     nomenclaturePageTitle: 'Nomenclatures',
