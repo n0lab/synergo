@@ -318,10 +318,19 @@ export function deleteNomenclature(id) {
 }
 
 export function upsertNomenclature(nomenclature) {
+  // First, check if a nomenclature with this label already exists (case-insensitive)
+  const stmtByLabel = db.prepare('SELECT * FROM nomenclatures WHERE LOWER(label) = LOWER(?)');
+  const existingByLabel = stmtByLabel.get(nomenclature.label);
+  if (existingByLabel) {
+    return existingByLabel; // Use existing nomenclature with this label
+  }
+
+  // Also check by ID for backward compatibility
   const existing = getNomenclatureById(nomenclature.id);
   if (existing) {
     return existing; // Don't overwrite existing nomenclatures
   }
+
   return createNomenclature(nomenclature);
 }
 
