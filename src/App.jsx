@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import OracleOverview from './components/OracleOverview.jsx';
 import ReviewerOverview from './components/ReviewerOverview.jsx';
+import QuizOverview from './components/QuizOverview.jsx';
 import MediaDetail from './components/MediaDetail.jsx';
 import Nomenclatures from './components/Nomenclatures.jsx';
 import AddResource from './components/AddResource.jsx';
@@ -575,33 +576,16 @@ function AppContent() {
         }));
 
         return (
-          <div className="placeholder oracle">
-            <div className="header-row">
-              <div>
-                <h2>{t('quizzTitle')}</h2>
-                <p>{t('quizzPlaceholder')}</p>
-              </div>
-              <button
-                className="primary"
-                onClick={startQuiz}
-                disabled={db.quizzList.length === 0}
-              >
-                {t('startQuizButton', { first: db.quizzList.length })}
-              </button>
-            </div>
-            <div className="grid">
-              {enrichedQuizzList.map((item) => (
-                <div className="card media-card" key={item.id} onClick={() => setSelectedMedia(item)}>
-                  <div className="media-type">
-                    {item.type === 'video' ? t('oracleVideoTag') : t('oraclePhotoTag')}
-                  </div>
-                  <h3>{item.title}</h3>
-                  <p className="description">{item.description}</p>
-                </div>
-              ))}
-              {db.quizzList.length === 0 && <div className="muted">{t('reviewerEmpty')}</div>}
-            </div>
-          </div>
+          <QuizOverview
+            items={enrichedQuizzList}
+            onSelect={(item) => {
+              const enriched = { ...item, displaySrc: getResourcePath(item.src) };
+              setSelectedMedia(enriched);
+            }}
+            onRemove={removeFromList('quizzList')}
+            onStartQuiz={startQuiz}
+            t={t}
+          />
         );
 
       case 'statistics':

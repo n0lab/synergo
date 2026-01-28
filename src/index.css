@@ -728,6 +728,27 @@ main {
   border-radius: 50%;
 }
 
+/* Remove from list button */
+.remove-from-list-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.remove-from-list-btn:hover {
+  background: var(--error-bg);
+  border-color: var(--error);
+  color: var(--error);
+}
+
 .indicator-dot.review {
   background: var(--info);
 }
