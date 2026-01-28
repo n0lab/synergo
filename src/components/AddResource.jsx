@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import * as api from '../api.js';
+import { getFilenameFromPath } from '../db.js';
 
 /**
  * Format a source string for use in filename:
@@ -52,8 +53,15 @@ export default function AddResource({
   findExistingResource,
   uploadFile,
   onNavigateToResource,
+  media = [],
   t,
 }) {
+  // Mode: 'selection' | 'upload' | 'existing'
+  const [mode, setMode] = useState('selection');
+  const [unusedFiles, setUnusedFiles] = useState([]);
+  const [selectedExistingFile, setSelectedExistingFile] = useState('');
+  const [isLoadingFiles, setIsLoadingFiles] = useState(true);
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [source, setSource] = useState('');
@@ -65,6 +73,41 @@ export default function AddResource({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
   const [nextNumber, setNextNumber] = useState('001');
+
+  // Fetch unused files on mount
+  useEffect(() => {
+    const fetchUnusedFiles = async () => {
+      setIsLoadingFiles(true);
+      try {
+        const data = await api.getResourceFiles();
+        const resourceFiles = data.files || [];
+
+        // Get all filenames used in media (local files only)
+        const usedFilenames = new Set();
+        media.forEach(item => {
+          if (item.src && !item.src.startsWith('http')) {
+            usedFilenames.add(getFilenameFromPath(item.src));
+          }
+        });
+
+        // Filter resource files that are not used
+        const unused = resourceFiles.filter(file => !usedFilenames.has(file));
+        setUnusedFiles(unused);
+
+        // If no unused files, skip to upload mode directly
+        if (unused.length === 0) {
+          setMode('upload');
+        }
+      } catch (err) {
+        console.error('Error fetching resource files:', err);
+        setUnusedFiles([]);
+        setMode('upload');
+      }
+      setIsLoadingFiles(false);
+    };
+
+    fetchUnusedFiles();
+  }, [media]);
 
   // Fetch next available number when source, subject name or date changes
   useEffect(() => {
@@ -166,6 +209,108 @@ export default function AddResource({
     document.getElementById('resource-file')?.click();
   };
 
+  // Detect file type based on extension
+  const getFileTypeFromExtension = useCallback((filename) => {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+    const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'];
+
+    if (imageExtensions.includes(ext)) return 'photo';
+    if (videoExtensions.includes(ext)) return 'video';
+    return 'video'; // Default to video
+  }, []);
+
+  // Get the detected type for the selected existing file
+  const existingFileType = useMemo(() => {
+    if (!selectedExistingFile) return null;
+    return getFileTypeFromExtension(selectedExistingFile);
+  }, [selectedExistingFile, getFileTypeFromExtension]);
+
+  // Handle going back to selection mode
+  const handleBackToSelection = () => {
+    setMode('selection');
+    setError('');
+    setDuplicateResource(null);
+    // Reset form fields
+    setTitle('');
+    setDescription('');
+    setSource('');
+    setSubjectName('');
+    setPublicationDate('');
+    setFile(null);
+    setSelectedExistingFile('');
+  };
+
+  // Handle submission for existing file
+  const handleSubmitExisting = async (event) => {
+    event.preventDefault();
+
+    // Validate required fields
+    if (!title.trim()) {
+      setError(t('resourceErrorMissing'));
+      return;
+    }
+
+    if (!source.trim()) {
+      setError(t('resourceErrorMissingSource'));
+      return;
+    }
+
+    if (!subjectName.trim()) {
+      setError(t('resourceErrorMissingSubjectName'));
+      return;
+    }
+
+    if (!publicationDate) {
+      setError(t('resourceErrorMissingDate'));
+      return;
+    }
+
+    if (!selectedExistingFile) {
+      setError(t('resourceErrorMissingFile'));
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError('');
+    setDuplicateResource(null);
+
+    try {
+      const payloadSrc = selectedExistingFile;
+      const payloadType = getFileTypeFromExtension(selectedExistingFile);
+
+      // Check for duplicates
+      const existingResource = findExistingResource?.({
+        title: title.trim(),
+        src: payloadSrc,
+      });
+
+      if (existingResource) {
+        setDuplicateResource(existingResource);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Create the resource (no upload needed, file already exists)
+      onCreate({
+        title: title.trim(),
+        description: description.trim(),
+        src: payloadSrc,
+        filename: selectedExistingFile,
+        type: payloadType,
+        source: source.trim(),
+        publicationDate: publicationDate,
+      });
+    } catch (err) {
+      console.error(err);
+      setError(t('resourceErrorUpload'));
+      setIsSubmitting(false);
+      return;
+    }
+
+    setIsSubmitting(false);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -244,6 +389,224 @@ export default function AddResource({
     setIsSubmitting(false);
   };
 
+  // Loading state
+  if (isLoadingFiles) {
+    return (
+      <div className="add-resource-page">
+        <div className="page-header">
+          <h2>{t('addResourceTitle')}</h2>
+          <p>{t('loadingTitle')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Selection screen with two cards
+  if (mode === 'selection') {
+    return (
+      <div className="add-resource-page">
+        <div className="page-header">
+          <h2>{t('resourceSelectionTitle')}</h2>
+          <p>{t('resourceSelectionSubtitle')}</p>
+        </div>
+
+        <div className="resource-selection-cards">
+          <button
+            type="button"
+            className="resource-selection-card"
+            onClick={() => setMode('upload')}
+          >
+            <div className="selection-card-icon upload-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+            </div>
+            <h3>{t('resourceOptionUpload')}</h3>
+            <p>{t('resourceOptionUploadDesc')}</p>
+          </button>
+
+          <button
+            type="button"
+            className="resource-selection-card"
+            onClick={() => setMode('existing')}
+          >
+            <div className="selection-card-icon existing-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                <line x1="12" y1="11" x2="12" y2="17" />
+                <line x1="9" y1="14" x2="15" y2="14" />
+              </svg>
+            </div>
+            <h3>{t('resourceOptionExisting')}</h3>
+            <p>{t('resourceOptionExistingDesc')}</p>
+            <span className="unused-count-badge">{unusedFiles.length}</span>
+          </button>
+        </div>
+
+        <div className="action-group" style={{ marginTop: 'var(--space-lg)' }}>
+          <button type="button" className="ghost" onClick={onBack}>
+            {t('cancel')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Existing file selection mode
+  if (mode === 'existing') {
+    return (
+      <div className="add-resource-page">
+        <div className="page-header">
+          <h2>{t('addResourceTitle')}</h2>
+          <p>{t('resourceOptionExistingDesc')}</p>
+        </div>
+
+        <form className="card form-grid" onSubmit={handleSubmitExisting}>
+          {/* File selection dropdown */}
+          <div className="field-group">
+            <label htmlFor="existing-file">{t('resourceSelectFile')}</label>
+            <select
+              id="existing-file"
+              value={selectedExistingFile}
+              onChange={(e) => setSelectedExistingFile(e.target.value)}
+              required
+            >
+              <option value="">{t('resourceSelectFilePlaceholder')}</option>
+              {unusedFiles.map((file) => (
+                <option key={file} value={file}>
+                  {file}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Preview of selected file */}
+          {selectedExistingFile && (
+            <div className="field-group">
+              <label>{t('resourcePreviewLabel')}</label>
+              <div className="existing-file-preview">
+                {existingFileType === 'photo' ? (
+                  <img
+                    src={`/resources/${selectedExistingFile}`}
+                    alt={selectedExistingFile}
+                    className="preview-media"
+                  />
+                ) : (
+                  <video
+                    src={`/resources/${selectedExistingFile}`}
+                    controls
+                    className="preview-media"
+                  />
+                )}
+                <div className="preview-info">
+                  <span className="preview-filename">{selectedExistingFile}</span>
+                  <span className={`media-type-badge ${existingFileType}`}>
+                    {existingFileType === 'photo' ? t('fileTypePhoto') : t('fileTypeVideo')}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="field-group">
+            <label htmlFor="resource-title">{t('resourceNameLabel')}</label>
+            <input
+              id="resource-title"
+              type="text"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder={t('resourceTitlePlaceholder')}
+              required
+            />
+          </div>
+
+          <div className="field-group">
+            <label htmlFor="resource-source">{t('resourceSourceLabel')}</label>
+            <input
+              id="resource-source"
+              type="text"
+              value={source}
+              onChange={(event) => setSource(event.target.value)}
+              placeholder={t('resourceSourcePlaceholder')}
+              required
+            />
+          </div>
+
+          <div className="field-group">
+            <label htmlFor="resource-subject-name">{t('resourceSubjectNameLabel')}</label>
+            <input
+              id="resource-subject-name"
+              type="text"
+              value={subjectName}
+              onChange={(event) => setSubjectName(event.target.value)}
+              placeholder={t('resourceSubjectNamePlaceholder')}
+              required
+            />
+          </div>
+
+          <div className="field-group">
+            <label htmlFor="resource-date">{t('resourceDateLabel')}</label>
+            <input
+              id="resource-date"
+              type="date"
+              value={publicationDate}
+              onChange={(event) => setPublicationDate(event.target.value)}
+              required
+            />
+          </div>
+
+          <div className="field-group">
+            <label htmlFor="resource-description">{t('resourceDescriptionLabel')}</label>
+            <textarea
+              id="resource-description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              onKeyDown={handleDescriptionKeyDown}
+              placeholder={t('resourceDescriptionPlaceholder')}
+              rows={4}
+            />
+          </div>
+
+          {(error || duplicateResource) && (
+            <div className="error-banner">
+              {duplicateResource ? (
+                <>
+                  {t('resourceDuplicate')}{' '}
+                  <button
+                    type="button"
+                    className="resource-link"
+                    onClick={() => duplicateResource && onNavigateToResource?.(duplicateResource)}
+                  >
+                    {duplicateResource.title}
+                  </button>
+                </>
+              ) : (
+                error
+              )}
+            </div>
+          )}
+
+          <div className="action-group end">
+            {unusedFiles.length > 0 && (
+              <button type="button" className="ghost" onClick={handleBackToSelection}>
+                {t('resourceBackToChoice')}
+              </button>
+            )}
+            <button type="button" className="ghost" onClick={onBack}>
+              {t('cancel')}
+            </button>
+            <button type="submit" className="primary" disabled={isSubmitting || !selectedExistingFile}>
+              {t('addNewResourceAction')}
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  // Upload mode (original form)
   return (
     <div className="add-resource-page">
       <div className="page-header">
@@ -392,6 +755,11 @@ export default function AddResource({
         )}
 
         <div className="action-group end">
+          {unusedFiles.length > 0 && (
+            <button type="button" className="ghost" onClick={handleBackToSelection}>
+              {t('resourceBackToChoice')}
+            </button>
+          )}
           <button type="button" className="ghost" onClick={onBack}>
             {t('cancel')}
           </button>
