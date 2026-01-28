@@ -324,6 +324,11 @@ function AppContent() {
       const currentItem = db.media.find(m => m.id === id);
       if (!currentItem) return;
 
+      // Capture old nomenclatures before update
+      const oldLabels = new Set();
+      currentItem.tags?.forEach(tag => oldLabels.add(tag.toLowerCase()));
+      currentItem.annotations?.forEach(ann => oldLabels.add(ann.label.toLowerCase()));
+
       const patch = typeof updater === 'function' ? updater(currentItem) : updater;
 
       // If src is modified, ensure we only store the filename
@@ -340,6 +345,50 @@ function AppContent() {
       }
 
       await refreshDb();
+
+      // Clean up unused nomenclatures after update
+      if (patch.tags || patch.annotations) {
+        const newLabels = new Set();
+        finalPatch.tags?.forEach(tag => newLabels.add(tag.toLowerCase()));
+        finalPatch.annotations?.forEach(ann => newLabels.add(ann.label.toLowerCase()));
+
+        // Find labels that were removed from this media
+        const removedLabels = [...oldLabels].filter(label => !newLabels.has(label));
+
+        if (removedLabels.length > 0) {
+          // Load latest database state once for all checks
+          const latestDb = await api.loadDatabase();
+
+          // Check if removed labels are still used by other media and delete if not
+          for (const label of removedLabels) {
+            const isUsedElsewhere = latestDb.media.some((item) => {
+              if (item.id === id) return false; // Skip the current item
+              const inTags = item.tags?.some((tag) => tag.toLowerCase() === label);
+              const inAnnotations = item.annotations?.some(
+                (annotation) => annotation.label.toLowerCase() === label
+              );
+              return inTags || inAnnotations;
+            });
+
+            if (!isUsedElsewhere) {
+              // Find the nomenclature by label and delete it
+              const nomenclature = latestDb.nomenclatures.find(
+                (n) => n.label.toLowerCase() === label
+              );
+              if (nomenclature) {
+                try {
+                  await api.deleteNomenclature(nomenclature.id);
+                } catch (err) {
+                  // Ignore deletion errors for cleanup
+                }
+              }
+            }
+          }
+
+          // Refresh db again after cleanup
+          await refreshDb();
+        }
+      }
 
       setSelectedMedia((prev) => {
         if (prev?.id === id && updatedItem) {
