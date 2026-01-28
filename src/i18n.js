@@ -164,6 +164,7 @@ const translations = {
     // Quiz
     quizzTitle: 'Quiz',
     quizzPlaceholder: 'Selection for a future quiz',
+    quizRemove: 'Remove from Quiz list',
     startQuizButton: (count) => `🎯 Start Quiz (${count})`,
     quizEmpty: 'Empty quiz',
     quizNoResources: 'No resources available for the quiz.',
@@ -453,6 +454,7 @@ const translations = {
     // Quiz
     quizzTitle: 'Quiz',
     quizzPlaceholder: 'Sélection pour un futur quiz',
+    quizRemove: 'Retirer de la liste Quiz',
     startQuizButton: (count) => `🎯 Démarrer le quiz (${count})`,
     quizEmpty: 'Quiz vide',
     quizNoResources: 'Aucune ressource disponible pour le quiz.',

@@ -8,7 +8,8 @@ import {
   ListPlus,
   HelpCircle,
   Eye,
-  MoreVertical
+  MoreVertical,
+  X
 } from 'lucide-react';
 
 /**
@@ -24,6 +25,8 @@ const MediaCard = memo(function MediaCard({
   onQuickDelete,
   onAddToReview,
   onAddToQuiz,
+  onRemoveFromList,
+  removeLabel = 'Remove',
   inReviewList = false,
   inQuizList = false,
   viewMode = 'grid',
@@ -214,15 +217,30 @@ const MediaCard = memo(function MediaCard({
             <TypeIcon size={12} />
             {isVideo ? videoLabel : photoLabel}
           </span>
-          {/* Status indicators */}
-          <div className="status-indicators">
-            {inReviewList && (
-              <span className="indicator-dot review" title="In Review List" />
-            )}
-            {inQuizList && (
-              <span className="indicator-dot quiz" title="In Quiz List" />
-            )}
-          </div>
+          {/* Status indicators or remove button */}
+          {onRemoveFromList ? (
+            <button
+              type="button"
+              className="remove-from-list-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemoveFromList();
+              }}
+              aria-label={removeLabel}
+              title={removeLabel}
+            >
+              <X size={16} />
+            </button>
+          ) : (
+            <div className="status-indicators">
+              {inReviewList && (
+                <span className="indicator-dot review" title="In Review List" />
+              )}
+              {inQuizList && (
+                <span className="indicator-dot quiz" title="In Quiz List" />
+              )}
+            </div>
+          )}
         </div>
 
         <h3>{item.title}</h3>
