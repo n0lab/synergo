@@ -148,16 +148,44 @@ export default function MediaDetail({
     video.currentTime = Math.max(0, video.currentTime + direction * frameDuration);
   };
 
+  const skipSeconds = (seconds) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = Math.max(0, Math.min(video.duration || Infinity, video.currentTime + seconds));
+  };
+
   useEffect(() => {
     const handleKey = (event) => {
       if (media.type !== 'video') return;
-      if (event.key === 'ArrowLeft') {
+
+      // Ignore if we're in an input/textarea
+      const target = event.target;
+      const isInput = target.tagName === 'INPUT' ||
+                     target.tagName === 'TEXTAREA' ||
+                     target.isContentEditable;
+      if (isInput) return;
+
+      // Shift+Arrow for frame stepping
+      if (event.shiftKey && event.key === 'ArrowLeft') {
         event.preventDefault();
         step(-1);
       }
-      if (event.key === 'ArrowRight') {
+      if (event.shiftKey && event.key === 'ArrowRight') {
         event.preventDefault();
         step(1);
+      }
+      // Ctrl+Arrow for 1-second skip
+      if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowLeft') {
+        event.preventDefault();
+        skipSeconds(-1);
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowRight') {
+        event.preventDefault();
+        skipSeconds(1);
+      }
+      if (event.key === ' ' || event.code === 'Space') {
+        event.preventDefault();
+        handlePlayPause();
       }
     };
 
@@ -354,13 +382,25 @@ export default function MediaDetail({
                 className="video-player"
                 onPause={() => setPaused(true)}
                 onPlay={() => setPaused(false)}
+                onKeyDown={(e) => {
+                  if (e.key === ' ' || e.code === 'Space') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }}
               />
               <div className="video-controls">
-                <button onClick={() => step(-1)} aria-label={t('previousFrame')}>
+                <button onClick={() => step(-1)} aria-label={t('previousFrame')} title="Shift + ←">
                   {t('previousFrame')}
                 </button>
+                <button onClick={() => skipSeconds(-1)} aria-label={t('skipBackward')} title="Ctrl + ←">
+                  {t('skipBackward')}
+                </button>
                 <button onClick={handlePlayPause}>{paused ? t('play') : t('pause')}</button>
-                <button onClick={() => step(1)} aria-label={t('nextFrame')}>
+                <button onClick={() => skipSeconds(1)} aria-label={t('skipForward')} title="Ctrl + →">
+                  {t('skipForward')}
+                </button>
+                <button onClick={() => step(1)} aria-label={t('nextFrame')} title="Shift + →">
                   {t('nextFrame')}
                 </button>
               </div>

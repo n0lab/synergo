@@ -183,36 +183,6 @@ export default function Settings({ db, onImport, onReset, t }) {
           )}
         </div>
 
-        {/* Keyboard shortcuts */}
-        <div className="card settings-section full-width">
-          <h3>{t('settingsShortcutsTitle')}</h3>
-          <div className="shortcuts-grid">
-            <div className="shortcut-item">
-              <kbd>Ctrl</kbd> + <kbd>K</kbd>
-              <span className="muted">{t('settingsShortcutOracle')}</span>
-            </div>
-            <div className="shortcut-item">
-              <kbd>Ctrl</kbd> + <kbd>N</kbd>
-              <span className="muted">{t('settingsShortcutNewResource')}</span>
-            </div>
-            <div className="shortcut-item">
-              <kbd>Ctrl</kbd> + <kbd>S</kbd>
-              <span className="muted">{t('settingsShortcutSave')}</span>
-            </div>
-            <div className="shortcut-item">
-              <kbd>Escape</kbd>
-              <span className="muted">{t('settingsShortcutClose')}</span>
-            </div>
-            <div className="shortcut-item">
-              <kbd>←</kbd> / <kbd>→</kbd>
-              <span className="muted">{t('settingsShortcutFrames')}</span>
-            </div>
-            <div className="shortcut-item">
-              <kbd>Space</kbd>
-              <span className="muted">{t('settingsShortcutPlayPause')}</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

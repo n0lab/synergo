@@ -98,16 +98,6 @@ function AppContent() {
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
-    'Ctrl+k': () => {
-      setSection('oracle');
-      setSelectedMedia(null);
-      setQuizMode(false);
-      setQuizResults(null);
-    },
-    'Ctrl+n': () => {
-      setSection('add-resource');
-      setSelectedMedia(null);
-    },
     'Escape': () => {
       if (quizMode) {
         setQuizMode(false);
@@ -437,15 +427,38 @@ function AppContent() {
 
   const navigation = useMemo(
     () => [
-      { key: 'oracle', label: t('sidebarOracle'), icon: '🔮' },
-      { key: 'nomenclatures', label: t('sidebarNomenclatures'), icon: '🏷️' },
-      { key: 'reviewer', label: t('sidebarReviewer'), icon: '📝' },
-      { key: 'quizz', label: t('sidebarQuizz'), icon: '❓' },
-      { key: 'statistics', label: t('statisticsTitle'), icon: '📊' },
-      { key: 'settings', label: t('settingsTitle'), icon: '⚙️' },
+      { key: 'oracle', label: t('sidebarOracle') },
+      { key: 'nomenclatures', label: t('sidebarNomenclatures') },
+      { key: 'reviewer', label: t('sidebarReviewer') },
+      { key: 'quizz', label: t('sidebarQuizz') },
+      { key: 'statistics', label: t('statisticsTitle') },
+      { key: 'settings', label: t('settingsTitle') },
     ],
     [t]
   );
+
+  // Counts for sidebar badges
+  const sidebarCounts = useMemo(() => ({
+    reviewer: db.reviewList.length,
+    quizz: db.quizzList.length,
+  }), [db.reviewList.length, db.quizzList.length]);
+
+  // Available tags for filtering
+  const availableTags = useMemo(() => {
+    const tagCounts = {};
+    db.media.forEach(item => {
+      item.tags?.forEach(tag => {
+        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+      });
+    });
+    return Object.entries(tagCounts)
+      .map(([label, count]) => ({ label, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [db.media]);
+
+  // Review and Quiz list IDs for quick lookup
+  const reviewListIds = useMemo(() => db.reviewList.map(item => item.id), [db.reviewList]);
+  const quizListIds = useMemo(() => db.quizzList.map(item => item.id), [db.quizzList]);
 
   // Show loading state
   if (loading) {
@@ -634,22 +647,25 @@ function AppContent() {
 
       default: // oracle
         return (
-          <>
-            <OracleOverview
-              stats={stats}
-              query={query}
-              onQueryChange={setQuery}
-              items={filteredMedia}
-              onSelect={(item) => setSelectedMedia(item)}
-              activeType={typeFilter}
-              onTypeChange={setTypeFilter}
-              onAddResource={() => setSection('add-resource')}
-              onAddResultsToReview={() => addManyToList('reviewList', filteredMedia)}
-              onAddResultsToQuizz={() => addManyToList('quizzList', filteredMedia)}
-              t={t}
-              language={language}
-            />
-          </>
+          <OracleOverview
+            stats={stats}
+            query={query}
+            onQueryChange={setQuery}
+            items={filteredMedia}
+            onSelect={(item) => setSelectedMedia(item)}
+            activeType={typeFilter}
+            onTypeChange={setTypeFilter}
+            onAddResource={() => setSection('add-resource')}
+            onAddResultsToReview={() => addManyToList('reviewList', filteredMedia)}
+            onAddResultsToQuizz={() => addManyToList('quizzList', filteredMedia)}
+            onAddToReview={(item) => addTo('reviewList')(item)}
+            onAddToQuiz={(item) => addTo('quizzList')(item)}
+            onQuickDelete={deleteResource}
+            reviewListIds={reviewListIds}
+            quizListIds={quizListIds}
+            availableTags={availableTags}
+            t={t}
+          />
         );
     }
   };
@@ -685,6 +701,7 @@ function AppContent() {
           }
         }}
         t={t}
+        counts={sidebarCounts}
       />
       <main>
         <header className="topbar">
