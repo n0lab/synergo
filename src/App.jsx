@@ -52,6 +52,7 @@ function AppContent() {
   const [language, setLanguage] = useState('en');
   const [quizMode, setQuizMode] = useState(false);
   const [quizResults, setQuizResults] = useState(null);
+  const [quizQuestionCount, setQuizQuestionCount] = useState(10);
 
   // Database state
   const [db, setDb] = useState({
@@ -461,11 +462,12 @@ function AppContent() {
     }
   };
 
-  const startQuiz = () => {
+  const startQuiz = (questionCount = 10) => {
     if (db.quizzList.length === 0) {
       toast.warning(t('toastNoQuizResources'));
       return;
     }
+    setQuizQuestionCount(questionCount);
     setQuizMode(true);
     setQuizResults(null);
   };
@@ -546,6 +548,8 @@ function AppContent() {
       return (
         <QuizMode
           items={enrichedQuizItems}
+          nomenclatures={db.nomenclatures}
+          questionCount={quizQuestionCount}
           onComplete={handleQuizComplete}
           onBack={() => setQuizMode(false)}
           t={t}
@@ -627,6 +631,7 @@ function AppContent() {
         return (
           <QuizOverview
             items={enrichedQuizzList}
+            nomenclatures={db.nomenclatures}
             onSelect={(item) => {
               const enriched = { ...item, displaySrc: getResourcePath(item.src) };
               setSelectedMedia(enriched);
