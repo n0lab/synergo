@@ -113,15 +113,20 @@ export default function Nomenclatures({
     }
   };
 
-  const requestDelete = (item) => {
-    if (isNomenclatureUsed?.(item.label)) {
+  const requestDelete = (itemId, itemLabel) => {
+    if (!itemId) {
+      console.error('Cannot delete nomenclature: missing ID');
+      return;
+    }
+
+    if (isNomenclatureUsed?.(itemLabel)) {
       toast.error(t('nomenclatureDeleteBlocked'));
       return;
     }
 
-    const confirmed = window.confirm(t('nomenclatureConfirmDelete', { label: item.label }));
+    const confirmed = window.confirm(t('nomenclatureConfirmDelete', { label: itemLabel }));
     if (confirmed) {
-      onDelete(item.id);
+      onDelete(itemId);
     }
   };
 
@@ -306,7 +311,7 @@ export default function Nomenclatures({
                         <button className="ghost soft" type="button" onClick={() => startEdit(item)}>
                           {t('edit')}
                         </button>
-                        <button className="ghost" type="button" onClick={() => requestDelete(item)}>
+                        <button className="ghost" type="button" onClick={() => requestDelete(item.id, item.label)}>
                           {t('delete')}
                         </button>
                       </div>
