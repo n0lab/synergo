@@ -53,26 +53,44 @@ function generateQuestions(items, nomenclatures, questionCount) {
   const itemsWithTags = items.filter(item => item.tags?.length > 0);
   itemsWithTags.forEach(item => {
     const correctAnswers = item.tags;
+    // Calculate required wrong answers: 3 wrong per correct answer
+    const requiredWrongCount = correctAnswers.length * 3;
+
     // Find similar nomenclatures as distractors
-    const distractors = findSimilarToMultiple(correctAnswers, allLabels, Math.max(4, correctAnswers.length + 3));
+    const availableDistractors = findSimilarToMultiple(correctAnswers, allLabels, requiredWrongCount);
+
+    // If not enough distractors, duplicate them to reach required count
+    let distractors = [...availableDistractors];
+    while (distractors.length < requiredWrongCount && availableDistractors.length > 0) {
+      distractors.push(...availableDistractors);
+    }
+    distractors = distractors.slice(0, requiredWrongCount);
 
     pools[QUESTION_TYPES.IDENTIFICATION].push({
       type: QUESTION_TYPES.IDENTIFICATION,
       media: item,
       correctAnswers,
-      options: shuffleArray([...correctAnswers, ...distractors.slice(0, Math.max(3, 6 - correctAnswers.length))])
+      options: shuffleArray([...correctAnswers, ...distractors])
     });
   });
 
   // Type 2: Nomenclatures with descriptions
+  // Required wrong answers: 3 wrong per correct answer (1 correct = 3 wrong)
+  const requiredWrongCountType2 = 3;
   const nomenclaturesWithDescription = usedNomenclatures.filter(n => n.description?.trim());
   nomenclaturesWithDescription.forEach(nom => {
     const otherDescriptions = usedNomenclatures
       .filter(n => n.id !== nom.id && n.description?.trim())
       .map(n => n.description);
 
-    if (otherDescriptions.length >= 3) {
-      const wrongAnswers = shuffleArray(otherDescriptions).slice(0, 3);
+    if (otherDescriptions.length > 0) {
+      // Duplicate wrong answers if not enough available
+      let wrongAnswers = shuffleArray(otherDescriptions);
+      while (wrongAnswers.length < requiredWrongCountType2) {
+        wrongAnswers.push(...shuffleArray(otherDescriptions));
+      }
+      wrongAnswers = wrongAnswers.slice(0, requiredWrongCountType2);
+
       pools[QUESTION_TYPES.DESCRIPTION].push({
         type: QUESTION_TYPES.DESCRIPTION,
         nomenclature: nom,
@@ -83,14 +101,22 @@ function generateQuestions(items, nomenclatures, questionCount) {
   });
 
   // Type 3: Nomenclatures with interpretations
+  // Required wrong answers: 3 wrong per correct answer (1 correct = 3 wrong)
+  const requiredWrongCountType3 = 3;
   const nomenclaturesWithInterpretation = usedNomenclatures.filter(n => n.interpretation?.trim());
   nomenclaturesWithInterpretation.forEach(nom => {
     const otherInterpretations = usedNomenclatures
       .filter(n => n.id !== nom.id && n.interpretation?.trim())
       .map(n => n.interpretation);
 
-    if (otherInterpretations.length >= 3) {
-      const wrongAnswers = shuffleArray(otherInterpretations).slice(0, 3);
+    if (otherInterpretations.length > 0) {
+      // Duplicate wrong answers if not enough available
+      let wrongAnswers = shuffleArray(otherInterpretations);
+      while (wrongAnswers.length < requiredWrongCountType3) {
+        wrongAnswers.push(...shuffleArray(otherInterpretations));
+      }
+      wrongAnswers = wrongAnswers.slice(0, requiredWrongCountType3);
+
       pools[QUESTION_TYPES.INTERPRETATION].push({
         type: QUESTION_TYPES.INTERPRETATION,
         nomenclature: nom,
