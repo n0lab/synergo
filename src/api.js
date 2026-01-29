@@ -76,7 +76,7 @@ export async function getAllMedia() {
 }
 
 export async function getMediaById(id) {
-  return fetchApi(`/media/${id}`);
+  return fetchApi(`/media/${encodeURIComponent(id)}`);
 }
 
 export async function createMedia(media) {
@@ -87,14 +87,14 @@ export async function createMedia(media) {
 }
 
 export async function updateMedia(id, updates) {
-  return fetchApi(`/media/${id}`, {
+  return fetchApi(`/media/${encodeURIComponent(id)}`, {
     method: 'PUT',
     body: JSON.stringify(updates),
   });
 }
 
 export async function deleteMedia(id) {
-  return fetchApi(`/media/${id}`, {
+  return fetchApi(`/media/${encodeURIComponent(id)}`, {
     method: 'DELETE',
   });
 }
@@ -124,14 +124,14 @@ export async function syncNomenclature(nomenclature) {
 }
 
 export async function updateNomenclature(id, updates) {
-  return fetchApi(`/nomenclatures/${id}`, {
+  return fetchApi(`/nomenclatures/${encodeURIComponent(id)}`, {
     method: 'PUT',
     body: JSON.stringify(updates),
   });
 }
 
 export async function deleteNomenclature(id) {
-  return fetchApi(`/nomenclatures/${id}`, {
+  return fetchApi(`/nomenclatures/${encodeURIComponent(id)}`, {
     method: 'DELETE',
   });
 }
@@ -157,7 +157,7 @@ export async function addManyToReviewList(mediaIds) {
 }
 
 export async function removeFromReviewList(mediaId) {
-  return fetchApi(`/lists/review/${mediaId}`, {
+  return fetchApi(`/lists/review/${encodeURIComponent(mediaId)}`, {
     method: 'DELETE',
   });
 }
@@ -183,7 +183,7 @@ export async function addManyToQuizList(mediaIds) {
 }
 
 export async function removeFromQuizList(mediaId) {
-  return fetchApi(`/lists/quiz/${mediaId}`, {
+  return fetchApi(`/lists/quiz/${encodeURIComponent(mediaId)}`, {
     method: 'DELETE',
   });
 }
