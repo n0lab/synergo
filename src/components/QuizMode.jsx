@@ -1,5 +1,5 @@
 // src/components/QuizMode.jsx
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { findSimilarToMultiple } from '../utils/similarity.js';
 
 // Question types
@@ -165,10 +165,10 @@ export default function QuizMode({ items, nomenclatures, questionCount, onComple
   const [showAnswer, setShowAnswer] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState(new Set());
 
-  // Generate questions at startup
-  const questions = useMemo(
-    () => generateQuestions(items, nomenclatures, questionCount),
-    [items, nomenclatures, questionCount]
+  // Generate questions only once at component mount using lazy state initialization
+  // This prevents question regeneration when theme/language changes trigger re-renders
+  const [questions] = useState(
+    () => generateQuestions(items, nomenclatures, questionCount)
   );
 
   const currentQuestion = questions[currentIndex];
