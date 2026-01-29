@@ -396,7 +396,7 @@ export default function MediaDetail({
                 <button onClick={() => skipSeconds(-1)} aria-label={t('skipBackward')} title="Ctrl + ←">
                   {t('skipBackward')}
                 </button>
-                <button onClick={handlePlayPause}>{paused ? t('play') : t('pause')}</button>
+                <button className="play-btn" onClick={handlePlayPause}>{paused ? t('play') : t('pause')}</button>
                 <button onClick={() => skipSeconds(1)} aria-label={t('skipForward')} title="Ctrl + →">
                   {t('skipForward')}
                 </button>
