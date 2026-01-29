@@ -12,6 +12,7 @@ export default function QuizOverview({
   const [questionCount, setQuestionCount] = useState(10);
 
   // Calculate the maximum possible questions based on available data
+  // This must match the logic in QuizMode.jsx generateQuestions()
   const maxQuestions = useMemo(() => {
     // Get all tags from quiz items
     const quizTags = new Set();
@@ -29,12 +30,14 @@ export default function QuizOverview({
     const type1Count = itemsWithTags.length;
 
     // Type 2: Description (need nomenclatures with description)
+    // Also need at least 1 other nomenclature with description for wrong answers
     const nomenclaturesWithDescription = usedNomenclatures.filter(n => n.description?.trim());
-    const type2Count = nomenclaturesWithDescription.length;
+    const type2Count = nomenclaturesWithDescription.length > 1 ? nomenclaturesWithDescription.length : 0;
 
     // Type 3: Interpretation (need nomenclatures with interpretation)
+    // Also need at least 1 other nomenclature with interpretation for wrong answers
     const nomenclaturesWithInterpretation = usedNomenclatures.filter(n => n.interpretation?.trim());
-    const type3Count = nomenclaturesWithInterpretation.length;
+    const type3Count = nomenclaturesWithInterpretation.length > 1 ? nomenclaturesWithInterpretation.length : 0;
 
     return type1Count + type2Count + type3Count;
   }, [items, nomenclatures]);
