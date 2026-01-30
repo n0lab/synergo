@@ -1,0 +1,50 @@
+# Dependencies
+node_modules
+
+# Build output (will be created during Docker build)
+dist
+
+# Development files
+.git
+.gitignore
+.env
+.env.local
+.env.*.local
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Database files (will be mounted as volume)
+server/data/*.db
+server/data/*.db-wal
+server/data/*.db-shm
+
+# Media files (will be mounted as volume)
+public/resources/*
+!public/resources/.gitkeep
+
+# Docker files (not needed inside container)
+docker-compose*.yml
+Dockerfile*
+
+# Documentation
+*.md
+!README.md
+
+# Test files
+*.test.js
+*.spec.js
+__tests__
+coverage

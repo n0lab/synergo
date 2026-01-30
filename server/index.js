@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { existsSync } from 'fs';
 
 import config from './config.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -12,13 +13,15 @@ import uploadRoutes from './routes/upload.js';
 import {
   getFullDatabase,
   importDatabase,
-  resetDatabase
+  resetDatabase,
+  dbPath
 } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Security: CORS with whitelist
 app.use(cors({
@@ -68,8 +71,19 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static files from public/resources
-app.use('/resources', express.static(join(__dirname, '..', 'public', 'resources')));
+// Serve static files from resources directory
+// In production (Docker), use RESOURCES_PATH env variable
+// In development, use public/resources
+const resourcesPath = process.env.RESOURCES_PATH || join(__dirname, '..', 'public', 'resources');
+app.use('/resources', express.static(resourcesPath));
+
+// In production, serve the built frontend
+if (isProduction) {
+  const distPath = join(__dirname, '..', 'dist');
+  if (existsSync(distPath)) {
+    app.use(express.static(distPath));
+  }
+}
 
 // API Routes
 app.use('/api/media', mediaRoutes);
@@ -131,12 +145,26 @@ app.use('/api/*', (req, res) => {
   });
 });
 
+// In production, serve index.html for all non-API routes (SPA fallback)
+if (isProduction) {
+  const distPath = join(__dirname, '..', 'dist');
+  if (existsSync(distPath)) {
+    app.get('*', (req, res) => {
+      res.sendFile(join(distPath, 'index.html'));
+    });
+  }
+}
+
 // Global error handler
 app.use(errorHandler);
 
 // Start server
 app.listen(config.port, () => {
   console.log(`Synergo API server running on http://localhost:${config.port}`);
-  console.log(`Database location: ${join(__dirname, 'data', 'synergo.db')}`);
+  console.log(`Database location: ${dbPath}`);
+  console.log(`Resources location: ${resourcesPath}`);
   console.log(`API Version: ${config.apiVersion}`);
+  if (isProduction) {
+    console.log(`Mode: Production`);
+  }
 });

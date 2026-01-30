@@ -11,7 +11,8 @@ const __dirname = dirname(__filename);
 const router = Router();
 
 // Ensure resources directory exists
-const resourcesDir = join(__dirname, '..', '..', 'public', 'resources');
+// In production (Docker), use RESOURCES_PATH env variable
+const resourcesDir = process.env.RESOURCES_PATH || join(__dirname, '..', '..', 'public', 'resources');
 if (!existsSync(resourcesDir)) {
   mkdirSync(resourcesDir, { recursive: true });
 }
