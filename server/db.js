@@ -5,8 +5,12 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const dbPath = join(__dirname, 'data', 'synergo.db');
+// Support custom database path via environment variable (for Docker)
+const dbPath = process.env.DB_PATH || join(__dirname, 'data', 'synergo.db');
 const db = new Database(dbPath);
+
+// Export dbPath for logging purposes
+export { dbPath };
 
 // Enable WAL mode for better performance
 db.pragma('journal_mode = WAL');
