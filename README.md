@@ -1,184 +1,184 @@
 # Synergo
 
-**Synergo** est un catalogue interactif pour la gestion et l'apprentissage de ressources gestuelles non-verbales. L'application permet de cataloguer des vidéos et photos de gestes, de les annoter, de les organiser avec un système de tags (nomenclatures), et de s'entraîner via un mode quiz.
+**Synergo** is an interactive catalog for managing and learning non-verbal gestural resources. The application allows you to catalog videos and photos of gestures, annotate them, organize them with a tag system (nomenclatures), and practice through a quiz mode.
 
-## Fonctionnalités
+## Features
 
-### Oracle (Vue principale)
-- Parcourir les médias en mode grille ou liste
-- Recherche floue sur le titre, la description et les tags
-- Filtrer par type (vidéo/photo) et par tags
-- Tri par date, titre ou pertinence
-- Cartes KPI avec compteurs vidéos/photos
+### Oracle (Main View)
+- Browse media in grid or list mode
+- Fuzzy search on title, description, and tags
+- Filter by type (video/photo) and by tags
+- Sort by date, title, or relevance
+- KPI cards with video/photo counters
 
-### Gestion des Médias
-- Ajout de ressources : fichier local, upload, ou URL externe
-- Lecteur vidéo avec contrôles avancés (play/pause, image par image, ±1 sec)
-- Annotations temporelles avec tags associés
-- Vue détaillée 70/30 (média + informations)
+### Media Management
+- Add resources: local file, upload, or external URL
+- Video player with advanced controls (play/pause, frame-by-frame, ±1 sec)
+- Temporal annotations with associated tags
+- 70/30 detail view (media + information)
 
 ### Nomenclatures
-- Gestion des tags avec étiquettes, descriptions et interprétations
-- Synchronisation automatique avec les tags des médias
-- Export en CSV
+- Tag management with labels, descriptions, and interpretations
+- Automatic synchronization with media tags
+- CSV export
 
-### Listes de Travail
-- **Reviewer** : Marquer des médias pour révision ultérieure
-- **Quiz** : Créer une liste de médias pour l'apprentissage
+### Work Lists
+- **Reviewer**: Mark media for later review
+- **Quiz**: Create a list of media for learning
 
-### Mode Quiz
-- Quiz interactif à choix multiples (4 options)
-- Items mélangés aléatoirement
-- Score et pourcentage de réussite
-- Revue des réponses à la fin
+### Quiz Mode
+- Interactive multiple choice quiz (4 options)
+- Randomly shuffled items
+- Score and success percentage
+- Answer review at the end
 
-### Statistiques
-- Compteurs de médias et nomenclatures
-- Fréquence d'utilisation des tags
-- Détection des fichiers et nomenclatures non utilisés
+### Statistics
+- Media and nomenclature counters
+- Tag usage frequency
+- Detection of unused files and nomenclatures
 
 ### Import/Export
-- Export de la base de données en JSON
-- Import de sauvegardes
-- Réinitialisation de la base
+- Database export to JSON
+- Backup import
+- Database reset
 
 ### Interface
-- Thème clair / sombre
-- Interface bilingue français / anglais
-- Sidebar rétractable et épinglable
-- Notifications toast
-- Raccourcis clavier
+- Light / dark theme
+- Bilingual interface French / English
+- Collapsible and pinnable sidebar
+- Toast notifications
+- Keyboard shortcuts
 
-## Démarrage Rapide
+## Quick Start
 
 ```bash
-# Installer les dépendances
+# Install dependencies
 npm install
 
-# Démarrer en mode développement (API + Vite)
+# Start in development mode (API + Vite)
 npm run dev
 ```
 
-L'application sera accessible sur :
-- **Frontend** : http://localhost:5173
-- **API** : http://localhost:3001
+The application will be accessible at:
+- **Frontend**: http://localhost:5173
+- **API**: http://localhost:3001
 
-## Scripts Disponibles
+## Available Scripts
 
-| Commande | Description |
-|----------|-------------|
-| `npm run dev` | Démarre le serveur API et Vite simultanément |
-| `npm run client` | Démarre uniquement le serveur Vite |
-| `npm run server` | Démarre uniquement le serveur API |
-| `npm run build` | Crée le build de production |
-| `npm run preview` | Prévisualise le build de production |
-| `npm start` | Démarre le serveur de production |
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start API server and Vite simultaneously |
+| `npm run client` | Start only the Vite server |
+| `npm run server` | Start only the API server |
+| `npm run build` | Create production build |
+| `npm run preview` | Preview production build |
+| `npm start` | Start production server |
 
 ## Architecture
 
 ```
 synergo/
-├── src/                    # Frontend React
-│   ├── components/         # Composants React
-│   ├── contexts/           # Contextes (notifications)
-│   ├── hooks/              # Hooks personnalisés
-│   ├── utils/              # Utilitaires (recherche, export)
-│   ├── App.jsx             # Composant principal
-│   ├── api.js              # Client API
-│   └── i18n.js             # Traductions
-├── server/                 # Backend Express
-│   ├── routes/             # Routes API
+├── src/                    # React Frontend
+│   ├── components/         # React Components
+│   ├── contexts/           # Contexts (notifications)
+│   ├── hooks/              # Custom hooks
+│   ├── utils/              # Utilities (search, export)
+│   ├── App.jsx             # Main component
+│   ├── api.js              # API Client
+│   └── i18n.js             # Translations
+├── server/                 # Express Backend
+│   ├── routes/             # API Routes
 │   ├── middleware/         # Middlewares
-│   ├── migrations/         # Migrations BDD
-│   ├── db.js               # Couche SQLite
-│   └── index.js            # Point d'entrée
+│   ├── migrations/         # DB Migrations
+│   ├── db.js               # SQLite layer
+│   └── index.js            # Entry point
 ├── public/
-│   └── resources/          # Fichiers médias
+│   └── resources/          # Media files
 └── package.json
 ```
 
-### Stack Technique
+### Tech Stack
 
-| Couche | Technologies |
-|--------|--------------|
+| Layer | Technologies |
+|-------|--------------|
 | Frontend | React 18, Vite 5, Lucide Icons |
 | Backend | Express.js, Node.js, Multer |
-| Base de données | SQLite (better-sqlite3) |
+| Database | SQLite (better-sqlite3) |
 
-## Gestion des Ressources Médias
+## Media Resources Management
 
-### Structure de Stockage
+### Storage Structure
 
-Les fichiers médias sont stockés dans `/public/resources/`. La base de données ne contient que les noms de fichiers :
+Media files are stored in `/public/resources/`. The database only contains filenames:
 
 ```
-Base de données : "geste-01.mp4"
+Database: "gesture-01.mp4"
        ↓
-Résolution : "/resources/geste-01.mp4"
+Resolution: "/resources/gesture-01.mp4"
        ↓
-Fichier : /public/resources/geste-01.mp4
+File: /public/resources/gesture-01.mp4
 ```
 
-### Ajouter des Ressources
+### Adding Resources
 
-**Option 1 : Fichier existant**
-1. Placer le fichier dans `/public/resources/`
-2. Dans l'app, aller à "Ajouter une ressource"
-3. Sélectionner "Fichier existant"
-4. Entrer le nom du fichier (ex: `geste-01.mp4`)
-5. Remplir le titre et la description
+**Option 1: Existing file**
+1. Place the file in `/public/resources/`
+2. In the app, go to "Add Resource"
+3. Select "Existing file"
+4. Enter the filename (e.g., `gesture-01.mp4`)
+5. Fill in the title and description
 
-**Option 2 : Upload**
-1. Dans l'app, aller à "Ajouter une ressource"
-2. Sélectionner "Upload"
-3. Choisir un fichier depuis votre ordinateur
-4. Le fichier sera automatiquement copié dans `/public/resources/`
+**Option 2: Upload**
+1. In the app, go to "Add Resource"
+2. Select "Upload"
+3. Choose a file from your computer
+4. The file will be automatically copied to `/public/resources/`
 
-**Option 3 : URL externe**
-1. Dans l'app, aller à "Ajouter une ressource"
-2. Sélectionner "URL externe"
-3. Entrer l'URL complète (http/https)
+**Option 3: External URL**
+1. In the app, go to "Add Resource"
+2. Select "External URL"
+3. Enter the complete URL (http/https)
 
-### Formats Supportés
+### Supported Formats
 
 | Type | Extensions |
 |------|------------|
-| Vidéo | .mp4, .webm, .mov, .avi, .mkv |
+| Video | .mp4, .webm, .mov, .avi, .mkv |
 | Photo | .jpg, .jpeg, .png, .gif, .webp, .bmp |
 
-## Base de Données
+## Database
 
-La base de données SQLite est stockée dans `server/data/synergo.db` et créée automatiquement au premier démarrage.
+The SQLite database is stored in `server/data/synergo.db` and is automatically created on first startup.
 
 ### Tables
 
-- **media** : Vidéos et photos avec métadonnées, tags et annotations
-- **nomenclatures** : Définitions des tags
-- **review_list** : Médias marqués pour révision
-- **quiz_list** : Médias dans la liste quiz
+- **media**: Videos and photos with metadata, tags, and annotations
+- **nomenclatures**: Tag definitions
+- **review_list**: Media marked for review
+- **quiz_list**: Media in the quiz list
 
 ## Configuration
 
-### Serveur (port 3001)
+### Server (port 3001)
 
-- Rate limiting : 500 requêtes / 15 minutes
-- Taille max body : 10 MB
-- Taille max upload : 100 MB
+- Rate limiting: 500 requests / 15 minutes
+- Max body size: 10 MB
+- Max upload size: 100 MB
 
 ### Frontend
 
-- Debounce recherche : 300ms
-- Durée toast : 5 secondes
-- FPS par défaut : 30
+- Search debounce: 300ms
+- Toast duration: 5 seconds
+- Default FPS: 30
 
-## Avantages de l'Architecture
+## Architecture Benefits
 
-- **Pas de limite de stockage navigateur** : Les médias sont sur le système de fichiers
-- **Performance** : Fichiers servis statiquement et mis en cache
-- **Persistance** : Base de données SQLite robuste
-- **Portabilité** : Export/import JSON pour sauvegardes
-- **Fonctionne hors-ligne** : Une fois les fichiers en place
+- **No browser storage limit**: Media files are on the file system
+- **Performance**: Files served statically and cached
+- **Persistence**: Robust SQLite database
+- **Portability**: JSON export/import for backups
+- **Works offline**: Once files are in place
 
-## Licence
+## License
 
 MIT
