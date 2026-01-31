@@ -14,6 +14,7 @@ import {
   importDatabase,
   resetDatabase
 } from './db.js';
+import path from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -133,6 +134,14 @@ app.use('/api/*', (req, res) => {
 
 // Global error handler
 app.use(errorHandler);
+
+// Vite frontend (dist/)
+app.use(express.static(path.join(__dirname, "..", "dist")));
+
+// Fallback SPA
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "dist", "index.html"));
+});
 
 // Start server
 app.listen(config.port, () => {
