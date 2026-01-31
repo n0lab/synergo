@@ -43,7 +43,7 @@ const detectMediaType = (link) => {
 function AppContent() {
   const toast = useToast();
   const [theme, setTheme] = useState(palette.dark);
-  const [sidebarPinned, setSidebarPinned] = useState(false);
+  const [sidebarPinned, setSidebarPinned] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [section, setSection] = useState('oracle');
   const [query, setQuery] = useState('');
