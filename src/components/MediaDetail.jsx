@@ -9,6 +9,7 @@ export default function MediaDetail({
   onToQuizz,
   onUpdateMedia,
   onDeleteMedia,
+  onNavigateToNomenclature,
   t,
 }) {
   const videoRef = useRef(null);
@@ -460,7 +461,14 @@ export default function MediaDetail({
                               aria-label={t('nomenclatureLabel')}
                             />
                           ) : (
-                            <span className="badge">{label}</span>
+                            <button
+                              type="button"
+                              className="badge link"
+                              onClick={() => onNavigateToNomenclature?.(label)}
+                              aria-label={t('editNomenclature', { label })}
+                            >
+                              {label}
+                            </button>
                           )}
                         </div>
                         {!editing && description && (
@@ -507,7 +515,14 @@ export default function MediaDetail({
                               aria-label={t('nomenclatureLabel')}
                             />
                           ) : (
-                            <span className="badge">{tag}</span>
+                            <button
+                              type="button"
+                              className="badge link"
+                              onClick={() => onNavigateToNomenclature?.(tag)}
+                              aria-label={t('editNomenclature', { label: tag })}
+                            >
+                              {tag}
+                            </button>
                           )}
                         </div>
                         {!editing && description && (

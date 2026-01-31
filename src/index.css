@@ -1701,12 +1701,14 @@ main {
 .toast-container {
   position: fixed;
   top: var(--space-lg);
-  right: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1000;
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  max-width: 400px;
+  max-width: 500px;
+  min-width: 350px;
 }
 
 .toast {
@@ -1720,13 +1722,13 @@ main {
   cursor: pointer;
   overflow: hidden;
   opacity: 0;
-  transform: translateX(100%);
+  transform: translateY(-20px);
   transition: all var(--transition-base);
 }
 
 .toast-show {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateY(0);
 }
 
 .toast-icon {
@@ -3305,10 +3307,14 @@ main {
   }
 
   .toast-container {
-    left: var(--space-md);
-    right: var(--space-md);
-    top: auto;
-    bottom: var(--space-md);
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    top: var(--space-md);
+    bottom: auto;
+    min-width: auto;
+    width: calc(100% - var(--space-md) * 2);
+    max-width: 500px;
   }
 
   .grid {
