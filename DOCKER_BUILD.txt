@@ -1,25 +1,25 @@
-# Notes de construction Docker pour Synergo
+# Docker Build Notes for Synergo
 
-## Construire l'image Docker
+## Build the Docker Image
 
-Pour construire l'image Docker en s'assurant qu'aucun cache n'est utilisé :
+To build the Docker image ensuring no cache is used:
 
     sudo docker build --no-cache -t synergo:1.0.0 .
 
-L'option --no-cache force Docker a reconstruire toutes les couches de l'image.
+The --no-cache option forces Docker to rebuild all image layers.
 
-## Exporter l'image vers un fichier tar
+## Export the Image to a tar File
 
-Pour sauvegarder l'image dans un fichier tar (utile pour le transfert) :
+To save the image to a tar file (useful for transfer):
 
     sudo docker image save -o synergo_1.0.0.tar synergo:1.0.0
 
-## Charger une image depuis un fichier tar
+## Load an Image from a tar File
 
-Pour charger une image precedemment exportee :
+To load a previously exported image:
 
     sudo docker load -i synergo_1.0.0.tar
 
-## Demarrer le conteneur
+## Start the Container
 
     sudo docker compose up -d
