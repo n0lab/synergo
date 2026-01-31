@@ -1974,14 +1974,6 @@ main {
 .media-panel {
   border-radius: var(--radius-lg);
   padding: var(--space-md);
-  display: flex;
-  flex-direction: column;
-}
-
-.video-wrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
 }
 
 .video-player,
