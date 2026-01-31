@@ -1,0 +1,9 @@
+services:
+  synergo:
+    image: synergo:1.0.0
+    container_name: synergo
+    ports:
+      - "3001:3001"
+    volumes:
+      - /volume1/docker/synergo/resources:/app/public/resources
+      - /volume1/docker/synergo/db:/app/server/data
