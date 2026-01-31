@@ -53,6 +53,7 @@ function AppContent() {
   const [quizMode, setQuizMode] = useState(false);
   const [quizResults, setQuizResults] = useState(null);
   const [quizQuestionCount, setQuizQuestionCount] = useState(10);
+  const [editNomenclatureLabel, setEditNomenclatureLabel] = useState(null);
 
   // Database state
   const [db, setDb] = useState({
@@ -161,6 +162,12 @@ function AppContent() {
     setSelectedMedia(null);
     setQuery(value);
     setTypeFilter('all');
+  };
+
+  const navigateToNomenclatureEdit = (label) => {
+    setSection('nomenclatures');
+    setSelectedMedia(null);
+    setEditNomenclatureLabel(label);
   };
 
   // Refresh database from server
@@ -591,6 +598,7 @@ function AppContent() {
           onToQuizz={addTo('quizzList')}
           onUpdateMedia={updateMediaItem}
           onDeleteMedia={deleteResource}
+          onNavigateToNomenclature={navigateToNomenclatureEdit}
           t={t}
         />
       );
@@ -607,6 +615,8 @@ function AppContent() {
             onDelete={deleteNomenclatureItem}
             onNavigate={navigateToOracleWithQuery}
             isNomenclatureUsed={isNomenclatureUsed}
+            editNomenclatureLabel={editNomenclatureLabel}
+            onClearEditNomenclature={() => setEditNomenclatureLabel(null)}
             t={t}
             language={language}
           />
