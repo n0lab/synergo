@@ -1028,6 +1028,7 @@ main {
   color: var(--text);
   font-size: 12px;
   font-weight: 500;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
   transition: all var(--transition-fast);
 }
 
@@ -1408,6 +1409,7 @@ main {
   border: 1px solid var(--border);
   color: var(--text-secondary);
   font-size: 12px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
   transition: all var(--transition-fast);
 }
 
@@ -1450,6 +1452,7 @@ main {
   border-radius: var(--radius-full);
   color: #fff;
   font-size: 12px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
 }
 
 .remove-tag-btn {
@@ -2528,6 +2531,7 @@ main {
   font-weight: 700;
   color: var(--text);
   text-align: center;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
 }
 
 /* Quiz Question */
