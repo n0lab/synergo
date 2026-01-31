@@ -1979,12 +1979,6 @@ main {
 .media-panel {
   border-radius: var(--radius-lg);
   padding: var(--space-md);
-  display: flex;
-  flex-direction: column;
-}
-
-.video-wrapper {
-  margin-top: auto;
 }
 
 .video-player,
