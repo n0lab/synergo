@@ -19,9 +19,9 @@ npm start            # Start production server
 ## Docker Commands
 
 ```bash
-docker build -t synergo:1.0.0 .                    # Build Docker image
-docker image save -o synergo_1.0.0.tar synergo:1.0.0  # Export image to tar
-docker compose up -d                               # Start with docker-compose
+docker build --no-cache -t synergo:1.0.0 .           # Build Docker image (no cache)
+docker image save -o synergo_1.0.0.tar synergo:1.0.0 # Export image to tar
+docker compose up -d                                 # Start with docker-compose
 ```
 
 ## Application Overview

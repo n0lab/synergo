@@ -82,8 +82,10 @@ The application will be accessible at http://localhost:3001
 ### Build the Docker Image
 
 ```bash
-docker build -t synergo:1.0.0 .
+docker build --no-cache -t synergo:1.0.0 .
 ```
+
+Use `--no-cache` to ensure all layers are rebuilt from scratch.
 
 ### Run with Docker Compose
 
