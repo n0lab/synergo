@@ -1,0 +1,2 @@
+#sudo docker build --no-cache -t synergo:1.0.0 .
+#sudo docker image save -o synergo_1.0.0.tar synergo:1.0.0
