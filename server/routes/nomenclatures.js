@@ -5,7 +5,8 @@ import {
   createNomenclature,
   updateNomenclature,
   deleteNomenclature,
-  upsertNomenclature
+  upsertNomenclature,
+  updateMediaTagsForRenamedLabel
 } from '../db.js';
 import { ApiError, asyncHandler } from '../middleware/errorHandler.js';
 import { validateNomenclature, validateIdParam } from '../middleware/validate.js';
@@ -59,11 +60,25 @@ router.post('/sync', validateNomenclature, asyncHandler(async (req, res) => {
 
 // PUT /api/nomenclatures/:id - Update nomenclature
 router.put('/:id', validateIdParam, validateNomenclature, asyncHandler(async (req, res) => {
-  const nomenclature = updateNomenclature(req.params.id, req.body);
-  if (!nomenclature) {
+  // Get current nomenclature to check if label is changing
+  const current = getNomenclatureById(req.params.id);
+  if (!current) {
     throw ApiError.notFound('Nomenclature not found');
   }
-  res.json(nomenclature);
+
+  const oldLabel = current.label;
+  const newLabel = req.body.label;
+
+  // Update the nomenclature
+  const nomenclature = updateNomenclature(req.params.id, req.body);
+
+  // If label changed, update all media that use this tag
+  if (newLabel && oldLabel !== newLabel) {
+    const updatedMediaCount = updateMediaTagsForRenamedLabel(oldLabel, newLabel);
+    res.json({ ...nomenclature, updatedMediaCount });
+  } else {
+    res.json(nomenclature);
+  }
 }));
 
 // DELETE /api/nomenclatures/:id - Delete nomenclature
