@@ -14,6 +14,7 @@ export default function MediaDetail({
   const videoRef = useRef(null);
   const [paused, setPaused] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [draftAnnotations, setDraftAnnotations] = useState(media.annotations ?? []);
   const [draftTags, setDraftTags] = useState(media.tags ?? []);
   const [draftTitle, setDraftTitle] = useState(media.title ?? '');
@@ -409,9 +410,18 @@ export default function MediaDetail({
             <img src={mediaSrc} alt={media.title} className="photo" />
           )}
         </section>
-        <aside className="tags-panel">
+        <aside className={`tags-panel ${panelCollapsed ? 'collapsed' : ''}`}>
           <div className="tags-panel-header">
             <h3>{t('nomenclaturesHeading')}</h3>
+            <button
+              type="button"
+              className="toggle-panel-btn"
+              onClick={() => setPanelCollapsed(!panelCollapsed)}
+              aria-label={panelCollapsed ? t('showNomenclatures') : t('hideNomenclatures')}
+              title={panelCollapsed ? t('showNomenclatures') : t('hideNomenclatures')}
+            >
+              <span className="chevron">{panelCollapsed ? '‹' : '›'}</span>
+            </button>
           </div>
           <div className="annotation-section">
             {media.type === 'video' ? (
