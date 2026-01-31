@@ -21,18 +21,52 @@ const __dirname = dirname(__filename);
 
 const app = express();
 
+// Helper to check if origin is a private/local IP address
+const isPrivateOrigin = (origin) => {
+  try {
+    const url = new URL(origin);
+    const hostname = url.hostname;
+    // Check for localhost variants
+    if (hostname === 'localhost' || hostname === '127.0.0.1') return true;
+    // Check for private IP ranges (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+    const ipMatch = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+    if (ipMatch) {
+      const [, a, b] = ipMatch.map(Number);
+      if (a === 10) return true; // 10.0.0.0/8
+      if (a === 192 && b === 168) return true; // 192.168.0.0/16
+      if (a === 172 && b >= 16 && b <= 31) return true; // 172.16.0.0/12
+    }
+    return false;
+  } catch {
+    return false;
+  }
+};
+
 // Security: CORS with whitelist
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
 
+    // Allow configured origins
     if (config.cors.origins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn(`CORS blocked request from: ${origin}`);
-      callback(null, true); // Allow in development, restrict in production
+      return callback(null, true);
     }
+
+    // In development, allow private/local IP addresses
+    if (process.env.NODE_ENV !== 'production' && isPrivateOrigin(origin)) {
+      return callback(null, true);
+    }
+
+    // In production, block unauthorized origins
+    if (process.env.NODE_ENV === 'production') {
+      console.warn(`CORS blocked request from: ${origin}`);
+      return callback(new Error('CORS not allowed'), false);
+    }
+
+    // In development, warn but allow
+    console.warn(`CORS blocked request from: ${origin}`);
+    callback(null, true);
   },
   credentials: config.cors.credentials
 }));
