@@ -87,7 +87,7 @@ docker build -t synergo:1.0.0 .
 
 ### Run with Docker Compose
 
-Create a `docker-compose.yaml` file (see `example.docker-compose.yaml`):
+Use the provided `docker-compose.yaml` file (adjust volume paths as needed):
 
 ```yaml
 services:
@@ -156,7 +156,7 @@ synergo/
 ├── public/
 │   └── resources/          # Media files
 ├── Dockerfile              # Docker build configuration
-├── example.docker-compose.yaml
+├── docker-compose.yaml         # Docker Compose configuration
 └── package.json
 ```
 

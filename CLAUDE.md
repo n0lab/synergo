@@ -142,7 +142,7 @@ synergo/
 │   └── resources/                # Media files (mounted volume in Docker)
 ├── Dockerfile                    # Multi-stage Docker build
 ├── .dockerignore                 # Docker build exclusions
-├── example.docker-compose.yaml   # Docker Compose example
+├── docker-compose.yaml           # Docker Compose configuration
 ├── styles.css                    # CSS variables and themes
 ├── vite.config.js                # Vite configuration
 └── package.json
@@ -166,7 +166,7 @@ The Dockerfile uses a multi-stage build:
 
 ### Docker Compose Configuration
 
-See `example.docker-compose.yaml`:
+See `docker-compose.yaml`:
 
 ```yaml
 services:
