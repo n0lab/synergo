@@ -13,7 +13,7 @@
 
 ### Media Management
 - Add resources: local file, upload, or external URL
-- Video player with advanced controls (play/pause, frame-by-frame, ±1 sec)
+- Video player with advanced controls (play/pause, frame-by-frame, +/-1 sec)
 - Temporal annotations with associated tags
 - 70/30 detail view (media + information)
 
@@ -51,6 +51,8 @@
 
 ## Quick Start
 
+### Development Mode
+
 ```bash
 # Install dependencies
 npm install
@@ -62,6 +64,64 @@ npm run dev
 The application will be accessible at:
 - **Frontend**: http://localhost:5173
 - **API**: http://localhost:3001
+
+### Production Mode
+
+```bash
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+The application will be accessible at http://localhost:3001
+
+## Docker Deployment
+
+### Build the Docker Image
+
+```bash
+docker build -t synergo:1.0.0 .
+```
+
+### Run with Docker Compose
+
+Use the provided `docker-compose.yaml` file (adjust volume paths as needed):
+
+```yaml
+services:
+  synergo:
+    image: synergo:1.0.0
+    container_name: synergo
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./data/resources:/app/public/resources
+      - ./data/db:/app/server/data
+    restart: unless-stopped
+```
+
+Start the container:
+
+```bash
+docker compose up -d
+```
+
+### Volume Mounts
+
+| Container Path | Purpose |
+|---------------|---------|
+| `/app/public/resources` | Media files (videos, photos) |
+| `/app/server/data` | SQLite database |
+
+These volumes ensure data persistence across container restarts and updates.
+
+### Export Docker Image
+
+```bash
+docker image save -o synergo_1.0.0.tar synergo:1.0.0
+```
 
 ## Available Scripts
 
@@ -90,10 +150,13 @@ synergo/
 │   ├── routes/             # API Routes
 │   ├── middleware/         # Middlewares
 │   ├── migrations/         # DB Migrations
+│   ├── data/               # SQLite database location
 │   ├── db.js               # SQLite layer
 │   └── index.js            # Entry point
 ├── public/
 │   └── resources/          # Media files
+├── Dockerfile              # Docker build configuration
+├── docker-compose.yaml         # Docker Compose configuration
 └── package.json
 ```
 
@@ -104,6 +167,7 @@ synergo/
 | Frontend | React 18, Vite 5, Lucide Icons |
 | Backend | Express.js, Node.js, Multer |
 | Database | SQLite (better-sqlite3) |
+| Container | Docker, multi-stage build |
 
 ## Media Resources Management
 
@@ -176,7 +240,7 @@ The SQLite database is stored in `server/data/synergo.db` and is automatically c
 - **No browser storage limit**: Media files are on the file system
 - **Performance**: Files served statically and cached
 - **Persistence**: Robust SQLite database
-- **Portability**: JSON export/import for backups
+- **Portability**: JSON export/import for backups + Docker support
 - **Works offline**: Once files are in place
 
 ## License

@@ -17,3 +17,11 @@ Thumbs.db
 # Environment
 .env
 .env.local
+
+# Database (SQLite)
+server/data/*
+!server/data/.gitkeep
+
+# Media resources (use Docker volumes)
+public/resources/*
+!public/resources/.gitkeep

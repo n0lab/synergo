@@ -16,6 +16,14 @@ npm start            # Start production server
 
 **Note:** No testing framework or linting tool is currently configured.
 
+## Docker Commands
+
+```bash
+docker build -t synergo:1.0.0 .                    # Build Docker image
+docker image save -o synergo_1.0.0.tar synergo:1.0.0  # Export image to tar
+docker compose up -d                               # Start with docker-compose
+```
+
 ## Application Overview
 
 **Synergo** is an interactive catalog for managing non-verbal gestural resources (videos and photos). The application allows cataloging, annotating, searching, and learning gestures through different usage modes.
@@ -49,6 +57,7 @@ npm start            # Start production server
 | **Backend** | Express.js, Node.js, Multer |
 | **Database** | SQLite (better-sqlite3), WAL mode |
 | **Build** | Vite 5, React Plugin |
+| **Container** | Docker, multi-stage build |
 
 ### Data Flow
 
@@ -125,15 +134,60 @@ synergo/
 │   │   ├── errorHandler.js       # Error handling
 │   │   └── validate.js           # Validation
 │   ├── migrations/               # DB Migrations
+│   ├── data/                     # SQLite database location
 │   ├── db.js                     # SQLite layer
 │   ├── index.js                  # Server entry point
 │   └── config.js                 # Configuration
 ├── public/
-│   └── resources/                # Media files
+│   └── resources/                # Media files (mounted volume in Docker)
+├── Dockerfile                    # Multi-stage Docker build
+├── .dockerignore                 # Docker build exclusions
+├── docker-compose.yaml           # Docker Compose configuration
 ├── styles.css                    # CSS variables and themes
 ├── vite.config.js                # Vite configuration
 └── package.json
 ```
+
+## Docker Deployment
+
+### Dockerfile Overview
+
+The Dockerfile uses a multi-stage build:
+
+1. **Build stage**: Compiles the application with native SQLite module
+   - Uses `node:20-bookworm-slim`
+   - Installs build tools (python3, make, g++) for better-sqlite3
+   - Runs `npm ci`, `npm run build`, and `npm prune --omit=dev`
+
+2. **Runtime stage**: Minimal production image
+   - Copies built application
+   - Creates directories for data persistence
+   - Exposes port 3001
+
+### Docker Compose Configuration
+
+See `docker-compose.yaml`:
+
+```yaml
+services:
+  synergo:
+    image: synergo:1.0.0
+    container_name: synergo
+    ports:
+      - "3001:3001"
+    volumes:
+      - /path/to/resources:/app/public/resources  # Media files
+      - /path/to/db:/app/server/data              # SQLite database
+```
+
+### Volume Mounts (Critical for Persistence)
+
+| Container Path | Purpose |
+|---------------|---------|
+| `/app/public/resources` | Media files (videos, photos) |
+| `/app/server/data` | SQLite database (synergo.db) |
+
+**Important:** Without these volumes, all data is lost when the container restarts.
 
 ## API Endpoints
 
@@ -186,6 +240,12 @@ synergo/
 | POST | `/api/upload` | Upload file (max 100MB) |
 | GET | `/api/upload/files` | List available files |
 
+### Health Check
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | Health check with status and version |
+
 ## Database Schema
 
 ### Table `media`
@@ -231,6 +291,7 @@ Database: "flower.mp4"
 Resolution: "/resources/flower.mp4"
         ↓
 File: /public/resources/flower.mp4
+      (or /app/public/resources/flower.mp4 in Docker)
 ```
 
 **Storage modes:**
@@ -268,7 +329,7 @@ Annotation format:
 ```
 
 - Frame-by-frame navigation (configurable FPS, default 30)
-- Controls: Play/Pause, ←/→ frames, ±1 second
+- Controls: Play/Pause, left/right frames, +/-1 second
 
 ### Search
 
@@ -284,8 +345,8 @@ Scoring algorithm:
 
 | Parameter | Value |
 |-----------|-------|
-| PORT | 3001 |
-| CORS | localhost:5173, localhost:3000 |
+| PORT | 3001 (configurable via env) |
+| CORS | localhost:5173, localhost:3000, 127.0.0.1:5173 |
 | Rate limit | 500 requests / 15 min |
 | Body limit | 10 MB |
 | Upload max | 100 MB |
@@ -301,6 +362,14 @@ Scoring algorithm:
 | MAX_TAGS | 50 |
 | MAX_ANNOTATIONS | 100 |
 
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| PORT | Server port | 3001 |
+| NODE_ENV | Environment mode | development |
+| ALLOWED_ORIGINS | CORS origins (comma-separated) | localhost:5173,localhost:3000 |
+
 ## Development Notes
 
 - Vite proxy redirects `/api` to Express server (port 3001)
@@ -308,6 +377,7 @@ Scoring algorithm:
 - Database is automatically created on first startup
 - Migrations managed with versioning system in `server/migrations/`
 - Security: input validation, filename sanitization, rate limiting
+- In production, Express serves both API and static frontend (dist/)
 
 ## Version
 
