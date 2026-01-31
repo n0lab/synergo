@@ -372,15 +372,23 @@ function AppContent() {
             });
 
             if (!isUsedElsewhere) {
-              // Find the nomenclature by label and delete it
+              // Find the nomenclature by label and delete it only if it has no content
               const nomenclature = latestDb.nomenclatures.find(
                 (n) => n.label.toLowerCase() === label
               );
               if (nomenclature) {
-                try {
-                  await api.deleteNomenclature(nomenclature.id);
-                } catch (err) {
-                  // Ignore deletion errors for cleanup
+                // Check if the nomenclature has content (description or interpretation)
+                const hasContent =
+                  (nomenclature.description && nomenclature.description.trim()) ||
+                  (nomenclature.interpretation && nomenclature.interpretation.trim());
+
+                // Only delete if the nomenclature has no content
+                if (!hasContent) {
+                  try {
+                    await api.deleteNomenclature(nomenclature.id);
+                  } catch (err) {
+                    // Ignore deletion errors for cleanup
+                  }
                 }
               }
             }
