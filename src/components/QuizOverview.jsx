@@ -1,5 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import MediaCard from './MediaCard.jsx';
+
+const GRID_SIZE_KEY = 'synergo-grid-size';
 
 export default function QuizOverview({
   items,
@@ -10,6 +12,26 @@ export default function QuizOverview({
   t
 }) {
   const [questionCount, setQuestionCount] = useState(10);
+  const [gridSize, setGridSize] = useState(() => {
+    const saved = localStorage.getItem(GRID_SIZE_KEY);
+    return saved && ['small', 'medium', 'large'].includes(saved) ? saved : 'medium';
+  });
+
+  // Listen for storage changes to sync with Oracle page
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === GRID_SIZE_KEY && e.newValue) {
+        if (['small', 'medium', 'large'].includes(e.newValue)) {
+          setGridSize(e.newValue);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const gridSizeClass = `grid-${gridSize}`;
 
   // Calculate the maximum possible questions based on available data
   // This must match the logic in QuizMode.jsx generateQuestions()
@@ -90,7 +112,7 @@ export default function QuizOverview({
         </div>
       )}
 
-      <div className="grid">
+      <div className={`grid ${gridSizeClass}`}>
         {items.map((item) => (
           <MediaCard
             key={item.id}

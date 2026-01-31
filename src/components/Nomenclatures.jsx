@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '../contexts/ToastContext.jsx';
 import StatsCard from './StatsCard.jsx';
 
@@ -9,9 +9,12 @@ export default function Nomenclatures({
   onDelete,
   onNavigate,
   isNomenclatureUsed,
+  editNomenclatureLabel,
+  onClearEditNomenclature,
   t,
   language,
 }) {
+  const rowRefs = useRef({});
   const [label, setLabel] = useState('');
   const [description, setDescription] = useState('');
   const [interpretation, setInterpretation] = useState('');
@@ -39,6 +42,35 @@ export default function Nomenclatures({
       return labelMatch || descriptionMatch || interpretationMatch;
     });
   }, [query, sortedItems]);
+
+  // Auto-edit and scroll to nomenclature when navigating from MediaDetail
+  useEffect(() => {
+    if (!editNomenclatureLabel) return;
+
+    // Clear the search query to ensure the item is visible
+    setQuery('');
+
+    // Find the nomenclature by label
+    const targetItem = items.find(
+      (item) => item.label.toLowerCase() === editNomenclatureLabel.toLowerCase()
+    );
+
+    if (targetItem) {
+      // Start editing the item
+      startEdit(targetItem);
+
+      // Scroll to the row after a short delay to ensure the DOM is updated
+      setTimeout(() => {
+        const rowElement = rowRefs.current[targetItem.id];
+        if (rowElement) {
+          rowElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+
+    // Clear the edit label so it doesn't re-trigger
+    onClearEditNomenclature?.();
+  }, [editNomenclatureLabel, items, onClearEditNomenclature]);
 
   const resetForm = () => {
     setLabel('');
@@ -247,7 +279,7 @@ export default function Nomenclatures({
                     ? 'nomenclature-label-partial'
                     : '';
               return (
-                <tr key={item.id}>
+                <tr key={item.id} ref={(el) => (rowRefs.current[item.id] = el)}>
                   <td className="label">
                     {isEditing ? (
                       <input

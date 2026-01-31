@@ -86,6 +86,8 @@ const translations = {
 
     // Nomenclatures
     nomenclaturesHeading: 'Nomenclatures',
+    hideNomenclatures: 'Hide nomenclatures',
+    showNomenclatures: 'Show nomenclatures',
     noTimedNomenclatures: 'No timestamped nomenclature.',
     newNomenclaturePlaceholder: 'New nomenclature',
     add: 'Add',
@@ -172,6 +174,7 @@ const translations = {
     delete: 'Delete',
     actions: 'Actions',
     searchNomenclature: (label) => `Search ${label}`,
+    editNomenclature: (label) => `Edit nomenclature ${label}`,
     noNomenclature: 'No nomenclature saved.',
     noNomenclatureRows: 'No nomenclature saved.',
 
@@ -403,6 +406,8 @@ const translations = {
 
     // Nomenclatures
     nomenclaturesHeading: 'Nomenclatures',
+    hideNomenclatures: 'Masquer les nomenclatures',
+    showNomenclatures: 'Afficher les nomenclatures',
     noTimedNomenclatures: 'Aucune nomenclature horodatée.',
     newNomenclaturePlaceholder: 'Nouvelle nomenclature',
     add: 'Ajouter',
@@ -492,6 +497,7 @@ const translations = {
     delete: 'Supprimer',
     actions: 'Actions',
     searchNomenclature: (label) => `Rechercher ${label}`,
+    editNomenclature: (label) => `Modifier la nomenclature ${label}`,
     noNomenclature: 'Aucune nomenclature enregistrée.',
     noNomenclatureRows: 'Aucune nomenclature enregistrée.',
 

@@ -311,6 +311,61 @@ export function updateNomenclature(id, updates) {
   return getNomenclatureById(id);
 }
 
+/**
+ * Update tag label in all media when a nomenclature label is renamed.
+ * This updates both the tags array and annotations labels.
+ * @param {string} oldLabel - The old tag label
+ * @param {string} newLabel - The new tag label
+ * @returns {number} - Number of media records updated
+ */
+export function updateMediaTagsForRenamedLabel(oldLabel, newLabel) {
+  if (!oldLabel || !newLabel || oldLabel === newLabel) {
+    return 0;
+  }
+
+  const allMedia = getAllMedia();
+  let updatedCount = 0;
+
+  const updateStmt = db.prepare(`
+    UPDATE media SET tags = ?, annotations = ?, updated_at = ?
+    WHERE id = ?
+  `);
+
+  for (const media of allMedia) {
+    let changed = false;
+
+    // Update tags array
+    const newTags = media.tags.map(tag => {
+      if (tag === oldLabel) {
+        changed = true;
+        return newLabel;
+      }
+      return tag;
+    });
+
+    // Update annotations labels
+    const newAnnotations = media.annotations.map(ann => {
+      if (ann.label === oldLabel) {
+        changed = true;
+        return { ...ann, label: newLabel };
+      }
+      return ann;
+    });
+
+    if (changed) {
+      updateStmt.run(
+        JSON.stringify(newTags),
+        JSON.stringify(newAnnotations),
+        Date.now(),
+        media.id
+      );
+      updatedCount++;
+    }
+  }
+
+  return updatedCount;
+}
+
 export function deleteNomenclature(id) {
   const stmt = db.prepare('DELETE FROM nomenclatures WHERE id = ?');
   const result = stmt.run(id);
