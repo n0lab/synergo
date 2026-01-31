@@ -44,7 +44,7 @@ function AppContent() {
   const toast = useToast();
   const [theme, setTheme] = useState(palette.dark);
   const [sidebarPinned, setSidebarPinned] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [section, setSection] = useState('oracle');
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
