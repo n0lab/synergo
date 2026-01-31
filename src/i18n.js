@@ -86,6 +86,8 @@ const translations = {
 
     // Nomenclatures
     nomenclaturesHeading: 'Nomenclatures',
+    hideNomenclatures: 'Hide nomenclatures',
+    showNomenclatures: 'Show nomenclatures',
     noTimedNomenclatures: 'No timestamped nomenclature.',
     newNomenclaturePlaceholder: 'New nomenclature',
     add: 'Add',
@@ -403,6 +405,8 @@ const translations = {
 
     // Nomenclatures
     nomenclaturesHeading: 'Nomenclatures',
+    hideNomenclatures: 'Masquer les nomenclatures',
+    showNomenclatures: 'Afficher les nomenclatures',
     noTimedNomenclatures: 'Aucune nomenclature horodatée.',
     newNomenclaturePlaceholder: 'Nouvelle nomenclature',
     add: 'Ajouter',
