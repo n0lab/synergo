@@ -8,11 +8,13 @@ export const config = {
 
   // CORS settings
   cors: {
-    origins: process.env.ALLOWED_ORIGINS?.split(',') || [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'http://127.0.0.1:5173'
-    ],
+    origins: process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(/[\s,]+/).map(o => o.trim()).filter(Boolean)
+      : [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://127.0.0.1:5173'
+      ],
     credentials: true
   },
 

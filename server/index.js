@@ -21,13 +21,15 @@ const __dirname = dirname(__filename);
 
 const app = express();
 
-// Helper to check if origin is a private/local IP address
+// Helper to check if origin is a private/local IP address or local domain
 const isPrivateOrigin = (origin) => {
   try {
     const url = new URL(origin);
     const hostname = url.hostname;
     // Check for localhost variants
     if (hostname === 'localhost' || hostname === '127.0.0.1') return true;
+    // Check for .local domains (mDNS/Bonjour)
+    if (hostname.endsWith('.local')) return true;
     // Check for private IP ranges (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
     const ipMatch = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
     if (ipMatch) {
@@ -42,6 +44,9 @@ const isPrivateOrigin = (origin) => {
   }
 };
 
+// Check if any configured origin is private (indicates local network deployment)
+const hasPrivateConfiguredOrigins = config.cors.origins.some(isPrivateOrigin);
+
 // Security: CORS with whitelist
 app.use(cors({
   origin: (origin, callback) => {
@@ -53,9 +58,11 @@ app.use(cors({
       return callback(null, true);
     }
 
-    // In development, allow private/local IP addresses
-    if (process.env.NODE_ENV !== 'production' && isPrivateOrigin(origin)) {
-      return callback(null, true);
+    // Allow private/local origins in development, or in production if private origins are configured
+    if (isPrivateOrigin(origin)) {
+      if (process.env.NODE_ENV !== 'production' || hasPrivateConfiguredOrigins) {
+        return callback(null, true);
+      }
     }
 
     // In production, block unauthorized origins
@@ -182,4 +189,9 @@ app.listen(config.port, () => {
   console.log(`Synergo API server running on http://localhost:${config.port}`);
   console.log(`Database location: ${join(__dirname, 'data', 'synergo.db')}`);
   console.log(`API Version: ${config.apiVersion}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`CORS origins: ${config.cors.origins.join(', ')}`);
+  if (hasPrivateConfiguredOrigins) {
+    console.log('Private network mode: enabled (all local IPs/domains allowed)');
+  }
 });
