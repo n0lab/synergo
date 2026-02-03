@@ -88,7 +88,7 @@ export default function Sidebar({
       <div className="sidebar-footer">
         {!collapsed && (
           <div className="version-info">
-            <span className="version-badge">v2.0</span>
+            <span className="version-badge">v1.0</span>
           </div>
         )}
       </div>

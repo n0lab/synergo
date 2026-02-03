@@ -466,7 +466,7 @@ export default function AddResource({
         <form className="card form-grid" onSubmit={handleSubmitExisting}>
           {/* File selection dropdown */}
           <div className="field-group">
-            <label htmlFor="existing-file">{t('resourceSelectFile')}</label>
+            <label htmlFor="existing-file">{t('resourceSelectFile')} <span className="required-asterisk">*</span></label>
             <select
               id="existing-file"
               value={selectedExistingFile}
@@ -511,7 +511,7 @@ export default function AddResource({
           )}
 
           <div className="field-group">
-            <label htmlFor="resource-title">{t('resourceNameLabel')}</label>
+            <label htmlFor="resource-title">{t('resourceNameLabel')} <span className="required-asterisk">*</span></label>
             <input
               id="resource-title"
               type="text"
@@ -523,7 +523,7 @@ export default function AddResource({
           </div>
 
           <div className="field-group">
-            <label htmlFor="resource-source">{t('resourceSourceLabel')}</label>
+            <label htmlFor="resource-source">{t('resourceSourceLabel')} <span className="required-asterisk">*</span></label>
             <input
               id="resource-source"
               type="text"
@@ -535,7 +535,7 @@ export default function AddResource({
           </div>
 
           <div className="field-group">
-            <label htmlFor="resource-subject-name">{t('resourceSubjectNameLabel')}</label>
+            <label htmlFor="resource-subject-name">{t('resourceSubjectNameLabel')} <span className="required-asterisk">*</span></label>
             <input
               id="resource-subject-name"
               type="text"
@@ -547,7 +547,7 @@ export default function AddResource({
           </div>
 
           <div className="field-group">
-            <label htmlFor="resource-date">{t('resourceDateLabel')}</label>
+            <label htmlFor="resource-date">{t('resourceDateLabel')} <span className="required-asterisk">*</span></label>
             <input
               id="resource-date"
               type="date"
@@ -616,7 +616,7 @@ export default function AddResource({
 
       <form className="card form-grid" onSubmit={handleSubmit}>
         <div className="field-group">
-          <label htmlFor="resource-title">{t('resourceNameLabel')}</label>
+          <label htmlFor="resource-title">{t('resourceNameLabel')} <span className="required-asterisk">*</span></label>
           <input
             id="resource-title"
             type="text"
@@ -628,7 +628,7 @@ export default function AddResource({
         </div>
 
         <div className="field-group">
-          <label htmlFor="resource-source">{t('resourceSourceLabel')}</label>
+          <label htmlFor="resource-source">{t('resourceSourceLabel')} <span className="required-asterisk">*</span></label>
           <input
             id="resource-source"
             type="text"
@@ -640,7 +640,7 @@ export default function AddResource({
         </div>
 
         <div className="field-group">
-          <label htmlFor="resource-subject-name">{t('resourceSubjectNameLabel')}</label>
+          <label htmlFor="resource-subject-name">{t('resourceSubjectNameLabel')} <span className="required-asterisk">*</span></label>
           <input
             id="resource-subject-name"
             type="text"
@@ -652,7 +652,7 @@ export default function AddResource({
         </div>
 
         <div className="field-group">
-          <label htmlFor="resource-date">{t('resourceDateLabel')}</label>
+          <label htmlFor="resource-date">{t('resourceDateLabel')} <span className="required-asterisk">*</span></label>
           <input
             id="resource-date"
             type="date"
@@ -695,7 +695,7 @@ export default function AddResource({
         </div>
 
         <div className="field-group">
-          <label>{t('resourceFileLabel')}</label>
+          <label>{t('resourceFileLabel')} <span className="required-asterisk">*</span></label>
           <div
             className={`dropzone ${isDragActive ? 'dropzone-active' : ''} ${file ? 'dropzone-has-file' : ''}`}
             onDragEnter={handleDragEnter}
