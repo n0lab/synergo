@@ -1852,6 +1852,11 @@ main {
   color: var(--text-secondary);
 }
 
+.required-asterisk {
+  color: var(--danger, #e53e3e);
+  font-weight: 700;
+}
+
 .field-group input,
 .field-group textarea,
 .field-group select {
